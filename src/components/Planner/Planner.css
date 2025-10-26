@@ -1,0 +1,31 @@
+.planner {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.planner h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.planner p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.planner button {
+  background: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.planner button:hover {
+  background: #003f99;
+}

@@ -1,0 +1,48 @@
+.inbox {
+  background: #eaf2ff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+}
+
+.inbox h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.add-tag {
+  display: flex;
+  gap: 6px;
+}
+
+.add-tag input {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.add-tag button {
+  background: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.tag-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-item {
+  background: white;
+  border-radius: 6px;
+  padding: 6px 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
