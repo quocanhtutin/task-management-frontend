@@ -21,6 +21,7 @@
 
 .add-tag input {
   flex: 1;
+  max-width: 72%;
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #ccc;

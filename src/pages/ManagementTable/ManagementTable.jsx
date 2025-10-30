@@ -7,7 +7,6 @@ import TaskBoard from '../../components/TaskBoard/TaskBoard.jsx'
 const ManagementTable = () => {
     return (
         <div className="man-table-container">
-            {/*Navbar chuyển vào MainLayout*/}
             <div className="main-content">
                 <Inbox />
                 <Planner />
