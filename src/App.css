@@ -41,6 +41,7 @@
 }
 
 .app {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -50,6 +51,7 @@
 
 /* Bố cục mặc định: có sidebar */
 .main-layout {
+  padding-top: 50px;
   display: flex;
   flex: 1;
 }
@@ -68,8 +70,8 @@
 
 /* Trang full màn hình (chỉ có Navbar trên) */
 .fullpage-content {
+  padding-top: 50px;
   flex: 1;
-  padding: 0;
   height: calc(100vh - 60px); /* trừ chiều cao navbar */
   overflow: hidden;
 }
