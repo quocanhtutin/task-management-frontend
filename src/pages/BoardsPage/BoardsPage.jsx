@@ -6,10 +6,10 @@ import './BoardsPage.css';
 
 export default function BoardsPage() {
     const templates = [
-        { title: 'Quản lý Dự án', color: '#0079BF' },
+        { title: 'Manage project', color: '#0079BF' },
         { title: 'Scrum', color: '#00C2E0' },
-        { title: 'Theo dõi Lỗi', color: '#61BD4F' },
-        { title: 'Quy trình Thiết kế Web', color: '#F5DD29' },
+        { title: 'Errors track', color: '#61BD4F' },
+        { title: 'Web process', color: '#F5DD29' },
     ];
 
     const navigate = useNavigate()
@@ -30,8 +30,8 @@ export default function BoardsPage() {
             <div className="user-boards">
                 <h3>Các bảng của bạn</h3>
                 <div className="user-board-cards">
-                    <BoardCard title="Bảng của tôi" color="#89609E" />
-                    <BoardCard title="Tạo bảng mới" color="#E2E4E6" add />
+                    <BoardCard title="My board" color="#89609E" />
+                    <BoardCard title="Create board" color="#E2E4E6" add />
                 </div>
             </div>
         </div>

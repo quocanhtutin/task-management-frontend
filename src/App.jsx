@@ -43,7 +43,7 @@ const App = () => {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
               </Route>
 
-              <Route path="/boards/myboard" element={<ManagementTable />} />
+              <Route path="/boards/:title" element={<ManagementTable />} />
             </Routes>
           </div>
         )}
