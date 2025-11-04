@@ -1,0 +1,44 @@
+/* src/layouts/MainLayout.css */
+
+.app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  color: #1e293b;
+  background-color: #ffffff;
+}
+
+/* Bố cục mặc định: có sidebar */
+.main-layout {
+  /* Lưu ý: padding-top: 50px là để chừa chỗ cho Navbar.
+    Bạn có thể muốn chuyển CSS của Navbar vào file riêng của Navbar sau.
+  */
+  padding-top: 50px; 
+  display: flex;
+  flex: 1;
+  /* Thêm dòng này để fix lỗi tràn 100vh do padding-top */
+  height: calc(100vh - 50px); 
+}
+
+.sidebar {
+  width: 240px;
+  border-right: 1px solid #ddd;
+  background-color: #fafafa;
+  /* Đảm bảo sidebar cuộn nếu nội dung dài */
+  overflow-y: auto; 
+}
+
+.page-content {
+  flex: 1;
+  padding: 35px;
+  overflow-y: auto; /* Cho phép nội dung trang cuộn */
+}
+
+/* (Class này có vẻ bạn định dùng cho layout không có sidebar) */
+.fullpage-content {
+  padding-top: 50px;
+  flex: 1;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}

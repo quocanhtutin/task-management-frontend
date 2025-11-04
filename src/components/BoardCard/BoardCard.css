@@ -1,0 +1,35 @@
+.board-card {
+  width: 180px;
+  height: 100px;
+  border-radius: 10px;
+  color: white;
+  padding: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.board-card:hover {
+  transform: scale(1.04);
+  filter: brightness(1.1);
+}
+
+.board-card.add-card {
+  background-color: #f3f4f6 !important;
+  color: #475569;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.add-card span {
+  font-size: 24px;
+  line-height: 0;
+}
+
+.add-card:hover {
+  background-color: #e5e7eb;
+}
