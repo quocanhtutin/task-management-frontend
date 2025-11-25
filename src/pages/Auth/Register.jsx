@@ -1,130 +1,212 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axiosClient from '../../utils/axiosConfig'; // Import cấu hình axios của bạn
 import './Register.css';
 
 const Register = () => {
+  // --- STATE ---
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // State OTP
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleRegisterSubmit = (e) => {
+  // --- BƯỚC 1: ĐĂNG KÝ (Đã xong) ---
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
+    // 1. Validate Mật khẩu
+    if (password.length < 8) {
+        alert("Mật khẩu phải có ít nhất 8 ký tự!");
+        return;
+    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+        alert("Mật khẩu yếu! Cần: 8 ký tự, 1 hoa, 1 thường, 1 số, 1 ký tự đặc biệt.");
+        return;
+    }
     if (password !== confirmPassword) {
       alert('Mật khẩu nhập lại không khớp!');
       return;
     }
 
-    //TODO: GỌI API BACKEND gửi { name, email, password }
-    console.log('Gửi yêu cầu đăng ký:', { name, email, password });
+    setIsLoading(true);
 
-    //Giả lập gọi API thành công
-    setIsOtpSent(true);
+    try {
+      // API Đăng ký: Có bọc { data: ... }
+      await axiosClient.post('/Auth/Register', {
+        data: {
+          name: name,
+          email: email,
+          password: password
+        }
+      });
+
+      alert('Đăng ký thành công! Hãy kiểm tra email để lấy mã OTP.');
+      setIsOtpSent(true); // Chuyển sang màn hình OTP
+
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleOtpSubmit = (e) => {
+  // --- BƯỚC 2: XÁC THỰC OTP (MỚI) ---
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    //TODO: GỌI API BACKEND để xác thực { email, otp } (2)
-    console.log('Gửi yêu cầu xác thực OTP:', { email, otp });
+    try {
+      // API Xác thực: Có bọc { data: ... } (Theo hình VerifyRegisterOtp)
+      await axiosClient.post('/Auth/VerifyRegisterOtp', {
+        data: {
+          email: email,
+          otp: otp
+        }
+      });
 
-    //Giả lập xác thực OTP thành công
-    alert('Xác thực thành công! Đang chuyển đến trang đăng nhập...');
-    navigate('/login');
+      // Nếu không lỗi -> Thành công
+      alert('Xác thực tài khoản thành công! Bạn sẽ được chuyển đến trang đăng nhập.');
+      navigate('/login'); 
+
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- CHỨC NĂNG: GỬI LẠI OTP (MỚI) ---
+  const handleResendOtp = async () => {
+    if(isLoading) return;
+    setIsLoading(true);
+    
+    try {
+      // API Gửi lại: KHÔNG bọc { data } (Theo hình ResendRegisterOtp)
+      // Nếu API này báo lỗi 400, bạn hãy thử thêm bọc data vào nhé.
+      await axiosClient.post('/Auth/ResendRegisterOtp', { 
+        email: email 
+      });
+
+      alert(`Đã gửi lại mã OTP mới tới ${email}!`);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // --- HÀM XỬ LÝ LỖI CHUNG ---
+  const handleError = (error) => {
+    console.error('Lỗi chi tiết:', error);
+    let errorMessage = 'Đã xảy ra lỗi.';
+
+    if (error.response && error.response.data) {
+        const serverData = error.response.data;
+        // Ưu tiên hiển thị message trực tiếp nếu có
+        if (serverData.message) {
+            errorMessage = serverData.message;
+        } 
+        // Nếu server trả về danh sách errors validation
+        else if (serverData.errors) {
+            const errorKeys = Object.keys(serverData.errors);
+            if (errorKeys.length > 0) {
+                errorMessage = serverData.errors[errorKeys[0]][0]; // Lấy lỗi đầu tiên
+            }
+        } else if (typeof serverData === 'string') {
+            errorMessage = serverData;
+        }
+    } else if (error.request) {
+        errorMessage = 'Không thể kết nối đến Server.';
+    }
+    alert(`Thông báo: ${errorMessage}`);
   };
 
   return (
     <div className="register-container">
       
       {!isOtpSent ? (
+        // FORM ĐĂNG KÝ
         <form className="register-form" onSubmit={handleRegisterSubmit}>
           <h2>Đăng ký</h2>
-          <p>Tạo tài khoản mới để bắt đầu hành trình của bạn.</p>
+          <p>Tạo tài khoản mới</p>
 
           <div className="input-group">
-            <label htmlFor="name">Họ và tên</label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <label>Họ và tên</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required disabled={isLoading}/>
           </div>
-
           <div className="input-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={false}
-            />
+            <label>Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading}/>
           </div>
-
           <div className="input-group">
-            <label htmlFor="password">Mật khẩu</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <label>Mật khẩu</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading}/>
           </div>
-
           <div className="input-group">
-            <label htmlFor="confirmPassword">Nhập lại mật khẩu</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <label>Nhập lại mật khẩu</label>
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={isLoading}/>
           </div>
 
-          <button type="submit" className="register-button">Đăng ký</button>
-
+          <button type="submit" className="register-button" disabled={isLoading}>
+            {isLoading ? 'Đang xử lý...' : 'Đăng ký'}
+          </button>
           <div className="form-links">
-            <p>
-              Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
-            </p>
+            <p>Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link></p>
           </div>
         </form>
       ) : (
+        // FORM NHẬP OTP
         <form className="register-form" onSubmit={handleOtpSubmit}>
-          <h2>Xác thực Email</h2>
-          <p>Một mã OTP đã được gửi đến <strong>{email}</strong>. Vui lòng nhập mã để hoàn tất.</p>
+          <h2>Xác thực OTP</h2>
+          <p>Mã xác thực đã được gửi tới <strong>{email}</strong></p>
+
           <div className="input-group">
-            <label htmlFor="otp">Mã OTP</label>
-            <input
-              type="text"
-              id="otp"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-              placeholder="Nhập 6 chữ số"
+            <label>Mã OTP</label>
+            <input 
+                type="text" 
+                value={otp} 
+                onChange={(e) => setOtp(e.target.value)} 
+                required 
+                placeholder="Nhập mã OTP"
+                disabled={isLoading}
             />
           </div>
 
-          <button type="submit" className="register-button">Xác nhận</button>
+          <button type="submit" className="register-button" disabled={isLoading}>
+             {isLoading ? 'Đang xác thực...' : 'Xác nhận'}
+          </button>
 
-          <div className="form-links">
+          <div className="form-links" style={{marginTop: '20px'}}>
             <p>
-              <a href="#" onClick={() => alert('TODO: Gọi API gửi lại OTP')}>Gửi lại mã?</a>
+              Không nhận được mã? <br/>
+              <span 
+                style={{
+                    color: isLoading ? '#ccc' : '#007bff', 
+                    cursor: isLoading ? 'default' : 'pointer', 
+                    fontWeight: 'bold',
+                    textDecoration: 'underline'
+                }} 
+                onClick={handleResendOtp}
+              >
+                Gửi lại mã mới
+              </span>
+            </p>
+            <p style={{marginTop: '10px'}}>
+               <span style={{cursor: 'pointer', color: '#666'}} onClick={() => setIsOtpSent(false)}>
+                 ← Quay lại nhập thông tin
+               </span>
             </p>
           </div>
         </form>
       )}
-
     </div>
   );
 };
