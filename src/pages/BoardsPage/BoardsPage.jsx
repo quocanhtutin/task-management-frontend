@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import WorkspaceHeader from '../../components/WorkspaceHeader/WorkspaceHeader.jsx';
 import BoardCard from '../../components/BoardCard/BoardCard.jsx';
 import { useNavigate } from 'react-router-dom';
 import './BoardsPage.css';
+import CreateBoardPopup from '../../components/CreateBoardPopup/CreateBoardPopup.jsx';
 
 export default function BoardsPage() {
     const templates = [
@@ -12,10 +13,13 @@ export default function BoardsPage() {
         { title: 'Web process', color: '#F5DD29' },
     ];
 
+    const [showCreateBoardPopup, setShowCreateBoardPopup] = useState(false)
+
     const navigate = useNavigate()
 
     return (
         <div className="boards-page">
+            {showCreateBoardPopup && <CreateBoardPopup onClose={() => setShowCreateBoardPopup(false)} />}
             <WorkspaceHeader />
             <div className="templates-section">
                 <h3>Jira</h3>
@@ -31,7 +35,7 @@ export default function BoardsPage() {
                 <h3>Các bảng của bạn</h3>
                 <div className="user-board-cards">
                     <BoardCard title="My board" color="#89609E" />
-                    <BoardCard title="Create board" color="#E2E4E6" add />
+                    <BoardCard title="Create board" add color="#E2E4E6" showPopup={() => setShowCreateBoardPopup(true)} />
                 </div>
             </div>
         </div>
