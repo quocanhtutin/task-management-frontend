@@ -1,0 +1,197 @@
+.cdp-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+}
+.cdp-main{
+    width:1000px;
+    max-width:95%;
+    height:450px;
+    background:#fff;
+    border-radius:12px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25)''
+}
+.cdp-top{
+    width: 100%;
+    padding: 15px 30px;
+    border-bottom: 1px solid #eee;
+}
+.cdp-top h2{
+    color: black;
+}
+.cdp-under{
+    display:flex;
+    height: 100%;
+}
+.cdp-left{
+    min-height: 100%;
+    width:56%;
+    padding:22px 30px;
+    overflow:auto;
+    border-right:1px solid #eee;
+}
+.cdp-right{
+    height: 100%;
+    background: whitesmoke;
+    width:44%;
+    padding:22px 30px;
+    display:flex;
+    flex-direction:column;
+    overflow:auto;
+}
+.cdp-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.cdp-checkbox{display:inline-flex;align-items:center}
+/* .cdp-checkbox input{display:none} */
+.cdp-checkbox-mark{width:28px;height:28px;border-radius:6px;border:2px solid #0079BF;display:inline-block;position:relative}
+.cdp-checkbox input:checked + .cdp-checkbox-mark{background:#0079BF}
+.cdp-title{font-size:26px;margin:0}
+.cdp-actions{
+    margin-top:6px; 
+    display: flex;
+    gap: 20px;
+}
+.action-row{
+    margin-bottom:12px;
+    position:relative;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+.action-btn{
+    padding:5px 10px;
+    border-radius:4px;
+    border:1px solid #ddd;
+    cursor:pointer
+}
+.label-preview{
+    display:inline-block;
+    width:48px;
+    height:30px;
+    border-radius:3px;
+    margin-left:8px;
+    vertical-align:middle
+}
+.label-select{position:absolute;top:44px;left:0;background:#fff;border:1px solid #ddd;padding:10px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);z-index:30}
+.label-grid{display:flex;gap:10px;align-items:center}
+.color-item{width:36px;height:36px;border-radius:6px;border:1px solid rgba(0,0,0,0.08);cursor:pointer}
+.color-item.clear{padding:6px;border-radius:6px;background:#f5f5f5}
+.date-popup{position:absolute;top:44px;left:0;background:#fff;border:1px solid #ddd;padding:12px;border-radius:8px;z-index:30;box-shadow:0 6px 18px rgba(0,0,0,0.12);width:260px}
+.date-popup label{font-weight:600;font-size:13px;margin-bottom:6px;display:block}
+.date-popup input[type=date], .date-popup select{width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;margin-bottom:8px}
+.time-row{display:flex;align-items:center;gap:6px}
+.time-row input{width:48%;padding:6px;border:1px solid #ddd;border-radius:6px}
+.date-actions{display:flex;justify-content:flex-end;gap:8px}
+.btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
+.btn.primary{background:#0079BF;color:#fff;border-color:#0079BF}
+.btn.small{padding:6px 8px;font-size:13px}
+.due-preview{margin-top:6px;font-size:13px;color:#444}
+.members-row{display:flex;align-items:center;gap:12px}
+.members-stack{display:flex;align-items:center}
+.avatar{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:600}
+.avatar.add{width:36px;height:36px;border-radius:50%;border:1px dashed #bbb;background:#fff;color:#333;cursor:pointer}
+.avatar.small{width:30px;height:30px;border-radius:50%;font-size:13px}
+.avatar.overlap{position:relative;margin-left:-10px;border:2px solid #fff}
+.member-search{
+    position:absolute;
+    top:54px;
+    right:0;
+    width:320px;
+    background:#fff;
+    border:1px solid #ddd;
+    padding:10px;
+    border-radius:8px;
+    z-index:2000;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12)
+}
+.member-search input{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px}
+.member-results{max-height:160px;overflow:auto}
+.member-item{display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer}
+.member-item.selected{background:#f0f7ff}
+.member-name{flex:1}
+.remove-member{border:none;padding:4px 6px;border-radius:4px}
+.section{margin-top:14px}
+.label{font-weight:600;margin-bottom:6px}
+.desc-text{width:100%;padding:10px;border-radius:6px;border:1px solid #ddd;resize:none}
+.desc-text.expanded{min-height:110px}
+.desc-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.cdp-right .comments-header{
+    font-weight:700;
+    margin-bottom:8px;
+}
+.comment-input textarea{
+    width:100%;
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    resize:none;
+    box-shadow: 2px 2px #44444415;
+}
+.comment-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:8px
+}
+.comments-list{
+    margin-top:10px;
+    overflow:auto;
+    margin-bottom: 50px;
+    width: 100%;
+}
+.comment-card{
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+    border:1px solid #ddd;
+    background:#fff;
+}
+.comment-meta{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.meta-text .name{font-weight:700}
+.meta-text .time{font-size:12px;color:#666}
+.comment-body{
+    width: 100%;
+}
+.comment-body .comment-text{
+    background:#fff;
+    padding:10px;
+    border-radius:6px;
+    width:100%;
+    border:1px solid #ddd;
+}
+.comment-body textarea{
+    width: 100%;
+    background:#fff;
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
+.comment-footer{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:8px}
+.icon-btn{
+    background:none;
+    border:none;
+    color:#0079BF;
+    cursor:pointer;
+    margin-left:6px}
+.cdp-close{
+    position:absolute;
+    top:10px;right:12px;
+    border:none;background:#fff;
+    border-radius:50%;width:36px;
+    height:36px;cursor:pointer;
+    font-size:16px
+}
+
+/* scrollbars small */
+.cdp-left::-webkit-scrollbar, .cdp-right::-webkit-scrollbar, .member-results::-webkit-scrollbar, .comments-list::-webkit-scrollbar{height:8px;width:8px}
+.cdp-left::-webkit-scrollbar-thumb, .cdp-right::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:6px}
+
+@media (max-width:1024px){.cdp-main{width:92%;height:calc(100vh - 60px)} .cdp-left{width:62%} .cdp-right{width:38%}}

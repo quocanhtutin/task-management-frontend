@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import TableMode from '../TableMode/TableMode';
 import ColumnMode from '../ColumnMode/ColumnMode';
 
-const TaskBoard = () => {
+const TaskBoard = ({ setCardDetail, setShowCardDetailPopup }) => {
 
     const [columns, setColumns] = useState([
         { title: 'Hướng dẫn', cards: ['Bắt đầu sử dụng Trello', 'Học cách dùng Trello'], addCard: false },
@@ -52,7 +52,16 @@ const TaskBoard = () => {
     const addCard = (col) => {
         if (input.trim()) {
             const updated = [...columns];
-            updated[col].cards.push(input);
+            updated[col].cards.push({
+                card_id: crypto.randomUUID(),
+                card_title: input,
+                card_column: updated[col].title,
+                card_label: null,
+                card_member: [],
+                card_deadline: null,
+                card_check: false,
+                card_edit: false
+            });
             setColumns(updated);
             displayAddCard(col)
             setInput('')
@@ -115,21 +124,52 @@ const TaskBoard = () => {
     };
 
     useEffect(() => {
-        const allCards = columns.flatMap(column =>
-            column.cards.map((card, i) => ({
-                card_id: null,
+        const updatedColumns = columns.map(column => ({
+            ...column,
+            cards: column.cards.map(card => ({
+                card_id: crypto.randomUUID(),
                 card_title: card,
                 card_column: column.title,
                 card_label: null,
                 card_member: [],
                 card_deadline: null,
                 card_check: false,
-
+                card_edit: false
             }))
-        );
+        }));
 
+        setColumns(updatedColumns);
+
+    }, []);
+
+    useEffect(() => {
+        const allCards = columns.flatMap(column => column.cards);
         setCards(allCards);
     }, [columns]);
+
+
+    // useEffect(() => {
+    //     const allCards = columns.flatMap(column =>
+    //         column.cards.map((card, i) => ({
+    //             card_id: null,
+    //             card_title: card,
+    //             card_column: column.title,
+    //             card_label: null,
+    //             card_member: [],
+    //             card_deadline: null,
+    //             card_check: false,
+
+    //         }))
+    //     );
+
+    //     setCards(allCards);
+    //     console.log(columns)
+    // }, [columns]);
+
+    // useEffect(() => {
+    //     console.log("Cards updated: ", cards);
+    // }, [cards]);
+
 
     const selectCardEdit = (card, cardIndex) => {
         if (cardEdit) return;
@@ -213,6 +253,8 @@ const TaskBoard = () => {
                     setInput={setInput}
                     displayAddCard={displayAddCard}
                     addCard={addCard}
+                    setCardDetail={setCardDetail}
+                    setShowCardDetailPopup={setShowCardDetailPopup}
                 />
             )}
 
@@ -225,7 +267,9 @@ const TaskBoard = () => {
                     cardEdit={cardEdit}
                     setCardEdit={setCardEdit}
                     updateCardEdit={updateCardEdit}
-                    columns={columns} />
+                    columns={columns}
+                    setCardDetail={setCardDetail}
+                    setShowCardDetailPopup={setShowCardDetailPopup} />
             )}
 
         </div>

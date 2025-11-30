@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './ColumnMode.css'
 import { Plus } from 'lucide-react'
 
@@ -8,7 +8,9 @@ const ColumnMode = ({
     input,
     setInput,
     displayAddCard,
-    addCard
+    addCard,
+    setCardDetail,
+    setShowCardDetailPopup
 }) => {
 
     const onDragStart = (e, fromCol, fromIndex) => {
@@ -26,10 +28,14 @@ const ColumnMode = ({
 
         const updated = [...columns];
         const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[toCol].cards.push(movedCard);
+        updated[toCol].cards.push({ ...movedCard, card_column: updated[toCol].title });
 
         setColumns(updated);
     };
+
+    useEffect(() => {
+        console.log(columns)
+    }, [columns])
 
     return (
         <div className="board-scroll">
@@ -49,9 +55,10 @@ const ColumnMode = ({
                                 className="card-item"
                                 draggable
                                 onDragStart={(e) => onDragStart(e, i, j)}
+
                             >
                                 <input type="radio" />
-                                <p>{card}</p>
+                                <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.card_title}</p>
                             </div>
                         ))}
 
