@@ -5,25 +5,20 @@ import { useParams } from 'react-router-dom';
 import TableMode from '../TableMode/TableMode';
 import ColumnMode from '../ColumnMode/ColumnMode';
 
-const TaskBoard = () => {
+const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, columns, setColumns }) => {
 
-    const [columns, setColumns] = useState([
-        { title: 'Hướng dẫn', cards: ['Bắt đầu sử dụng Trello', 'Học cách dùng Trello'], addCard: false },
-        { title: 'Hôm nay', cards: [], addCard: false },
-        { title: 'Tuần này', cards: [], addCard: false },
-        { title: 'Sau này', cards: [], addCard: false },
-    ]);
 
     const [cards, setCards] = useState([
         {
-            card_id: null,
-            card_title: null,
-            card_column: null,
-            card_label: null,
-            card_member: [],
-            card_deadline: null,
-            card_check: false,
-            card_edit: false
+            id: null,
+            title: null,
+            column: null,
+            label: null,
+            members: [],
+            deadline: null,
+            checked: false,
+            description: null,
+            edit: false,
         }
     ])
 
@@ -34,11 +29,6 @@ const TaskBoard = () => {
     const [showViewMenu, setShowViewMenu] = useState(false);
     const [popupInfo, setPopupInfo] = useState(null);
     const [cardEdit, setCardEdit] = useState('')
-
-    const addColumn = () => {
-        const title = prompt('Tên cột mới:');
-        if (title) setColumns([...columns, { title, cards: [], addCard: false }]);
-    };
 
     const displayAddCard = (col) => {
         setColumns(prev =>
@@ -52,7 +42,17 @@ const TaskBoard = () => {
     const addCard = (col) => {
         if (input.trim()) {
             const updated = [...columns];
-            updated[col].cards.push(input);
+            updated[col].cards.push({
+                id: crypto.randomUUID(),
+                title: input,
+                column: updated[col].title,
+                label: null,
+                members: [],
+                deadline: null,
+                check: false,
+                description: null,
+                edit: false,
+            });
             setColumns(updated);
             displayAddCard(col)
             setInput('')
@@ -64,50 +64,6 @@ const TaskBoard = () => {
         e.dataTransfer.setData('fromIndex', fromIndex);
     };
 
-
-    const onDrop = (e, toCol) => {
-        const fromCol = e.dataTransfer.getData('fromCol');
-        const fromIndex = e.dataTransfer.getData('fromIndex');
-        if (fromCol === '' || fromIndex === '') return;
-        const updated = [...columns];
-        const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[toCol].cards.push(movedCard);
-        setColumns(updated);
-    };
-
-
-    const allowDrop = (e) => e.preventDefault();
-
-    const moveCardToColumn = (toColIndex) => {
-        if (!popupInfo) return;
-        const { colIndex, cardIndex, fromTable } = popupInfo;
-
-        if (fromTable) {
-            const toColumn = columns[toColIndex].title;
-
-            // Cập nhật trong mảng cards
-            const updatedCards = cards.map((c, i) =>
-                i === cardIndex ? { ...c, card_column: toColumn } : c
-            );
-            setCards(updatedCards);
-            setPopupInfo(null);
-            return;
-        }
-
-        // Cũ: di chuyển card giữa các cột khi view = column
-        if (colIndex === toColIndex) {
-            setPopupInfo(null);
-            return;
-        }
-
-        const updated = [...columns];
-        const [movedCard] = updated[colIndex].cards.splice(cardIndex, 1);
-        updated[toColIndex].cards.push(movedCard);
-        setColumns(updated);
-        setPopupInfo(null);
-    };
-
-
     const toggleViewMenu = () => setShowViewMenu(!showViewMenu);
     const selectView = (mode) => {
         setViewMode(mode);
@@ -115,33 +71,65 @@ const TaskBoard = () => {
     };
 
     useEffect(() => {
-        const allCards = columns.flatMap(column =>
-            column.cards.map((card, i) => ({
-                card_id: null,
-                card_title: card,
-                card_column: column.title,
-                card_label: null,
-                card_member: [],
-                card_deadline: null,
-                card_check: false,
-
+        const updatedColumns = columns.map(column => ({
+            ...column,
+            cards: column.cards.map(card => ({
+                id: crypto.randomUUID(),
+                title: card,
+                column: column.title,
+                label: null,
+                members: [],
+                deadline: null,
+                check: false,
+                description: false,
+                edit: false,
             }))
-        );
+        }));
 
+        setColumns(updatedColumns);
+
+    }, []);
+
+    useEffect(() => {
+        const allCards = columns.flatMap(column => column.cards);
         setCards(allCards);
     }, [columns]);
 
+
+    // useEffect(() => {
+    //     const allCards = columns.flatMap(column =>
+    //         column.cards.map((card, i) => ({
+    //             card_id: null,
+    //             card_title: card,
+    //             card_column: column.title,
+    //             card_label: null,
+    //             card_member: [],
+    //             card_deadline: null,
+    //             card_check: false,
+
+    //         }))
+    //     );
+
+    //     setCards(allCards);
+    //     console.log(columns)
+    // }, [columns]);
+
+    // useEffect(() => {
+    //     console.log("Cards updated: ", cards);
+    // }, [cards]);
+
+
     const selectCardEdit = (card, cardIndex) => {
         if (cardEdit) return;
-        const allCards = cards.map((card, i) => i === cardIndex ? { ...card, card_edit: true } : card)
+        const allCards = cards.map((card, i) => i === cardIndex ? { ...card, edit: true } : card)
         setCards(allCards)
-        setCardEdit(card.card_title)
+        setCardEdit(card.title)
         console.log(cardEdit)
     }
 
     const updateCardEdit = (card, cardIndex) => {
         if (!cardEdit.trim()) return;
-        const allCards = cards.map((c, i) => i === cardIndex ? { ...c, card_title: cardEdit, card_edit: false } : c)
+        const allCards = cards.map((c, i) => i === cardIndex ? { ...c, title: cardEdit, edit: false } : c)
         setCards(allCards)
         setCardEdit("")
         console.log(cardEdit)
@@ -213,6 +201,9 @@ const TaskBoard = () => {
                     setInput={setInput}
                     displayAddCard={displayAddCard}
                     addCard={addCard}
+                    setCardDetail={setCardDetail}
+                    setShowCardDetailPopup={setShowCardDetailPopup}
+                    updateCardInColumn={updateCardInColumn}
                 />
             )}
 
@@ -225,7 +216,9 @@ const TaskBoard = () => {
                     cardEdit={cardEdit}
                     setCardEdit={setCardEdit}
                     updateCardEdit={updateCardEdit}
-                    columns={columns} />
+                    columns={columns}
+                    setCardDetail={setCardDetail}
+                    setShowCardDetailPopup={setShowCardDetailPopup} />
             )}
 
         </div>

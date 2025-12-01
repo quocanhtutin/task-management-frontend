@@ -39,7 +39,7 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
 
             // Cập nhật trong mảng cards
             const updatedCards = cards.map((c, i) =>
-                i === cardIndex ? { ...c, card_column: toColumn } : c
+                i === cardIndex ? { ...c, column: toColumn } : c
             );
             setCards(updatedCards);
             setPopupInfo(null);
@@ -72,9 +72,9 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
                                 <input type='radio' />
                             </td>
                             <td >
-                                {!card.card_edit ?
+                                {!card.edit ?
                                     <div onClick={() => selectCardEdit(card, cardIndex)}>
-                                        {card.card_title}
+                                        {card.title}
                                     </div>
                                     :
                                     <div className='edit-card'>
@@ -85,7 +85,7 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
                             </td>
                             <td className="column-cell">
                                 <div className="column-selector" onClick={(e) => openMovePopup(cardIndex, e)}>
-                                    <span>{card.card_column}</span>
+                                    <span>{card.column}</span>
                                     <ChevronDown size={14} className="down-icon" />
                                 </div>
                                 {popupInfo?.cardIndex === cardIndex && (
@@ -95,7 +95,7 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
                                         {columns.map((col, i) => (
                                             <div
                                                 key={i}
-                                                className={`popup-item ${col.title === card.card_column ? 'active' : ''}`}
+                                                className={`popup-item ${col.title === card.column ? 'active' : ''}`}
                                                 onClick={() => moveCardToColumn(i)}
                                             >
                                                 {col.title}
@@ -107,13 +107,13 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
                             </td>
 
                             <td>
-                                {card.card_label || "."}
+                                {card.label || "."}
                             </td>
                             <td>
-                                {card.card_member != [] ? card.card_member : "."}
+                                {card.member != [] ? card.member : "."}
                             </td>
                             <td>
-                                {card.card_deadline || "."}
+                                {card.deadline || "."}
                             </td>
                         </tr>
                     ))}
