@@ -7,21 +7,25 @@ import BoardsPage from './pages/BoardsPage/BoardsPage';
 import Login from './pages/Auth/Login.jsx';
 import Register from './pages/Auth/Register.jsx';
 import ForgotPassword from './pages/Auth/ForgotPassword.jsx';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import PublicRoute from './components/ProtectedRoute/PublicRoute';
 
 const App = () => {
   return (
     <Routes>
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route element={<PublicRoute />}>
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
       </Route>
-
-      <Route element={<MainLayout />}>
-        <Route path="/main/boards" element={<BoardsPage />} />
-        <Route path="/boards/:title" element={<ManagementTable />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+          <Route path="/main/boards" element={<BoardsPage />} />
+          <Route path="/boards/:title" element={<ManagementTable />} />
+        </Route>
       </Route>
-
       <Route path="/" element={<Navigate to="/login" replace />} />
       
     </Routes>

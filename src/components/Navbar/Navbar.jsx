@@ -2,11 +2,32 @@ import React, { useState } from 'react'
 import './Navbar.css'
 import { Bell, Home, Plus, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
+import axiosClient from '../../utils/axiosConfig';
 
 const Navbar = () => {
     const [showMenu, setShowMenu] = useState(false);
     const navigate = useNavigate()
+
+    const handleLogout = async () => {
+        try {
+            const refreshToken = localStorage.getItem('refreshToken');
+            const provider = localStorage.getItem('provider');
+      
+            await axiosClient.post('/Auth/Logout', {
+                provider: provider,
+                refreshToken: refreshToken
+        });
+
+        } catch (error) {
+            console.error("Lỗi logout trên server:", error);
+        } finally {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('provider');
+
+            navigate('/login');
+        }
+    };
 
     return (
         <div className="navbar">
@@ -26,7 +47,9 @@ const Navbar = () => {
                                 <li>Cài đặt</li>
                                 <li>Chủ đề</li>
                                 <li>Trợ giúp</li>
-                                <li className="logout">Đăng xuất</li>
+                                <li><button onClick={handleLogout}>
+                                    Đăng xuất
+                                </button></li>
                             </ul>
                         </div>
                     )}
