@@ -28,9 +28,14 @@ const ColumnMode = ({
 
         const updated = [...columns];
         const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[toCol].cards.push({ ...movedCard, card_column: updated[toCol].title });
+        updated[toCol].cards.push({ ...movedCard, column: updated[toCol].title });
 
         setColumns(updated);
+    };
+
+    const addColumn = () => {
+        const title = prompt('Tên cột mới:');
+        if (title) setColumns([...columns, { title, cards: [] }]);
     };
 
     useEffect(() => {
@@ -58,7 +63,7 @@ const ColumnMode = ({
 
                             >
                                 <input type="radio" />
-                                <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.card_title}</p>
+                                <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
                             </div>
                         ))}
 
@@ -87,6 +92,7 @@ const ColumnMode = ({
                     </div>
                 </div>
             ))}
+            <button className="add-column" onClick={addColumn}>+ Thêm cột</button>
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./CardDetailPopup.css";
+import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 const MOCK_USERS = [
     { id: 1, name: "Nguyễn Văn A", avatarColor: "#F44336" },
@@ -8,9 +9,9 @@ const MOCK_USERS = [
     { id: 4, name: "Phạm D", avatarColor: "#4CAF50" },
 ];
 
-export default function CardDetailPopup({ card = {}, onClose }) {
+export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn }) {
     const [completed, setCompleted] = useState(card.completed || false);
-    const [title] = useState(card.card_title || "Học cách dùng Trello");
+    const [title] = useState(card.title || "Học cách dùng Trello");
 
     // Labels
     const labelColors = ["#FF7043", "#FFA726", "#FFEB3B", "#66BB6A", "#42A5F5", "#AB47BC"];
@@ -19,9 +20,9 @@ export default function CardDetailPopup({ card = {}, onClose }) {
 
     // Due date
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [dueDate, setDueDate] = useState(card.dueDate || null);
-    const [dateInput, setDateInput] = useState(() => (card.dueDate ? card.dueDate.split("T")[0] : ""));
-    const [timeInput, setTimeInput] = useState(() => (card.dueDate ? card.dueDate.split("T")[1].slice(0, 5) : ""));
+    const [deadline, setDeadline] = useState(card.deadline || null);
+    const [dateInput, setDateInput] = useState(() => (card.deadline ? card.deadline.split("T")[0] : ""));
+    const [timeInput, setTimeInput] = useState(() => (card.deadline ? card.deadline.split("T")[1].slice(0, 5) : ""));
     const [reminder, setReminder] = useState(card.reminder || "none");
 
     // Members
@@ -58,12 +59,13 @@ export default function CardDetailPopup({ card = {}, onClose }) {
     function saveDate() {
         if (!dateInput) return;
         const iso = `${dateInput}T${timeInput || "00:00"}`;
-        setDueDate(iso);
+        setDeadline(iso);
         setShowDatePicker(false);
     }
 
     function saveDescription() {
         setIsEditingDesc(false);
+        updateCardInColumn(card.column, card.id, "description", desc)
     }
 
     function addComment() {
@@ -79,22 +81,29 @@ export default function CardDetailPopup({ card = {}, onClose }) {
     }
 
     useEffect(() => {
-        console.log(showMemberSearch)
-    }, [showMemberSearch])
+        updateCardInColumn(card.column, card.id, "label", label)
+    }, [label])
+
+    useEffect(() => {
+        updateCardInColumn(card.column, card.id, "deadline", deadline)
+    }, [deadline])
+
+    useEffect(() => {
+        updateCardInColumn(card.column, card.id, "members", members)
+    }, [members])
 
     return (
         <div className="cdp-overlay">
             <div className="cdp-main">
                 <div className="cdp-top">
-                    <h2>{card.card_column}</h2>
+                    <h2>{card.column}</h2>
                 </div>
                 <div className="cdp-under">
                     {/* Left column */}
                     <div className="cdp-left">
                         <div className="cdp-header">
                             <label className="cdp-checkbox">
-                                <input type="radio" checked={completed} onChange={(e) => setCompleted(e.target.checked)} />
-                                {/* <span className="cdp-checkbox-mark" /> */}
+                                <input type="checkbox" checked={completed} onChange={(e) => setCompleted(e.target.checked)} />
                             </label>
                             <h1 className="cdp-title">{title}</h1>
                         </div>
@@ -164,7 +173,7 @@ export default function CardDetailPopup({ card = {}, onClose }) {
                                     </div>
                                 )}
 
-                                {dueDate && <div className="due-preview">Hạn: {new Date(dueDate).toLocaleString()}</div>}
+                                {deadline && <div className="due-preview">Hạn: {new Date(deadline).toLocaleString()}</div>}
                             </div>
 
                             {/* Members */}
@@ -198,13 +207,10 @@ export default function CardDetailPopup({ card = {}, onClose }) {
                         {/* Description */}
                         <div className="section">
                             <div className="label">Mô tả</div>
-                            <textarea
-                                ref={descRef}
-                                className={`desc-text ${isEditingDesc ? 'expanded' : ''}`}
+                            <AutoResizeTextarea
                                 value={desc}
                                 onChange={(e) => setDesc(e.target.value)}
                                 onFocus={() => setIsEditingDesc(true)}
-                                rows={isEditingDesc ? 6 : 2}
                             />
 
                             {isEditingDesc && (
@@ -266,7 +272,7 @@ function CommentEditor({ initial, onSave, onCancel }) {
     const [val, setVal] = useState(initial);
     return (
         <div>
-            <textarea value={val} onChange={(e) => setVal(e.target.value)} ></textarea>
+            <AutoResizeTextarea value={val} onChange={(e) => setVal(e.target.value)} ></AutoResizeTextarea>
             <div className="desc-actions">
                 <button onClick={onCancel} className="btn">Hủy</button>
                 <button onClick={() => onSave(val)} className="btn primary">Lưu</button>

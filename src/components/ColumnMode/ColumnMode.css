@@ -16,7 +16,7 @@
 }
 
 .board-column {
-  background: white;
+  background: #f8f9fa;
   border-radius: 8px;
   width: 260px;
   padding: 12px;
@@ -24,7 +24,6 @@
   height: fit-content;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   margin-bottom: 56px;
-  /* overflow-y: auto; */
 }
 
 .board-column h3 {
@@ -39,7 +38,7 @@
 }
 
 .card-item {
-  background: #f8f9fa;
+  background: white;
   border-radius: 6px;
   padding: 8px;
   padding-left: 14px;
@@ -48,6 +47,14 @@
   display: flex;
   gap: 20px;
   align-items: center;
+}
+
+.card-item p {
+  max-width: 80%;
+  width: 80%;
+  word-wrap: break-word;       
+  overflow-wrap: break-word; 
+  white-space: normal;
 }
 
 .card-item:hover {
@@ -64,7 +71,8 @@
   background: rgba(255,255,255,0.7);
   border: 2px dashed #555;
   border-radius: 8px;
-  min-width: 150px;
+  width: 260px;
+  min-width: 260px;
   cursor: pointer;
   font-weight: bold;
   color: #333;
@@ -114,6 +122,10 @@
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
+  max-width: 100%;
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 .add-card-container {
   display:contents;
