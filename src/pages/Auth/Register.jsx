@@ -1,27 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axiosClient from '../../utils/axiosConfig'; // Import cấu hình axios của bạn
+import axiosClient from '../../utils/axiosConfig';
 import './Register.css';
 
 const Register = () => {
-  // --- STATE ---
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // State OTP
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // --- BƯỚC 1: ĐĂNG KÝ (Đã xong) ---
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. Validate Mật khẩu
     if (password.length < 8) {
         alert("Mật khẩu phải có ít nhất 8 ký tự!");
         return;
@@ -39,7 +35,6 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // API Đăng ký: Có bọc { data: ... }
       await axiosClient.post('/Auth/Register', {
         data: {
           name: name,
@@ -49,7 +44,7 @@ const Register = () => {
       });
 
       alert('Đăng ký thành công! Hãy kiểm tra email để lấy mã OTP.');
-      setIsOtpSent(true); // Chuyển sang màn hình OTP
+      setIsOtpSent(true);
 
     } catch (error) {
       handleError(error);
@@ -58,13 +53,11 @@ const Register = () => {
     }
   };
 
-  // --- BƯỚC 2: XÁC THỰC OTP (MỚI) ---
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // API Xác thực: Có bọc { data: ... } (Theo hình VerifyRegisterOtp)
       await axiosClient.post('/Auth/VerifyRegisterOtp', {
         data: {
           email: email,
@@ -72,7 +65,6 @@ const Register = () => {
         }
       });
 
-      // Nếu không lỗi -> Thành công
       alert('Xác thực tài khoản thành công! Bạn sẽ được chuyển đến trang đăng nhập.');
       navigate('/login'); 
 
@@ -83,14 +75,11 @@ const Register = () => {
     }
   };
 
-  // --- CHỨC NĂNG: GỬI LẠI OTP (MỚI) ---
   const handleResendOtp = async () => {
     if(isLoading) return;
     setIsLoading(true);
     
     try {
-      // API Gửi lại: KHÔNG bọc { data } (Theo hình ResendRegisterOtp)
-      // Nếu API này báo lỗi 400, bạn hãy thử thêm bọc data vào nhé.
       await axiosClient.post('/Auth/ResendRegisterOtp', { 
         email: email 
       });
@@ -103,22 +92,19 @@ const Register = () => {
     }
   }
 
-  // --- HÀM XỬ LÝ LỖI CHUNG ---
   const handleError = (error) => {
     console.error('Lỗi chi tiết:', error);
     let errorMessage = 'Đã xảy ra lỗi.';
 
     if (error.response && error.response.data) {
         const serverData = error.response.data;
-        // Ưu tiên hiển thị message trực tiếp nếu có
         if (serverData.message) {
             errorMessage = serverData.message;
         } 
-        // Nếu server trả về danh sách errors validation
         else if (serverData.errors) {
             const errorKeys = Object.keys(serverData.errors);
             if (errorKeys.length > 0) {
-                errorMessage = serverData.errors[errorKeys[0]][0]; // Lấy lỗi đầu tiên
+                errorMessage = serverData.errors[errorKeys[0]][0];
             }
         } else if (typeof serverData === 'string') {
             errorMessage = serverData;
@@ -133,7 +119,6 @@ const Register = () => {
     <div className="register-container">
       
       {!isOtpSent ? (
-        // FORM ĐĂNG KÝ
         <form className="register-form" onSubmit={handleRegisterSubmit}>
           <h2>Đăng ký</h2>
           <p>Tạo tài khoản mới</p>
@@ -163,7 +148,6 @@ const Register = () => {
           </div>
         </form>
       ) : (
-        // FORM NHẬP OTP
         <form className="register-form" onSubmit={handleOtpSubmit}>
           <h2>Xác thực OTP</h2>
           <p>Mã xác thực đã được gửi tới <strong>{email}</strong></p>

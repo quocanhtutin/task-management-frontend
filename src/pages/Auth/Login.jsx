@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axiosClient from '../../utils/axiosConfig'; // Import axios đã cấu hình
-import './Login.css'; // (Giả sử bạn dùng chung style với form cũ hoặc tạo file mới)
+import axiosClient from '../../utils/axiosConfig';
+import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,36 +15,24 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Dựa vào hình Swagger: Payload gồm type, email, password, token
-      // "type" và "token": Thường dùng cho login Google/Facebook. 
-      // Với login thường, ta có thể để type là "Normal" hoặc chuỗi rỗng (tùy Backend quy định).
-      // Tạm thời mình để chuỗi rỗng, nếu lỗi sẽ sửa sau.
       const payload = {
-        type: "local", // Hoặc thử để trống "" nếu Backend không nhận
+        type: "local",
         email: email,
         password: password,
-        token: "" // Login bằng pass thì không có token bên thứ 3
+        token: ""
       };
 
-      // Gọi API Login
       const response = await axiosClient.post('/Auth/Login', payload);
 
       console.log('Login response:', response.data);
-
-      // --- XỬ LÝ LƯU TOKEN ---
-      // Backend thường trả về: { accessToken: "...", refreshToken: "..." }
-      // Hoặc bọc trong data: { data: { accessToken: "..." } }
-      // Bạn cần mở Console log xem cấu trúc chính xác để sửa dòng dưới này nhé
       
       const { accessToken, refreshToken, provider } = response.data.value || response.data; 
 
       if (accessToken) {
-        // Lưu vào LocalStorage để dùng cho toàn bộ web
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('provider', provider || 'local');
         
-        // Chuyển hướng vào trang chính (Dashboard)
         navigate('/main/boards'); 
       } else {
         alert('Đăng nhập thành công nhưng không tìm thấy Token!');
@@ -55,7 +43,6 @@ const Login = () => {
       
       let errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại email/mật khẩu.';
 
-      // Xử lý hiển thị lỗi chi tiết từ Server (tương tự trang Register)
       if (error.response && error.response.data) {
          const serverData = error.response.data;
          if (serverData.message) {
