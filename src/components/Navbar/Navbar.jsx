@@ -41,13 +41,13 @@ const Navbar = () => {
                 <div className="menu-wrapper">
                     <button className="icon-btn" onClick={() => setShowMenu(!showMenu)}><User /></button>
                     {showMenu && (
-                        <div className="dropdown-menu">
+                        <div className="navbar-dropdown-menu">
                             <ul>
                                 <li>Tài khoản</li>
                                 <li>Cài đặt</li>
                                 <li>Chủ đề</li>
                                 <li>Trợ giúp</li>
-                                <li><button onClick={handleLogout}>
+                                <li><button onClick={handleLogout} className="logout-btn">
                                     Đăng xuất
                                 </button></li>
                             </ul>

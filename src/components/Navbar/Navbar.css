@@ -1,14 +1,25 @@
+/* src/components/Navbar/Navbar.css */
+
+/* Reset box-sizing để an toàn */
+.navbar, .navbar * {
+  box-sizing: border-box;
+}
+
 .navbar {
-  position: absolute;
+  position: fixed;
   top: 0;
-  width: 100%;
-  z-index: 3;
+  left: 0;
+  right: 0;
+  height: 50px;
+  
+  z-index: 100; /* Đủ cao để nổi lên */
+  
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: #ffffff;
   border-bottom: 1px solid #e0e0e0;
-  padding: 8px 16px;
+  padding: 0 16px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
@@ -21,7 +32,7 @@
 .navbar-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
 }
 
 .icon-btn {
@@ -29,53 +40,79 @@
   border: none;
   padding: 6px;
   cursor: pointer;
-  color: #333;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
 }
 
 .icon-btn:hover {
   background: #f0f0f0;
-  border-radius: 6px;
 }
 
 .search-input {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
   width: 250px;
+  font-size: 14px;
 }
 
-/* Dropdown Menu */
+/* --- DROPDOWN MENU (ĐÃ ĐỔI TÊN) --- */
 .menu-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.dropdown-menu {
+/* 👇 Class mới: navbar-dropdown-menu (Không còn trùng với Popup nữa) */
+.navbar-dropdown-menu {
   position: absolute;
-  top: 38px;
+  top: 120%; 
   right: 0;
+  
+  /* Các thuộc tính giữ dáng menu */
+  width: 180px;
+  min-width: 180px;
+  
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  width: 160px;
-  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid #eee;
+  z-index: 101;
+  overflow: hidden;
 }
 
-.dropdown-menu ul {
+.navbar-dropdown-menu ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.dropdown-menu li {
-  padding: 10px 14px;
+.navbar-dropdown-menu li {
+  padding: 10px 16px;
   cursor: pointer;
   transition: background 0.2s;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap; /* Chống xuống dòng */
 }
 
-.dropdown-menu li:hover {
-  background: #f2f2f2;
+.navbar-dropdown-menu li:hover {
+  background: #f5f5f5;
 }
 
-.logout {
+/* Style cho nút Logout */
+.logout-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  cursor: pointer;
   color: #e53935;
+  font-weight: 500;
+  font-family: inherit;
 }
