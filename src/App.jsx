@@ -9,6 +9,7 @@ import Register from './pages/Auth/Register.jsx';
 import ForgotPassword from './pages/Auth/ForgotPassword.jsx';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import PublicRoute from './components/ProtectedRoute/PublicRoute';
+import BoardLayout from './layouts/BoardLayout.jsx';
 
 const App = () => {
   return (
@@ -23,11 +24,14 @@ const App = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/main/boards" element={<BoardsPage />} />
+        </Route>
+        <Route element={<BoardLayout />}>
           <Route path="/boards/:title" element={<ManagementTable />} />
         </Route>
+
       </Route>
       <Route path="/" element={<Navigate to="/login" replace />} />
-      
+
     </Routes>
   );
 }

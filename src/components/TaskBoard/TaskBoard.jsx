@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import './TaskBoard.css'
 import { Plus, ChevronDown } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import TableMode from '../TableMode/TableMode';
+import ColumnMode from '../ColumnMode/ColumnMode';
 
 const TaskBoard = () => {
 
@@ -204,101 +206,26 @@ const TaskBoard = () => {
             </div>
 
             {viewMode === 'column' && (
-                <div className="board-scroll">
-                    {columns.map((col, i) => (
-                        <div key={i} className="board-column" onDrop={(e) => onDrop(e, i)} onDragOver={allowDrop}>
-                            <h3>{col.title}</h3>
-                            <div className="card-list">
-                                {col.cards.map((card, j) => (
-                                    <div
-                                        key={j}
-                                        className="card-item"
-                                        draggable
-                                        onDragStart={(e) => onDragStart(e, i, j)}
-                                    >
-                                        <input type="radio" />
-                                        <p>{card}</p>
-                                    </div>
-                                ))}
-                                {col.addCard ?
-                                    <div className="add-card-container">
-                                        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Thêm thẻ" />
-                                        <button className="add-card blue" onClick={() => addCard(i)}>Thêm</button>
-                                        <button className="add-card white" onClick={() => displayAddCard(i)}>Hủy</button>
-                                    </div>
-                                    :
-                                    <div className='card-add' onClick={() => displayAddCard(i)}>
-                                        <Plus /> <p>Thêm thẻ</p>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    ))}
-                    <button className="add-column" onClick={addColumn}>+ Thêm cột</button>
-                </div>
+                <ColumnMode
+                    columns={columns}
+                    setColumns={setColumns}
+                    input={input}
+                    setInput={setInput}
+                    displayAddCard={displayAddCard}
+                    addCard={addCard}
+                />
             )}
 
+
             {viewMode === 'table' && (
-                <div className='table-mode'>
-                    <table className="table-view">
-                        <thead>
-                            <tr><th></th><th>Thẻ</th><th>Danh sách</th><th>Nhãn</th><th>Thành viên</th><th>Ngày hết hạn</th></tr>
-                        </thead>
-                        <tbody>
-                            {cards.map((card, cardIndex) => (
-                                <tr key={cardIndex}>
-                                    <td>
-                                        <input type='radio' />
-                                    </td>
-                                    <td >
-                                        {!card.card_edit ?
-                                            <div onClick={() => selectCardEdit(card, cardIndex)}>
-                                                {card.card_title}
-                                            </div>
-                                            :
-                                            <div className='edit-card'>
-                                                <input type='text' value={cardEdit} onChange={(e) => setCardEdit(e.target.value)} />
-                                                <button className="update-card" onClick={() => updateCardEdit(card, cardIndex)}>Lưu</button>
-                                            </div>
-                                        }
-                                    </td>
-                                    <td className="column-cell">
-                                        <div className="column-selector" onClick={(e) => openMovePopup(cardIndex, e)}>
-                                            <span>{card.card_column}</span>
-                                            <ChevronDown size={14} className="down-icon" />
-                                        </div>
-                                        {popupInfo?.cardIndex === cardIndex && (
-                                            <div
-                                                className="move-popup-inline"
-                                            >
-                                                {columns.map((col, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className={`popup-item ${col.title === card.card_column ? 'active' : ''}`}
-                                                        onClick={() => moveCardToColumn(i)}
-                                                    >
-                                                        {col.title}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                    </td>
-
-                                    <td>
-                                        {card.card_label || "."}
-                                    </td>
-                                    <td>
-                                        {card.card_member != [] ? card.card_member : "."}
-                                    </td>
-                                    <td>
-                                        {card.card_deadline || "."}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <TableMode
+                    cards={cards}
+                    setCards={setCards}
+                    selectCardEdit={selectCardEdit}
+                    cardEdit={cardEdit}
+                    setCardEdit={setCardEdit}
+                    updateCardEdit={updateCardEdit}
+                    columns={columns} />
             )}
 
         </div>
