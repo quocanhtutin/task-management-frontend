@@ -27,11 +27,11 @@ const CreateBoardPopup = ({ onClose }) => {
         <div className="popup-overlay">
             <div className="popup-container">
                 <div className="popup-header">
-                    <h2>Tạo bảng</h2>
+                    <h1>Tạo bảng</h1>
                     <button onClick={onClose} className="close-btn">✕</button>
                 </div>
 
-                {/* Background Section */}
+                {/* Background section-cbp */}
                 <div>
                     <p className="label">Phông nền</p>
 
@@ -91,7 +91,7 @@ const CreateBoardPopup = ({ onClose }) => {
                 </div>
 
                 {/* Title Input */}
-                <div className="section">
+                <div className="section-cbp">
                     <p className="label">Tiêu đề bảng *</p>
                     <input
                         value={title}
@@ -102,7 +102,7 @@ const CreateBoardPopup = ({ onClose }) => {
                 </div>
 
                 {/* View Type Dropdown */}
-                <div className="section dropdown-wrapper">
+                <div className="section-cbp dropdown-wrapper">
                     <p className="label">Quyền xem</p>
                     <button
                         onClick={() => setShowViewSelect(!showViewSelect)}

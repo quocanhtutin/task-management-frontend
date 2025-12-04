@@ -15,6 +15,9 @@ const ManagementTable = () => {
         { title: 'Tuần này', cards: [], addCard: false },
         { title: 'Sau này', cards: [], addCard: false },
     ]);
+    const [showInbox, setShowInbox] = useState(false);
+    const [showPlanner, setShowPlanner] = useState(false);
+
     const updateCardInColumn = (columnTitle, cardId, field, value) => {
         setColumns(prev =>
             prev.map(col =>
@@ -32,13 +35,42 @@ const ManagementTable = () => {
         );
         console.log(field, value)
     };
+
+    const boardWide = (!showInbox && !showPlanner) ? "full-board" : (!showInbox || !showPlanner) ? "wide-board" : "normal-board"
+
     return (
         <div className="man-table-container">
             {showCardDetailPopup && <CardDetailPopup card={cardDetail} onClose={() => setShowCardDetailPopup(false)} updateCardInColumn={updateCardInColumn} />}
-            <div className="main-content">
-                <Inbox />
-                <Planner />
-                <TaskBoard setShowCardDetailPopup={setShowCardDetailPopup} setCardDetail={setCardDetail} updateCardInColumn={updateCardInColumn} columns={columns} setColumns={setColumns} />
+
+            <div className={`main-content ${boardWide}`}>
+                {showInbox && (
+                    <Inbox onClose={() => setShowInbox(false)} />
+                )}
+
+                {showPlanner && (
+                    <Planner onClose={() => setShowPlanner(false)} />
+                )}
+
+                <TaskBoard
+                    setShowCardDetailPopup={setShowCardDetailPopup}
+                    setCardDetail={setCardDetail}
+                    updateCardInColumn={updateCardInColumn}
+                    columns={columns}
+                    setColumns={setColumns}
+                />
+            </div>
+
+            <div className="toggle-floating-panel">
+                {!showInbox && (
+                    <div className="toggle-icon" onClick={() => setShowInbox(true)}>
+                        Inbox
+                    </div>
+                )}
+                {!showPlanner && (
+                    <div className="toggle-icon" onClick={() => setShowPlanner(true)}>
+                        Planner
+                    </div>
+                )}
             </div>
         </div>
     )

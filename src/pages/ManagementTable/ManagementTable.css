@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   background: #f5f6fa;
-  padding-top: 60px;
+  padding-top: 58px;
 }
 
 .main-content {
@@ -14,4 +14,47 @@
   padding: 16px;
   height: 100%;
   overflow: hidden;
+}
+
+.main-content.wide-board {
+  grid-template-columns: 1fr 3fr;
+}
+
+.main-content.full-board {
+  grid-template-columns: 1fr;
+  padding: 0;
+}
+
+.main-content.full-board .trello-board {
+  border-radius: 0 !important;
+  padding: 0 !important;
+  height: 100%;
+  width: 100%;
+  transition: width 3s ease, height 0.25s ease;
+}
+
+.toggle-floating-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toggle-icon {
+  background: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  font-size: 14px;
+  transition: 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toggle-icon:hover {
+  background: #f0f0f0;
 }
