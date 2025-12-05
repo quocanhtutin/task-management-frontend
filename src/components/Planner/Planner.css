@@ -4,6 +4,7 @@
   padding: 20px;
   text-align: center;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .planner h2 {
@@ -28,4 +29,13 @@
 
 .planner button:hover {
   background: #003f99;
+}
+
+.close-component{
+  position:absolute;
+  top:12px;
+  right:15px;
+  cursor: pointer;
+  color: rgba(56, 56, 56, 0.447);
+  z-index: 100;
 }

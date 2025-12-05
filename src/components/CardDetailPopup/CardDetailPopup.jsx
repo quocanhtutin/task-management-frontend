@@ -10,8 +10,9 @@ const MOCK_USERS = [
 ];
 
 export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn }) {
-    const [completed, setCompleted] = useState(card.completed || false);
-    const [title] = useState(card.title || "Học cách dùng Trello");
+    const [completed, setCompleted] = useState(card.check || false);
+    const [title, setTitle] = useState(card.title);
+    const [editTitle, setEditTitle] = useState(false)
 
     // Labels
     const labelColors = ["#FF7043", "#FFA726", "#FFEB3B", "#66BB6A", "#42A5F5", "#AB47BC"];
@@ -68,6 +69,13 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         updateCardInColumn(card.column, card.id, "description", desc)
     }
 
+    function saveTitle() {
+        setEditTitle(false);
+        if (title) {
+            updateCardInColumn(card.column, card.id, "title", title)
+        }
+    }
+
     function addComment() {
         if (!commentText.trim()) return;
         const newC = { id: Date.now(), text: commentText, author: "Bạn", time: new Date().toISOString() };
@@ -92,6 +100,14 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         updateCardInColumn(card.column, card.id, "members", members)
     }, [members])
 
+    useEffect(() => {
+        updateCardInColumn(card.column, card.id, "check", completed)
+    }, [completed])
+
+    useEffect(() => {
+        updateCardInColumn(card.column, card.id, "reminder", reminder)
+    }, [reminder])
+
     return (
         <div className="cdp-overlay">
             <div className="cdp-main">
@@ -105,7 +121,16 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                             <label className="cdp-checkbox">
                                 <input type="checkbox" checked={completed} onChange={(e) => setCompleted(e.target.checked)} />
                             </label>
-                            <h1 className="cdp-title">{title}</h1>
+                            {!editTitle ?
+                                <h1 className="cdp-title">{title}</h1>
+                                :
+                                <textarea className="cdp-title" value={title} onChange={(e) => setTitle(e.target.value)} />}
+                            {!editTitle ?
+                                <p className="edit-title" onClick={() => setEditTitle(true)}>Sửa</p>
+                                :
+                                <p className="edit-title" onClick={() => { setEditTitle(false); saveTitle() }}>Lưu</p>
+                            }
+
                         </div>
 
                         {/* Actions */}

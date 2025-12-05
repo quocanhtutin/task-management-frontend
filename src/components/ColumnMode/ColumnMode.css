@@ -23,7 +23,7 @@
   flex-shrink: 0;
   height: fit-content;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  margin-bottom: 56px;
+  margin-bottom: 135px;
 }
 
 .board-column h3 {
@@ -38,7 +38,6 @@
 }
 
 .card-item {
-  background: white;
   border-radius: 6px;
   padding: 8px;
   padding-left: 14px;
@@ -69,13 +68,13 @@
 
 .add-column {
   background: rgba(255,255,255,0.7);
-  border: 2px dashed #555;
+  border: 2px #bbb;
   border-radius: 8px;
   width: 260px;
   min-width: 260px;
   cursor: pointer;
   font-weight: bold;
-  color: #333;
+  color: #333333a9;
   padding: 12px;
   height: fit-content;
 }
@@ -107,6 +106,7 @@
   border-radius: 6px;
   padding: 6px 10px;
   cursor: pointer;
+  width: 100%;
 }
 
 .add-card.blue{
@@ -128,8 +128,25 @@
   overflow-wrap: break-word;
 }
 .add-card-container {
-  display:contents;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  padding-top: 4.5px;
   padding-bottom: 4.5px;
 }
+
+.add-column-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.add-column-container input{
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  max-width: 100%;
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+

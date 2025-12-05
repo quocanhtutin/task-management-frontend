@@ -4,9 +4,17 @@
   padding: 16px;
   display: flex;
   flex-direction: column;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position:relative;
   /* height: fit-content; */
+}
+.close-component{
+  position:absolute;
+  top:12px;
+  right:15px;
+  cursor: pointer;
+  color: rgba(56, 56, 56, 0.447);
+  z-index: 100;
 }
 
 .inbox h2 {

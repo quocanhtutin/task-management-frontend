@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import './TaskBoard.css'
 import { Plus, ChevronDown } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import TableMode from '../TableMode/TableMode';
 import ColumnMode from '../ColumnMode/ColumnMode';
 
 const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, columns, setColumns }) => {
-
 
     const [cards, setCards] = useState([
         {
@@ -24,10 +23,14 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
 
     const { title } = useParams()
     const board_title = title
-    const [input, setInput] = useState('');
-    const [viewMode, setViewMode] = useState('column');
-    const [showViewMenu, setShowViewMenu] = useState(false);
-    const [popupInfo, setPopupInfo] = useState(null);
+    const [searchParams] = useSearchParams()
+    const rawColor = decodeURIComponent(searchParams.get("color"));
+    const [color, setColor] = useState("");
+    const [headerColor, setHeaderColor] = useState("")
+    const [input, setInput] = useState('')
+    const [viewMode, setViewMode] = useState('column')
+    const [showViewMenu, setShowViewMenu] = useState(false)
+    const [popupInfo, setPopupInfo] = useState(null)
     const [cardEdit, setCardEdit] = useState('')
 
     const displayAddCard = (col) => {
@@ -59,16 +62,31 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
         }
     }
 
-    const onDragStart = (e, fromCol, fromIndex) => {
-        e.dataTransfer.setData('fromCol', fromCol);
-        e.dataTransfer.setData('fromIndex', fromIndex);
-    };
-
     const toggleViewMenu = () => setShowViewMenu(!showViewMenu);
     const selectView = (mode) => {
         setViewMode(mode);
         setShowViewMenu(false);
     };
+
+    function darkenColor(hex, percent) {
+        hex = hex.replace("#", "");
+
+        let r = parseInt(hex.substring(0, 2), 16);
+        let g = parseInt(hex.substring(2, 4), 16);
+        let b = parseInt(hex.substring(4, 6), 16);
+
+        r = Math.floor(r * (1 - percent / 100));
+        g = Math.floor(g * (1 - percent / 100));
+        b = Math.floor(b * (1 - percent / 100));
+
+        r = Math.max(0, r);
+        g = Math.max(0, g);
+        b = Math.max(0, b);
+
+        const toHex = (v) => v.toString(16).padStart(2, "0");
+
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
 
     useEffect(() => {
         const updatedColumns = columns.map(column => ({
@@ -88,36 +106,28 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
 
         setColumns(updatedColumns);
 
+        if (rawColor.includes(",")) {
+            const baseColor = rawColor.split(",")[0];
+            setHeaderColor(darkenColor(baseColor, 30));
+
+            // gradient
+            setColor(`linear-gradient(135deg, ${rawColor})`);
+        } else {
+            // màu đơn
+            setHeaderColor(darkenColor(rawColor, 30));
+            setColor(rawColor);
+        }
+
     }, []);
+
+    useEffect(() => {
+        console.log(color)
+    }, [])
 
     useEffect(() => {
         const allCards = columns.flatMap(column => column.cards);
         setCards(allCards);
     }, [columns]);
-
-
-    // useEffect(() => {
-    //     const allCards = columns.flatMap(column =>
-    //         column.cards.map((card, i) => ({
-    //             card_id: null,
-    //             card_title: card,
-    //             card_column: column.title,
-    //             card_label: null,
-    //             card_member: [],
-    //             card_deadline: null,
-    //             card_check: false,
-
-    //         }))
-    //     );
-
-    //     setCards(allCards);
-    //     console.log(columns)
-    // }, [columns]);
-
-    // useEffect(() => {
-    //     console.log("Cards updated: ", cards);
-    // }, [cards]);
-
 
     const selectCardEdit = (card, cardIndex) => {
         if (cardEdit) return;
@@ -172,11 +182,9 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-
-
     return (
-        <div className="trello-board">
-            <div className='board-header'>
+        <div className="trello-board" style={{ background: color }}>
+            <div className='board-header' style={{ background: headerColor }}>
                 <h2>{board_title}</h2>
                 <div className="view-selector">
                     <button className="view-btn" onClick={toggleViewMenu}>

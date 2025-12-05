@@ -74,6 +74,7 @@
     word-wrap: break-word;       
     overflow-wrap: break-word; 
     white-space: normal;
+    padding:8px;
 }
 .cdp-actions{
     margin-top:20px; 
@@ -376,11 +377,15 @@
     margin-left:6px}
 .cdp-close{
     position:absolute;
-    top:10px;right:12px;
-    border:none;background:#fff;
-    border-radius:50%;width:36px;
-    height:36px;cursor:pointer;
-    font-size:16px
+    top:10px;
+    right:12px;
+    border:none;
+    background:#fff;
+    border-radius:50%;
+    width:36px;
+    height:36px;
+    cursor:pointer;
+    font-size:16px;
 }
 
 /* scrollbars small */
@@ -391,6 +396,22 @@
 .cdp-left::-webkit-scrollbar-thumb, .cdp-right::-webkit-scrollbar-thumb{
     background:rgba(0,0,0,0.12);
     border-radius:6px;
+}
+.edit-title{
+    color: #8c7f7fa6;
+    justify-self: right;
+    cursor: pointer;
+    font-size: 20px;
+}
+.edit-title:hover{
+    color: #3d3d3d;
+}
+.cdp-header textarea {
+    width:100%;
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    resize:none;
 }
 
 @media (max-width:1024px){

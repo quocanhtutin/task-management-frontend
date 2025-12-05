@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import './ColumnMode.css'
 import { Plus } from 'lucide-react'
 
@@ -10,8 +10,12 @@ const ColumnMode = ({
     displayAddCard,
     addCard,
     setCardDetail,
-    setShowCardDetailPopup
+    setShowCardDetailPopup,
+    updateCardInColumn
 }) => {
+
+    const [showAddColumn, setShowAddColumn] = useState(false)
+    const [newColumn, setNewColumn] = useState("")
 
     const onDragStart = (e, fromCol, fromIndex) => {
         e.dataTransfer.setData('fromCol', fromCol);
@@ -34,13 +38,11 @@ const ColumnMode = ({
     };
 
     const addColumn = () => {
-        const title = prompt('Tên cột mới:');
+        const title = newColumn;
         if (title) setColumns([...columns, { title, cards: [] }]);
+        setNewColumn("")
+        setShowAddColumn(false)
     };
-
-    useEffect(() => {
-        console.log(columns)
-    }, [columns])
 
     return (
         <div className="board-scroll">
@@ -60,9 +62,9 @@ const ColumnMode = ({
                                 className="card-item"
                                 draggable
                                 onDragStart={(e) => onDragStart(e, i, j)}
-
+                                style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}
                             >
-                                <input type="radio" />
+                                <input type="checkbox" checked={card.check} />
                                 <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
                             </div>
                         ))}
@@ -86,13 +88,29 @@ const ColumnMode = ({
                                 className="card-add"
                                 onClick={() => displayAddCard(i)}
                             >
-                                <Plus /> <p>Thêm thẻ</p>
+                                <p>+ Thêm thẻ</p>
                             </div>
                         )}
                     </div>
                 </div>
             ))}
-            <button className="add-column" onClick={addColumn}>+ Thêm cột</button>
+            {showAddColumn ?
+                <div className="board-column">
+                    <div className="add-column-container">
+                        <input
+                            value={newColumn}
+                            onChange={(e) => setNewColumn(e.target.value)}
+                            placeholder="Thêm tiêu đề"
+                        />
+                        <button className="add-card blue" onClick={addColumn}>
+                            Thêm
+                        </button>
+                        <button className="add-card white" onClick={() => { setNewColumn(""); setShowAddColumn(false) }}>
+                            Hủy
+                        </button>
+                    </div>
+                </div> :
+                <button className="add-column" onClick={() => setShowAddColumn(true)}>+ Thêm cột</button>}
         </div>
     );
 };

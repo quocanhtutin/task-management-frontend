@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CreateBoardPopup.css";
 
 const CreateBoardPopup = ({ onClose }) => {
@@ -10,8 +11,9 @@ const CreateBoardPopup = ({ onClose }) => {
     const [selectedBg, setSelectedBg] = useState(null);
 
     const canCreate = title.trim().length > 0;
+    const navigate = useNavigate()
 
-    const gradientOptions = ["#a1c4fd,#c2e9fb", "#667eea,#764ba2", "#ff9a9e,#fad0c4"];
+    const gradientOptions = ["#9abcf2ff, #dff4ffff", "#764ba2, #dbe1ffff", "#dc7e81ff, #ffebe6ff"];
     const solidColors = ["#4BA3C3", "#7B1FA2", "#D32F2F", "#388E3C", "#1976D2"];
     const imageOptions = [
         "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
@@ -23,15 +25,19 @@ const CreateBoardPopup = ({ onClose }) => {
         console.log(selectedBg)
     }, [selectedBg])
 
+    const handleCreateBoard = () => {
+        navigate(`/boards/${title}?color=${encodeURIComponent(selectedBg)}`)
+    }
+
     return (
         <div className="popup-overlay">
             <div className="popup-container">
                 <div className="popup-header">
-                    <h2>Tạo bảng</h2>
+                    <h1>Tạo bảng</h1>
                     <button onClick={onClose} className="close-btn">✕</button>
                 </div>
 
-                {/* Background Section */}
+                {/* Background section-cbp */}
                 <div>
                     <p className="label">Phông nền</p>
 
@@ -91,7 +97,7 @@ const CreateBoardPopup = ({ onClose }) => {
                 </div>
 
                 {/* Title Input */}
-                <div className="section">
+                <div className="section-cbp">
                     <p className="label">Tiêu đề bảng *</p>
                     <input
                         value={title}
@@ -102,7 +108,7 @@ const CreateBoardPopup = ({ onClose }) => {
                 </div>
 
                 {/* View Type Dropdown */}
-                <div className="section dropdown-wrapper">
+                <div className="section-cbp dropdown-wrapper">
                     <p className="label">Quyền xem</p>
                     <button
                         onClick={() => setShowViewSelect(!showViewSelect)}
@@ -155,6 +161,7 @@ const CreateBoardPopup = ({ onClose }) => {
                 <button
                     disabled={!canCreate}
                     className={canCreate ? "create-btn" : "create-btn disabled"}
+                    onClick={handleCreateBoard}
                 >
                     Tạo bảng mới
                 </button>

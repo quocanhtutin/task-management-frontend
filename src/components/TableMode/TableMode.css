@@ -7,13 +7,16 @@
 .table-view {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   background: white;
   border-radius: 10px;
-  overflow: visible;
   flex-shrink: 0;
   height: fit-content;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   margin-bottom: 56px;
+  position: relative;
+  z-index:1;
+  overflow: visible !important;
 }
 
 .table-view th {
@@ -27,6 +30,12 @@
   border-top: 1px solid #eee;
   cursor: pointer;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: static !important;
+  z-index:1;
+  overflow: visible !important;
 }
 
 .table-view td:hover {
@@ -58,11 +67,6 @@
 
 }
 
-.column-cell {
-  position: relative;
-  cursor: pointer;
-}
-
 .column-selector {
   display: flex;
   align-items: center;
@@ -71,14 +75,16 @@
   padding: 2px 6px;
   border-radius: 4px;
   transition: background 0.2s;
+  position: relative;
+  z-index:1;
 }
 
 .down-icon {
   opacity: 0.6;
 }
 
-.column-cell {
-  position: relative;
+.column-cell{
+  position: relative !important;
 }
 
 .move-popup-inline {
@@ -86,9 +92,11 @@
   background: #fff;
   border: 1px solid #ccc;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-  z-index: 999;
+  z-index: 9999 !important;
   min-width: 140px;
   animation: fadeIn 0.15s ease-in-out;
+  top:0;
+  left:0;
 }
 
 .popup-item {
@@ -104,6 +112,13 @@
   font-weight: 600;
 }
 
+.labeled {
+  display:inline-block;
+  width:100%;
+  height:30px;
+  border-radius:3px;
+  vertical-align:top;
+}
 
 
 @keyframes fadeIn {

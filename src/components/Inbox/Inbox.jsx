@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './Inbox.css'
 
-const Inbox = () => {
+const Inbox = ({ onClose }) => {
     const [tags, setTags] = useState([]);
     const [input, setInput] = useState('');
 
@@ -26,6 +26,7 @@ const Inbox = () => {
                     <div key={i} className="tag-item">{tag}</div>
                 ))}
             </div>
+            <div className="close-component" onClick={onClose}>X</div>
         </div>
     );
 }
