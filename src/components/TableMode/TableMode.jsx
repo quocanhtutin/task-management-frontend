@@ -3,33 +3,8 @@ import { ChevronDown } from 'lucide-react';
 import './TableMode.css'
 
 
-const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, updateCardEdit, columns }) => {
+const TableMode = ({ cards, setCards, selectCardEdit, setColumns, cardEdit, setCardEdit, updateCardEdit, columns, setCardDetail, setShowCardDetailPopup }) => {
     const [popupInfo, setPopupInfo] = useState(null);
-    const openMovePopup = (cardIndex, e) => {
-        e.stopPropagation();
-        const board = document.querySelector('.trello-board');
-        const boardRect = board.getBoundingClientRect();
-        const rect = e.currentTarget.getBoundingClientRect();
-
-        let top = rect.bottom - boardRect.top + 4;
-        let left = rect.left - boardRect.left;
-
-        // Giới hạn popup không tràn ra ngoài vùng trello-board
-        const popupWidth = 150;
-        const popupHeight = 150;
-        const maxLeft = boardRect.width - popupWidth - 10;
-        const maxTop = boardRect.height - popupHeight - 10;
-
-        if (left > maxLeft) left = maxLeft;
-        if (top > maxTop) top = maxTop;
-
-        setPopupInfo({
-            cardIndex,
-            top,
-            left,
-            fromTable: true,
-        });
-    };
     const moveCardToColumn = (toColIndex) => {
         if (!popupInfo) return;
         const { colIndex, cardIndex, fromTable } = popupInfo;
@@ -62,6 +37,14 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
     return (
         <div className='table-mode'>
             <table className="table-view">
+                <colgroup>
+                    <col style={{ width: "5%" }} />
+                    <col style={{ width: "35%" }} />
+                    <col style={{ width: "20%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "10%" }} />
+                </colgroup>
                 <thead>
                     <tr><th></th><th>Thẻ</th><th>Danh sách</th><th>Nhãn</th><th>Thành viên</th><th>Ngày hết hạn</th></tr>
                 </thead>
@@ -69,11 +52,11 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
                     {cards.map((card, cardIndex) => (
                         <tr key={cardIndex}>
                             <td>
-                                <input type='radio' />
+                                <input type='checkbox' checked={card.check} />
                             </td>
                             <td >
                                 {!card.edit ?
-                                    <div onClick={() => selectCardEdit(card, cardIndex)}>
+                                    <div onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
                                         {card.title}
                                     </div>
                                     :
@@ -83,31 +66,15 @@ const TableMode = ({ cards, setCards, selectCardEdit, cardEdit, setCardEdit, upd
                                     </div>
                                 }
                             </td>
-                            <td className="column-cell">
-                                <div className="column-selector" onClick={(e) => openMovePopup(cardIndex, e)}>
-                                    <span>{card.column}</span>
+                            <td>
+                                <div className="column-selector" onClick={(e) => setPopupInfo(cardIndex)}>
+                                    <p>{card.column}</p>
                                     <ChevronDown size={14} className="down-icon" />
                                 </div>
-                                {popupInfo?.cardIndex === cardIndex && (
-                                    <div
-                                        className="move-popup-inline"
-                                    >
-                                        {columns.map((col, i) => (
-                                            <div
-                                                key={i}
-                                                className={`popup-item ${col.title === card.column ? 'active' : ''}`}
-                                                onClick={() => moveCardToColumn(i)}
-                                            >
-                                                {col.title}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
                             </td>
 
                             <td>
-                                {card.label || "."}
+                                {card.label ? <span className="labeled" style={{ background: card.label }} /> : "."}
                             </td>
                             <td>
                                 {card.member != [] ? card.member : "."}

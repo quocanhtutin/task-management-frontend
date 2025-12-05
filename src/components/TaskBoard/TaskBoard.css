@@ -23,6 +23,7 @@
 }
 .view-menu{
   position: absolute;
+  z-index: 100;
   top: 30px;
   background: rgb(225, 225, 225);
   color: black;

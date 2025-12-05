@@ -7,7 +7,6 @@ import ColumnMode from '../ColumnMode/ColumnMode';
 
 const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, columns, setColumns }) => {
 
-
     const [cards, setCards] = useState([
         {
             id: null,
@@ -25,7 +24,9 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
     const { title } = useParams()
     const board_title = title
     const [searchParams] = useSearchParams()
-    const color = decodeURIComponent(searchParams.get("color"))
+    const rawColor = decodeURIComponent(searchParams.get("color"));
+    const [color, setColor] = useState("");
+    const [headerColor, setHeaderColor] = useState("")
     const [input, setInput] = useState('')
     const [viewMode, setViewMode] = useState('column')
     const [showViewMenu, setShowViewMenu] = useState(false)
@@ -61,16 +62,31 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
         }
     }
 
-    const onDragStart = (e, fromCol, fromIndex) => {
-        e.dataTransfer.setData('fromCol', fromCol);
-        e.dataTransfer.setData('fromIndex', fromIndex);
-    };
-
     const toggleViewMenu = () => setShowViewMenu(!showViewMenu);
     const selectView = (mode) => {
         setViewMode(mode);
         setShowViewMenu(false);
     };
+
+    function darkenColor(hex, percent) {
+        hex = hex.replace("#", "");
+
+        let r = parseInt(hex.substring(0, 2), 16);
+        let g = parseInt(hex.substring(2, 4), 16);
+        let b = parseInt(hex.substring(4, 6), 16);
+
+        r = Math.floor(r * (1 - percent / 100));
+        g = Math.floor(g * (1 - percent / 100));
+        b = Math.floor(b * (1 - percent / 100));
+
+        r = Math.max(0, r);
+        g = Math.max(0, g);
+        b = Math.max(0, b);
+
+        const toHex = (v) => v.toString(16).padStart(2, "0");
+
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
 
     useEffect(() => {
         const updatedColumns = columns.map(column => ({
@@ -90,17 +106,28 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
 
         setColumns(updatedColumns);
 
-    }, []);
+        if (rawColor.includes(",")) {
+            const baseColor = rawColor.split(",")[0];
+            setHeaderColor(darkenColor(baseColor, 30));
 
-    useEffect(() => {
-        const allCards = columns.flatMap(column => column.cards);
-        setCards(allCards);
-    }, [columns]);
+            // gradient
+            setColor(`linear-gradient(135deg, ${rawColor})`);
+        } else {
+            // màu đơn
+            setHeaderColor(darkenColor(rawColor, 30));
+            setColor(rawColor);
+        }
+
+    }, []);
 
     useEffect(() => {
         console.log(color)
     }, [])
 
+    useEffect(() => {
+        const allCards = columns.flatMap(column => column.cards);
+        setCards(allCards);
+    }, [columns]);
 
     const selectCardEdit = (card, cardIndex) => {
         if (cardEdit) return;
@@ -154,28 +181,6 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
-
-    function darkenColor(hex, percent) {
-        hex = hex.replace("#", "");
-
-        let r = parseInt(hex.substring(0, 2), 16);
-        let g = parseInt(hex.substring(2, 4), 16);
-        let b = parseInt(hex.substring(4, 6), 16);
-
-        r = Math.floor(r * (1 - percent / 100));
-        g = Math.floor(g * (1 - percent / 100));
-        b = Math.floor(b * (1 - percent / 100));
-
-        r = Math.max(0, r);
-        g = Math.max(0, g);
-        b = Math.max(0, b);
-
-        const toHex = (v) => v.toString(16).padStart(2, "0");
-
-        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-    }
-
-    const headerColor = darkenColor(color, 30)
 
     return (
         <div className="trello-board" style={{ background: color }}>
