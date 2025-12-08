@@ -187,7 +187,7 @@ const TaskBoard = ({
 
                         {showViewMenu && (
                             <ul className="view-menu">
-                                {['column', 'table', 'grid'].map((mode) => (
+                                {['column', 'table'].map((mode) => (
                                     <li className={viewMode === mode ? "active-mode" : ""} key={mode} onClick={() => selectView(mode)}>{mode}</li>
                                 ))}
                             </ul>

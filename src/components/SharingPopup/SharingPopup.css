@@ -87,18 +87,18 @@
   margin-top: 20px;
 }
 
-.tab {
+.tab-list {
   padding: 6px 12px;
-  background: transparent;
+  background: #fff;
   border: none;
   cursor: pointer;
   color: #555;
   border-radius: 0;
   font-size: 16px;
-  font-style: bold;
+  font-weight: 500;
 }
 
-.tab.active {
+.tab-list.tab-active {
   border-bottom: 2px solid #0b63f8;
   color: #0b63f8;
 }

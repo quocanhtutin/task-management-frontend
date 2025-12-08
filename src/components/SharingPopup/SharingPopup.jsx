@@ -32,8 +32,8 @@ const SharingPopup = ({ onClose }) => {
                 </div>
 
                 <div className="share-tabs">
-                    <button className={`tab ${tab === "members" ? "active" : ""}`} onClick={() => setTab("members")}>Thành viên của bảng</button>
-                    <button className={`tab ${tab === "requests" ? "active" : ""}`} onClick={() => setTab("requests")}>Yêu cầu tham gia</button>
+                    <button className={`tab-list ${tab === "members" ? "tab-active" : ""}`} onClick={() => setTab("members")}>Thành viên của bảng</button>
+                    <button className={`tab-list ${tab === "requests" ? "tab-active" : ""}`} onClick={() => setTab("requests")}>Yêu cầu tham gia</button>
                 </div>
                 {tab === "members" ?
                     <div className="member-list">
