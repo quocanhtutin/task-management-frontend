@@ -11,7 +11,8 @@ const ColumnMode = ({
     addCard,
     setCardDetail,
     setShowCardDetailPopup,
-    updateCardInColumn
+    updateCardInColumn,
+    addNewList
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
@@ -39,7 +40,7 @@ const ColumnMode = ({
 
     const addColumn = () => {
         const title = newColumn;
-        if (title) setColumns([...columns, { title, cards: [] }]);
+        addNewList(title)
         setNewColumn("")
         setShowAddColumn(false)
     };
@@ -64,7 +65,7 @@ const ColumnMode = ({
                                 onDragStart={(e) => onDragStart(e, i, j)}
                                 style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}
                             >
-                                <input type="checkbox" checked={card.check} />
+                                <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.title, card.id, "check", e.target.checked)} />
                                 <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
                             </div>
                         ))}

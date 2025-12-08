@@ -5,7 +5,16 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import TableMode from '../TableMode/TableMode';
 import ColumnMode from '../ColumnMode/ColumnMode';
 
-const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, columns, setColumns }) => {
+const TaskBoard = ({
+    setCardDetail,
+    setShowCardDetailPopup,
+    updateCardInColumn,
+    columns,
+    setColumns,
+    addNewList,
+    addCard,
+    setShowSharePopup
+}) => {
 
     const [cards, setCards] = useState([
         {
@@ -32,6 +41,8 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
     const [showViewMenu, setShowViewMenu] = useState(false)
     const [popupInfo, setPopupInfo] = useState(null)
     const [cardEdit, setCardEdit] = useState('')
+    const [isStarred, setIsStarred] = useState(false);
+
 
     const displayAddCard = (col) => {
         setColumns(prev =>
@@ -42,25 +53,7 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
         setInput("")
     }
 
-    const addCard = (col) => {
-        if (input.trim()) {
-            const updated = [...columns];
-            updated[col].cards.push({
-                id: crypto.randomUUID(),
-                title: input,
-                column: updated[col].title,
-                label: null,
-                members: [],
-                deadline: null,
-                check: false,
-                description: null,
-                edit: false,
-            });
-            setColumns(updated);
-            displayAddCard(col)
-            setInput('')
-        }
-    }
+
 
     const toggleViewMenu = () => setShowViewMenu(!showViewMenu);
     const selectView = (mode) => {
@@ -185,19 +178,35 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
     return (
         <div className="trello-board" style={{ background: color }}>
             <div className='board-header' style={{ background: headerColor }}>
-                <h2>{board_title}</h2>
-                <div className="view-selector">
-                    <button className="view-btn" onClick={toggleViewMenu}>
-                        <ChevronDown size={16} />
-                    </button>
+                <div className='board-header-left'>
+                    <h2>{board_title}</h2>
+                    <div className="view-selector">
+                        <button className="view-btn" onClick={toggleViewMenu}>
+                            <ChevronDown size={16} />
+                        </button>
 
-                    {showViewMenu && (
-                        <ul className="view-menu">
-                            {['column', 'table', 'grid'].map((mode) => (
-                                <li className={viewMode === mode && "active-mode"} key={mode} onClick={() => selectView(mode)}>{mode}</li>
-                            ))}
-                        </ul>
-                    )}
+                        {showViewMenu && (
+                            <ul className="view-menu">
+                                {['column', 'table', 'grid'].map((mode) => (
+                                    <li className={viewMode === mode ? "active-mode" : ""} key={mode} onClick={() => selectView(mode)}>{mode}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+                <div className='board-header-right'>
+                    <div className="board-avatar">
+                        QA
+                    </div>
+                    <button
+                        className="star-btn"
+                        onClick={() => setIsStarred(prev => !prev)}
+                    >
+                        {isStarred ? "★" : "☆"}
+                    </button>
+                    <button className="share-btn" onClick={() => setShowSharePopup(true)}>
+                        + Chia sẻ
+                    </button>
                 </div>
             </div>
 
@@ -208,10 +217,11 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
                     input={input}
                     setInput={setInput}
                     displayAddCard={displayAddCard}
-                    addCard={addCard}
+                    addCard={(col) => { addCard(col, input); setInput(""), displayAddCard(col) }}
                     setCardDetail={setCardDetail}
                     setShowCardDetailPopup={setShowCardDetailPopup}
                     updateCardInColumn={updateCardInColumn}
+                    addNewList={addNewList}
                 />
             )}
 
@@ -219,14 +229,19 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
             {viewMode === 'table' && (
                 <TableMode
                     cards={cards}
-                    setCards={setCards}
-                    selectCardEdit={selectCardEdit}
                     cardEdit={cardEdit}
                     setCardEdit={setCardEdit}
                     updateCardEdit={updateCardEdit}
                     columns={columns}
+                    setColumns={setColumns}
                     setCardDetail={setCardDetail}
-                    setShowCardDetailPopup={setShowCardDetailPopup} />
+                    setShowCardDetailPopup={setShowCardDetailPopup}
+                    updateCardInColumn={updateCardInColumn}
+                    addNewList={addNewList}
+                    addCard={(col) => { addCard(col, input); setInput("") }}
+                    input={input}
+                    setInput={setInput}
+                />
             )}
 
         </div>

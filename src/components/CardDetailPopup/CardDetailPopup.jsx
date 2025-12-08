@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./CardDetailPopup.css";
+import { ChevronDown } from 'lucide-react';
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 const MOCK_USERS = [
@@ -9,10 +10,15 @@ const MOCK_USERS = [
     { id: 4, name: "Phạm D", avatarColor: "#4CAF50" },
 ];
 
-export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn }) {
+export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn, columns, setColumns }) {
     const [completed, setCompleted] = useState(card.check || false);
     const [title, setTitle] = useState(card.title);
     const [editTitle, setEditTitle] = useState(false)
+
+    // Column
+    const [column, setColumn] = useState(card.column)
+    const [showColumns, setShowColumns] = useState(false)
+    const active_index = columns.findIndex(col => col.title === card.column)
 
     // Labels
     const labelColors = ["#FF7043", "#FFA726", "#FFEB3B", "#66BB6A", "#42A5F5", "#AB47BC"];
@@ -30,6 +36,8 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     const [showMemberSearch, setShowMemberSearch] = useState(false);
     const [memberQuery, setMemberQuery] = useState("");
     const [members, setMembers] = useState(card.members || []);
+    const [showAssignedMembers, setShowAssignedMembers] = useState(false)
+    const hoverTimer = useRef(null);
 
     // Description
     const [desc, setDesc] = useState(card.description || "");
@@ -51,39 +59,39 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         return () => document.removeEventListener("click", onDocClick);
     }, []);
 
-    function toggleMember(user) {
+    const toggleMember = (user) => {
         const exists = members.find(m => m.id === user.id);
         if (exists) setMembers(members.filter(m => m.id !== user.id));
         else setMembers([...members, user]);
     }
 
-    function saveDate() {
+    const saveDate = () => {
         if (!dateInput) return;
         const iso = `${dateInput}T${timeInput || "00:00"}`;
         setDeadline(iso);
         setShowDatePicker(false);
     }
 
-    function saveDescription() {
+    const saveDescription = () => {
         setIsEditingDesc(false);
         updateCardInColumn(card.column, card.id, "description", desc)
     }
 
-    function saveTitle() {
+    const saveTitle = () => {
         setEditTitle(false);
         if (title) {
             updateCardInColumn(card.column, card.id, "title", title)
         }
     }
 
-    function addComment() {
+    const addComment = () => {
         if (!commentText.trim()) return;
         const newC = { id: Date.now(), text: commentText, author: "Bạn", time: new Date().toISOString() };
         setComments([newC, ...comments]);
         setCommentText("");
     }
 
-    function saveEditComment(id, newText) {
+    const saveEditComment = (id, newText) => {
         setComments(comments.map(c => c.id === id ? { ...c, text: newText } : c));
         setEditingCommentId(null);
     }
@@ -108,11 +116,28 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         updateCardInColumn(card.column, card.id, "reminder", reminder)
     }, [reminder])
 
+    const handleChangeColumn = (toCol) => {
+        const updated = [...columns]
+        const cardIndex = updated[active_index].cards.findIndex(c => c.id === card.id)
+        const [movedCard] = updated[active_index].cards.splice(cardIndex, 1);
+        updated[toCol].cards.push({ ...movedCard, column: updated[toCol].title });
+        setColumns(updated)
+        setShowColumns(false)
+    }
+
     return (
         <div className="cdp-overlay">
             <div className="cdp-main">
                 <div className="cdp-top">
-                    <h2>{card.column}</h2>
+                    <h2>{column}</h2>
+                    <ChevronDown size={14} className="down-icon" onClick={() => setShowColumns(true)} />
+                    {showColumns && (
+                        <ul className="view-columns">
+                            {columns.map((col, i) => (
+                                <li className={col.title === card.column ? "active-column" : ""} key={i} onClick={() => { setColumn(col.title); handleChangeColumn(i) }}>{col.title}</li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
                 <div className="cdp-under">
                     {/* Left column */}
@@ -204,12 +229,37 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                             {/* Members */}
                             <div className="action-row">
                                 <div className="members-row">
-                                    <div className="members-stack">
+                                    <div
+                                        className="members-stack"
+                                        onMouseEnter={() => {
+                                            hoverTimer.current = setTimeout(() => {
+                                                setShowAssignedMembers(true);
+                                            }, 1000);
+                                        }}
+                                        onMouseLeave={() => {
+                                            clearTimeout(hoverTimer.current);
+                                            setShowAssignedMembers(false);
+                                        }}
+                                    >
                                         {members.slice(0, 3).map((m, idx) => (
-                                            <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>{m.name[0]}</div>
+                                            <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>
+                                                {m.name[0]}
+                                            </div>
                                         ))}
-                                        <button className="avatar add member-btn" onClick={() => { setShowMemberSearch(true) }}>+</button>
+                                        {showAssignedMembers &&
+                                            <div className="member-assigned">
+                                                <div className="member-results">
+                                                    {members.map(u => (
+                                                        <div key={u.id} className={`member-item`}>
+                                                            <div className="avatar small" style={{ background: u.avatarColor }}>{u.name[0]}</div>
+                                                            <div className="member-name">{u.name}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>}
                                     </div>
+                                    <button className="avatar add member-btn" onClick={() => setShowMemberSearch(true)}>+</button>
+
 
                                     {showMemberSearch && (
                                         <div className="member-search">

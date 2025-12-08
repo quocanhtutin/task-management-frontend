@@ -1,0 +1,155 @@
+
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+.share-popup {
+  width: 520px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  animation: fadeIn 0.18s ease-out;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.share-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.share-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.share-invite {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.share-invite input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.share-invite select {
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+}
+.share-invite option {
+  border: none;
+}
+
+.share-submit-btn {
+  background: #0b63f8;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.share-link-section {
+  margin-top: 18px;
+  padding: 12px;
+  background: #f7f7f7;
+  border-radius: 6px;
+}
+
+.share-link-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.share-create-link-btn {
+  background: transparent;
+  border: none;
+  color: #0b63f8;
+  cursor: pointer;
+}
+
+.share-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-top: 20px;
+}
+
+.tab {
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  border-radius: 0;
+  font-size: 16px;
+  font-style: bold;
+}
+
+.tab.active {
+  border-bottom: 2px solid #0b63f8;
+  color: #0b63f8;
+}
+
+.member-list {
+  margin-top: 15px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.member-requests{
+  margin-top: 15px;
+  max-height: 200px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 4px;
+  gap: 12px;
+}
+
+.member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d84fff;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-info p {
+  margin: 0;
+}
+
+.member-name {
+  font-weight: bold;
+}
+
+.member-username {
+  font-size: 13px;
+  color: gray;
+}
+
+.member-role {
+  margin-left: auto;
+  padding: 4px 6px;
+  border-radius: 6px;
+}

@@ -5,14 +5,56 @@
   overflow: hidden;
   max-height: 100%;
 }
-.board-header{
-  padding: 15px;
+.board-header {
+  padding: 12px 18px;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background-color: #5112b5;
   color: white;
-  align-items: center;
+}
+.board-header-left {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 16px;
+}
+.board-header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.board-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgb(252, 40, 40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.star-btn {
+  font-size: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.share-btn {
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+.share-btn:hover {
+  background: rgba(255,255,255,0.4);
 }
 
 .view-selector {
@@ -25,11 +67,15 @@
   position: absolute;
   z-index: 100;
   top: 30px;
-  background: rgb(225, 225, 225);
+  background: #fff;
   color: black;
+  width: 100px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
 }
 .view-menu li {
   padding:5px 10px;
+  font-size: 20px;
+  width:100%;
 }
 
 .view-menu li:hover{
@@ -37,7 +83,7 @@
 }
 
 .view-menu .active-mode{
-  background: #f2f2f2;
+  background: #a2c2ff;
 }
 
 @keyframes fadeIn {

@@ -3,35 +3,35 @@ import { ChevronDown } from 'lucide-react';
 import './TableMode.css'
 
 
-const TableMode = ({ cards, setCards, selectCardEdit, setColumns, cardEdit, setCardEdit, updateCardEdit, columns, setCardDetail, setShowCardDetailPopup }) => {
+const TableMode = ({
+    cards,
+    setColumns,
+    cardEdit,
+    setCardEdit,
+    updateCardEdit,
+    columns,
+    setCardDetail,
+    setShowCardDetailPopup,
+    updateCardInColumn,
+    addNewList,
+    addCard,
+    input,
+    setInput
+}) => {
     const [popupInfo, setPopupInfo] = useState(null);
-    const moveCardToColumn = (toColIndex) => {
-        if (!popupInfo) return;
-        const { colIndex, cardIndex, fromTable } = popupInfo;
+    const [cardColumn, setCardColumn] = useState("")
+    const [showAddCard, setShowAddCard] = useState(false)
+    const [showColumns, setShowColumns] = useState(false)
+    const [newColumn, setNewColumn] = useState(null)
+    const [showAddColumn, setShowAddColumn] = useState("")
 
-        if (fromTable) {
-            const toColumn = columns[toColIndex].title;
-
-            // Cập nhật trong mảng cards
-            const updatedCards = cards.map((c, i) =>
-                i === cardIndex ? { ...c, column: toColumn } : c
-            );
-            setCards(updatedCards);
-            setPopupInfo(null);
-            return;
-        }
-
-        // Cũ: di chuyển card giữa các cột khi view = column
-        if (colIndex === toColIndex) {
-            setPopupInfo(null);
-            return;
-        }
-
-        const updated = [...columns];
-        const [movedCard] = updated[colIndex].cards.splice(cardIndex, 1);
-        updated[toColIndex].cards.push(movedCard);
-        setColumns(updated);
-        setPopupInfo(null);
+    const addColumn = () => {
+        const title = newColumn;
+        addNewList(title)
+        setNewColumn("")
+        setShowAddColumn(false)
+        setCardColumn(title)
+        setShowColumns(false)
     };
 
     return (
@@ -50,13 +50,13 @@ const TableMode = ({ cards, setCards, selectCardEdit, setColumns, cardEdit, setC
                 </thead>
                 <tbody>
                     {cards.map((card, cardIndex) => (
-                        <tr key={cardIndex}>
-                            <td>
-                                <input type='checkbox' checked={card.check} />
+                        <tr key={cardIndex} className="table-row">
+                            <td className="row-check">
+                                <input type='checkbox' checked={card.check} onChange={(e) => updateCardInColumn(card.column, card.id, "check", e.target.checked)} />
                             </td>
-                            <td >
+                            <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
                                 {!card.edit ?
-                                    <div onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
+                                    <div >
                                         {card.title}
                                     </div>
                                     :
@@ -66,26 +66,80 @@ const TableMode = ({ cards, setCards, selectCardEdit, setColumns, cardEdit, setC
                                     </div>
                                 }
                             </td>
-                            <td>
+                            <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
                                 <div className="column-selector" onClick={(e) => setPopupInfo(cardIndex)}>
                                     <p>{card.column}</p>
-                                    <ChevronDown size={14} className="down-icon" />
                                 </div>
                             </td>
 
-                            <td>
+                            <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
                                 {card.label ? <span className="labeled" style={{ background: card.label }} /> : "."}
                             </td>
-                            <td>
-                                {card.member != [] ? card.member : "."}
+                            <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
+                                {card.members != [] ?
+                                    card.members.map((m, idx) => (
+                                        <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>
+                                            {m.name[0]}
+                                        </div>
+                                    )) :
+                                    "."}
                             </td>
-                            <td>
-                                {card.deadline || "."}
+                            <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
+                                {card.deadline ? <p className="deadline">{new Date(card.deadline).toLocaleString()}</p> : "."}
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+            {!showAddCard ?
+                <button className="add-row" onClick={() => setShowAddCard(true)}>+<p>Thêm thẻ</p></button>
+                :
+                <div className="add-card-format">
+                    <input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Thêm thẻ"
+                    />
+                    <div className='select-column'>
+                        <p className='selected-column'>
+                            {cardColumn || "Thêm danh mục"}
+                        </p>
+                        <ChevronDown size={20} className="down-icon" onClick={() => setShowColumns(!showColumns)} />
+                        {showColumns && (
+                            <ul className="view-columns-tb">
+                                {columns.map((col, i) => (
+                                    <li key={i} onClick={() => { setCardColumn(col.title); setShowColumns(false) }}>{col.title}</li>
+                                ))}
+                                {!showAddColumn ?
+                                    <li onClick={() => setShowAddColumn(true)}>+ Thêm danh sách</li>
+                                    :
+                                    <li className='new-list'>
+                                        <input className='new-column' value={newColumn} onChange={(e) => setNewColumn(e.target.value)} />
+                                        <button className="add-card blue" onClick={addColumn}>
+                                            Thêm
+                                        </button>
+                                        <button className="add-card white" onClick={() => { setNewColumn(""); setShowAddColumn(false) }}>
+                                            Hủy
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                        )}
+                    </div>
+                    <button className="add-card blue" onClick={() => {
+                        const columnIndex = columns.findIndex(col => col.title === cardColumn);
+                        addCard(columnIndex);
+                        setShowAddCard(false);
+                        setCardColumn("");
+                        setShowColumns(false);
+                    }}>
+                        Thêm
+                    </button>
+                    <button className="add-card white" onClick={() => { setShowAddCard(false); setShowColumns(false); setCardColumn("") }}>
+                        Hủy
+                    </button>
+                </div>
+            }
         </div>
     )
 }

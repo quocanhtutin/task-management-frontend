@@ -21,10 +21,39 @@
     width: 100%;
     padding: 15px 30px;
     border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    position:relative;
 }
 .cdp-top h2{
     color: black;
     font-size: 20px;
+}
+.view-columns{
+  width: 200px;
+  position: absolute;
+  z-index: 100;
+  top: 60px;
+  left:0px;
+  background: #fff;
+  color: black;
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+}
+.view-columns li {
+  padding:10px 30px;
+  font-size: 20px;
+  width:100%;
+  word-wrap: break-word;       
+  overflow-wrap: break-word; 
+  align-items: center;
+  cursor: pointer;
+}
+.view-columns li:hover {
+  background: #eee;
+}
+.view-columns .active-column{
+    background: #a2c2ff;
 }
 .cdp-under{
     display:flex;
@@ -62,7 +91,6 @@
     width: 20px;
     border-radius: 50%;
 }
-/* .cdp-checkbox input{display:none} */
 .cdp-checkbox input:checked + .cdp-checkbox-mark{
     background:#0079BF;
 }
@@ -232,7 +260,7 @@
 }
 .member-search{
     position:absolute;
-    top:54px;
+    top:35px;
     right:0;
     width:320px;
     background:#fff;
@@ -240,6 +268,18 @@
     padding:10px;
     border-radius:8px;
     z-index:2000;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12)
+}
+.member-assigned{
+    position:absolute;
+    top:35px;
+    right:0;
+    width:320px;
+    background:#fff;
+    border:1px solid #ddd;
+    padding:10px;
+    border-radius:8px;
+    z-index:1000;
     box-shadow:0 6px 18px rgba(0,0,0,0.12)
 }
 .member-search input{
