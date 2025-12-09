@@ -1,31 +1,59 @@
 import React, { useState } from "react";
 import "./MenuBoardPopup.css";
-import { X, UserPlus, Star, Settings, Image, Share2, Info, ArrowLeft } from "lucide-react";
+import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound } from "lucide-react";
+import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 
-const MenuBoardPopup = ({ onClose, setShowSharePopup }) => {
+const MenuBoardPopup = ({
+    onClose,
+    setShowSharePopup,
+    setRawColor,
+    rawColor,
+    isStarred,
+    setIsStarred,
+    boardDes,
+    setBoardDes
+}) => {
     const [backgroundType, setBackgroundType] = useState("gradient");
-    const [selectedBg, setSelectedBg] = useState(null);
-    const gradientOptions = ["#9abcf2ff, #dff4ffff", "#764ba2, #dbe1ffff", "#dc7e81ff, #ffebe6ff"];
-    const solidColors = ["#4BA3C3", "#7B1FA2", "#D32F2F", "#388E3C", "#1976D2"];
-    const imageOptions = [
-        "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    const gradientOptions = [
+        "#9abcf2ff, #dff4ffff",
+        "#764ba2, #dbe1ffff",
+        "#dc7e81ff, #ffebe6ff",
+        "#cef930ff, #f5f9deff",
+        "#4e5cdeff, #83f7f7ff",
+        "#28945dff, #e6ffe7ff",
+        "#ef61c2ff, #eddca6ff",
+        "#151239ff, #2330a9ff",
     ];
+    const solidColors = [
+        "#4BA3C3",
+        "#7B1FA2",
+        "#D32F2F",
+        "#388E3C",
+        "#1976D2",
+        "#e5fc51ff",
+        "#ee3dd9ff",
+        "#241f61ff",
+    ];
+    const imageOptions = [];
     const [changeBackground, setChangeBackground] = useState(false)
+    const [showInfo, setShowInfo] = useState(false)
+
+    const [isEditingDesc, setIsEditingDesc] = useState(false)
+    const [desc, setDesc] = useState(boardDes)
 
     return (
         <div className="menu-overlay" onClick={onClose}>
-
             <div
                 className="menu-panel"
                 onClick={(e) => e.stopPropagation()}
             >
                 {changeBackground &&
                     <div className="change-bg-container">
-                        <ArrowLeft size={20} onClick={() => setChangeBackground(false)} />
-                        <p className="label">Phông nền</p>
+                        <div className="menu-header">
+                            <h3>Phông nền</h3>
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setChangeBackground(false)} />
+                        </div>
 
                         <div className="bg-tabs">
                             <button
@@ -48,13 +76,13 @@ const MenuBoardPopup = ({ onClose, setShowSharePopup }) => {
                             </button>
                         </div>
 
-                        <div className="bg-grid">
+                        <div className="bg-grid-menu">
                             {backgroundType === "gradient" &&
                                 gradientOptions.map((g, i) => (
                                     <div
                                         key={i}
-                                        onClick={() => setSelectedBg(g)}
-                                        className={selectedBg === g ? "bg-item active-bg" : "bg-item"}
+                                        onClick={() => setRawColor(g)}
+                                        className={rawColor === g ? "bg-item-menu active-bg" : "bg-item-menu"}
                                         style={{ background: `linear-gradient(135deg, ${g})` }}
                                     />
                                 ))}
@@ -63,8 +91,8 @@ const MenuBoardPopup = ({ onClose, setShowSharePopup }) => {
                                 imageOptions.map((img, i) => (
                                     <div
                                         key={i}
-                                        onClick={() => setSelectedBg(img)}
-                                        className={selectedBg === img ? "bg-item bg-img active-bg" : "bg-item bg-img"}
+                                        onClick={() => setRawColor(img)}
+                                        className={rawColor === img ? "bg-item-menu bg-img active-bg" : "bg-item-menu bg-img"}
                                         style={{ backgroundImage: `url(${img})` }}
                                     />
                                 ))}
@@ -73,13 +101,52 @@ const MenuBoardPopup = ({ onClose, setShowSharePopup }) => {
                                 solidColors.map((c, i) => (
                                     <div
                                         key={i}
-                                        onClick={() => setSelectedBg(c)}
-                                        className={selectedBg === c ? "bg-item active-bg" : "bg-item"}
+                                        onClick={() => setRawColor(c)}
+                                        className={rawColor === c ? "bg-item-menu active-bg" : "bg-item-menu"}
                                         style={{ background: c }}
                                     />
                                 ))}
                         </div>
-                    </div>}
+                    </div>
+                }
+                {showInfo &&
+                    <div className="change-bg-container">
+                        <div className="menu-header">
+                            <h3>Thông tin</h3>
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setShowInfo(false)} />
+                        </div>
+                        <div className="owner">
+                            <div className="owner-section">
+                                <UserRound size={28} />
+                                <h2>Quản trị viên của bảng</h2>
+                            </div>
+                            <div className="member-item">
+                                <div className="member-avatar">QA</div>
+                                <div className="member-info">
+                                    <p className="member-name">Quốc Anh Nguyễn (bạn)</p>
+                                    <p className="member-username">@qucanhnguyen26</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="board-info">
+                            <h2>Mô tả</h2>
+                            <AutoResizeTextarea
+                                value={desc}
+                                onChange={(e) => setDesc(e.target.value)}
+                                onFocus={() => setIsEditingDesc(true)}
+                            />
+
+                            {isEditingDesc && (
+                                <div className="desc-actions">
+                                    <button onClick={() => { setDesc(boardDes || ""); setIsEditingDesc(false) }} className="btn">Hủy</button>
+                                    <button onClick={() => { setBoardDes(desc); setIsEditingDesc(false) }} className="btn primary">Lưu</button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                }
+
+
                 <div className="menu-header">
                     <h3>Menu</h3>
                     <X size={28} className="close-btn" onClick={onClose} />
@@ -91,7 +158,7 @@ const MenuBoardPopup = ({ onClose, setShowSharePopup }) => {
                         <span>Chia sẻ</span>
                     </li>
 
-                    <li>
+                    <li onClick={() => setShowInfo(true)}>
                         <Info size={20} />
                         <span>Về bảng này</span>
                     </li>
@@ -101,8 +168,10 @@ const MenuBoardPopup = ({ onClose, setShowSharePopup }) => {
                         <span>In, xuất và chia sẻ</span>
                     </li>
 
-                    <li>
-                        <Star size={20} />
+                    <li onClick={() => setIsStarred(prev => !prev)}>
+                        <button className="star-btn-menu">
+                            {isStarred ? "★" : "☆"}
+                        </button>
                         <span>Gắn sao</span>
                     </li>
 

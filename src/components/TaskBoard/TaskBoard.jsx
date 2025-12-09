@@ -14,7 +14,10 @@ const TaskBoard = ({
     addNewList,
     addCard,
     setShowSharePopup,
-    setShowMenuBoardPopup
+    setShowMenuBoardPopup,
+    rawColor,
+    isStarred,
+    setIsStarred
 }) => {
 
     const [cards, setCards] = useState([
@@ -34,14 +37,12 @@ const TaskBoard = ({
 
     const { title } = useParams()
     const board_title = title
-    const [searchParams] = useSearchParams()
-    const rawColor = decodeURIComponent(searchParams.get("color"));
     const [color, setColor] = useState("");
     const [headerColor, setHeaderColor] = useState("")
     const [input, setInput] = useState('')
     const [viewMode, setViewMode] = useState('column')
     const [showViewMenu, setShowViewMenu] = useState(false)
-    const [isStarred, setIsStarred] = useState(false);
+
 
 
     const displayAddCard = (col) => {
@@ -99,7 +100,9 @@ const TaskBoard = ({
         }));
 
         setColumns(updatedColumns);
+    }, []);
 
+    useEffect(() => {
         if (rawColor.includes(",")) {
             const baseColor = rawColor.split(",")[0];
             setHeaderColor(darkenColor(baseColor, 30));
@@ -109,8 +112,7 @@ const TaskBoard = ({
             setHeaderColor(darkenColor(rawColor, 30));
             setColor(rawColor);
         }
-
-    }, []);
+    }, [rawColor])
 
     useEffect(() => {
         console.log(color)

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import './ManagementTable.css'
+import { useSearchParams } from 'react-router-dom'
 import Inbox from '../../components/Inbox/Inbox.jsx'
 import Planner from '../../components/Planner/Planner.jsx'
 import TaskBoard from '../../components/TaskBoard/TaskBoard.jsx'
@@ -24,6 +25,14 @@ const ManagementTable = () => {
     ]);
     const [showInbox, setShowInbox] = useState(false);
     const [showPlanner, setShowPlanner] = useState(false);
+
+    const [searchParams] = useSearchParams()
+    const [rawColor, setRawColor] = useState(decodeURIComponent(searchParams.get("color")))
+
+    const [isStarred, setIsStarred] = useState(false);
+
+    const [boardDes, setBoardDes] = useState("")
+
 
     const updateCardInColumn = (columnTitle, cardId, field, value) => {
         setColumns(prev =>
@@ -75,7 +84,12 @@ const ManagementTable = () => {
                 <MenuBoardPopup
                     onClose={() => setShowMenuBoardPopup(false)}
                     setShowSharePopup={setShowSharePopup}
-
+                    setRawColor={setRawColor}
+                    rawColor={rawColor}
+                    setIsStarred={setIsStarred}
+                    isStarred={isStarred}
+                    boardDes={boardDes}
+                    setBoardDes={setBoardDes}
                 />
             }
 
@@ -98,6 +112,9 @@ const ManagementTable = () => {
                     addCard={addCard}
                     setShowSharePopup={setShowSharePopup}
                     setShowMenuBoardPopup={setShowMenuBoardPopup}
+                    rawColor={rawColor}
+                    isStarred={isStarred}
+                    setIsStarred={setIsStarred}
                 />
             </div>
 

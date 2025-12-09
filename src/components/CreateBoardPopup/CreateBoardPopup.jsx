@@ -13,8 +13,26 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
     const canCreate = title.trim().length > 0;
     const navigate = useNavigate()
 
-    const gradientOptions = ["#9abcf2ff, #dff4ffff", "#764ba2, #dbe1ffff", "#dc7e81ff, #ffebe6ff"];
-    const solidColors = ["#4BA3C3", "#7B1FA2", "#D32F2F", "#388E3C", "#1976D2"];
+    const gradientOptions = [
+        "#9abcf2ff, #dff4ffff",
+        "#764ba2, #dbe1ffff",
+        "#dc7e81ff, #ffebe6ff",
+        "#cef930ff, #f5f9deff",
+        "#4e5cdeff, #83f7f7ff",
+        "#28945dff, #e6ffe7ff",
+        "#ef61c2ff, #eddca6ff",
+        "#151239ff, #2330a9ff",
+    ];
+    const solidColors = [
+        "#4BA3C3",
+        "#7B1FA2",
+        "#D32F2F",
+        "#388E3C",
+        "#1976D2",
+        "#e5fc51ff",
+        "#ee3dd9ff",
+        "#241f61ff",
+    ];
     const imageOptions = [
         "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
         "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
