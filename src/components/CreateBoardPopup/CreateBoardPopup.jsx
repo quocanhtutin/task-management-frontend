@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CreateBoardPopup.css";
 
-const CreateBoardPopup = ({ onClose }) => {
+const CreateBoardPopup = ({ onClose, addNewBoard }) => {
     const [title, setTitle] = useState("");
     const [viewType, setViewType] = useState("workspace");
     const [showViewSelect, setShowViewSelect] = useState(false);
@@ -21,12 +21,11 @@ const CreateBoardPopup = ({ onClose }) => {
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
     ];
 
-    useEffect(() => {
-        console.log(selectedBg)
-    }, [selectedBg])
-
     const handleCreateBoard = () => {
-        navigate(`/boards/${title}?color=${encodeURIComponent(selectedBg)}`)
+        addNewBoard(title, selectedBg)
+        setTitle("")
+        setSelectedBg(null)
+        onClose()
     }
 
     return (
@@ -37,7 +36,6 @@ const CreateBoardPopup = ({ onClose }) => {
                     <button onClick={onClose} className="close-btn">✕</button>
                 </div>
 
-                {/* Background section-cbp */}
                 <div>
                     <p className="label">Phông nền</p>
 
@@ -62,7 +60,6 @@ const CreateBoardPopup = ({ onClose }) => {
                         </button>
                     </div>
 
-                    {/* Background Options */}
                     <div className="bg-grid">
                         {backgroundType === "gradient" &&
                             gradientOptions.map((g, i) => (
@@ -96,7 +93,6 @@ const CreateBoardPopup = ({ onClose }) => {
                     </div>
                 </div>
 
-                {/* Title Input */}
                 <div className="section-cbp">
                     <p className="label">Tiêu đề bảng *</p>
                     <input
@@ -107,7 +103,6 @@ const CreateBoardPopup = ({ onClose }) => {
                     />
                 </div>
 
-                {/* View Type Dropdown */}
                 <div className="section-cbp dropdown-wrapper">
                     <p className="label">Quyền xem</p>
                     <button
@@ -157,7 +152,6 @@ const CreateBoardPopup = ({ onClose }) => {
                     )}
                 </div>
 
-                {/* Create Button */}
                 <button
                     disabled={!canCreate}
                     className={canCreate ? "create-btn" : "create-btn disabled"}

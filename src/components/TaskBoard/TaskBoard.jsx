@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import './TaskBoard.css'
-import { Plus, ChevronDown } from 'lucide-react';
+import { Plus, ChevronDown, EllipsisVertical } from 'lucide-react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import TableMode from '../TableMode/TableMode';
 import ColumnMode from '../ColumnMode/ColumnMode';
 
-const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, columns, setColumns }) => {
+const TaskBoard = ({
+    setCardDetail,
+    setShowCardDetailPopup,
+    updateCardInColumn,
+    columns,
+    setColumns,
+    addNewList,
+    addCard,
+    setShowSharePopup,
+    setShowMenuBoardPopup
+}) => {
 
     const [cards, setCards] = useState([
         {
@@ -18,6 +28,7 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
             checked: false,
             description: null,
             edit: false,
+            stored: false
         }
     ])
 
@@ -30,8 +41,8 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
     const [input, setInput] = useState('')
     const [viewMode, setViewMode] = useState('column')
     const [showViewMenu, setShowViewMenu] = useState(false)
-    const [popupInfo, setPopupInfo] = useState(null)
-    const [cardEdit, setCardEdit] = useState('')
+    const [isStarred, setIsStarred] = useState(false);
+
 
     const displayAddCard = (col) => {
         setColumns(prev =>
@@ -42,25 +53,7 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
         setInput("")
     }
 
-    const addCard = (col) => {
-        if (input.trim()) {
-            const updated = [...columns];
-            updated[col].cards.push({
-                id: crypto.randomUUID(),
-                title: input,
-                column: updated[col].title,
-                label: null,
-                members: [],
-                deadline: null,
-                check: false,
-                description: null,
-                edit: false,
-            });
-            setColumns(updated);
-            displayAddCard(col)
-            setInput('')
-        }
-    }
+
 
     const toggleViewMenu = () => setShowViewMenu(!showViewMenu);
     const selectView = (mode) => {
@@ -101,6 +94,7 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
                 check: false,
                 description: false,
                 edit: false,
+                stored: false
             }))
         }));
 
@@ -110,10 +104,8 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
             const baseColor = rawColor.split(",")[0];
             setHeaderColor(darkenColor(baseColor, 30));
 
-            // gradient
             setColor(`linear-gradient(135deg, ${rawColor})`);
         } else {
-            // màu đơn
             setHeaderColor(darkenColor(rawColor, 30));
             setColor(rawColor);
         }
@@ -129,75 +121,41 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
         setCards(allCards);
     }, [columns]);
 
-    const selectCardEdit = (card, cardIndex) => {
-        if (cardEdit) return;
-        const allCards = cards.map((card, i) => i === cardIndex ? { ...card, edit: true } : card)
-        setCards(allCards)
-        setCardEdit(card.title)
-        console.log(cardEdit)
-    }
-
-    const updateCardEdit = (card, cardIndex) => {
-        if (!cardEdit.trim()) return;
-        const allCards = cards.map((c, i) => i === cardIndex ? { ...c, title: cardEdit, edit: false } : c)
-        setCards(allCards)
-        setCardEdit("")
-        console.log(cardEdit)
-        console.log(cards)
-    }
-
-    const openMovePopup = (cardIndex, e) => {
-        e.stopPropagation();
-        const board = document.querySelector('.trello-board');
-        const boardRect = board.getBoundingClientRect();
-        const rect = e.currentTarget.getBoundingClientRect();
-
-        let top = rect.bottom - boardRect.top + 4;
-        let left = rect.left - boardRect.left;
-
-        // Giới hạn popup không tràn ra ngoài vùng trello-board
-        const popupWidth = 150;
-        const popupHeight = 150;
-        const maxLeft = boardRect.width - popupWidth - 10;
-        const maxTop = boardRect.height - popupHeight - 10;
-
-        if (left > maxLeft) left = maxLeft;
-        if (top > maxTop) top = maxTop;
-
-        setPopupInfo({
-            cardIndex,
-            top,
-            left,
-            fromTable: true,
-        });
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (!e.target.closest('.move-popup-inline') && !e.target.closest('.column-selector')) {
-                setPopupInfo(null);
-            }
-        };
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
-
     return (
         <div className="trello-board" style={{ background: color }}>
             <div className='board-header' style={{ background: headerColor }}>
-                <h2>{board_title}</h2>
-                <div className="view-selector">
-                    <button className="view-btn" onClick={toggleViewMenu}>
-                        <ChevronDown size={16} />
-                    </button>
+                <div className='board-header-left'>
+                    <h2>{board_title}</h2>
+                    <div className="view-selector">
+                        <button className="view-btn" onClick={toggleViewMenu}>
+                            <ChevronDown size={16} />
+                        </button>
 
-                    {showViewMenu && (
-                        <ul className="view-menu">
-                            {['column', 'table', 'grid'].map((mode) => (
-                                <li className={viewMode === mode && "active-mode"} key={mode} onClick={() => selectView(mode)}>{mode}</li>
-                            ))}
-                        </ul>
-                    )}
+                        {showViewMenu && (
+                            <ul className="view-menu">
+                                {['column', 'table'].map((mode) => (
+                                    <li className={viewMode === mode ? "active-mode" : ""} key={mode} onClick={() => selectView(mode)}>{mode}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+                <div className='board-header-right'>
+                    <div className="board-avatar">
+                        QA
+                    </div>
+                    <button
+                        className="star-btn"
+                        onClick={() => setIsStarred(prev => !prev)}
+                    >
+                        {isStarred ? "★" : "☆"}
+                    </button>
+                    <button className="share-btn" onClick={() => setShowSharePopup(true)}>
+                        + Chia sẻ
+                    </button>
+                    <button className='menu-board' onClick={() => setShowMenuBoardPopup(true)}>
+                        <EllipsisVertical />
+                    </button>
                 </div>
             </div>
 
@@ -208,10 +166,11 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
                     input={input}
                     setInput={setInput}
                     displayAddCard={displayAddCard}
-                    addCard={addCard}
+                    addCard={(col) => { addCard(col, input); setInput(""), displayAddCard(col) }}
                     setCardDetail={setCardDetail}
                     setShowCardDetailPopup={setShowCardDetailPopup}
                     updateCardInColumn={updateCardInColumn}
+                    addNewList={addNewList}
                 />
             )}
 
@@ -219,14 +178,16 @@ const TaskBoard = ({ setCardDetail, setShowCardDetailPopup, updateCardInColumn, 
             {viewMode === 'table' && (
                 <TableMode
                     cards={cards}
-                    setCards={setCards}
-                    selectCardEdit={selectCardEdit}
-                    cardEdit={cardEdit}
-                    setCardEdit={setCardEdit}
-                    updateCardEdit={updateCardEdit}
                     columns={columns}
+                    setColumns={setColumns}
                     setCardDetail={setCardDetail}
-                    setShowCardDetailPopup={setShowCardDetailPopup} />
+                    setShowCardDetailPopup={setShowCardDetailPopup}
+                    updateCardInColumn={updateCardInColumn}
+                    addNewList={addNewList}
+                    addCard={(col) => { addCard(col, input); setInput("") }}
+                    input={input}
+                    setInput={setInput}
+                />
             )}
 
         </div>

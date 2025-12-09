@@ -1,7 +1,15 @@
 .table-mode{
   padding: 16px;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: scroll;
+}
+
+.table-mode::-webkit-scrollbar {
+  height: 8px;
+}
+.table-mode::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
 }
 
 .table-view {
@@ -13,10 +21,46 @@
   flex-shrink: 0;
   height: fit-content;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  margin-bottom: 56px;
+  margin-bottom: 16px;
   position: relative;
-  z-index:1;
-  overflow: visible !important;
+  overflow:hidden;
+}
+
+.add-row{
+  margin-bottom: 170px;
+  background: rgba(255, 255, 255, 0.329);
+  border: 2px #bbb;
+  border-radius: 25px;
+  width: 35px;
+  min-width: 35px;
+  height: 35px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #333333a9;
+  font-size: 16px;
+  align-items: center;
+  padding: 13px;
+  display: flex; 
+  gap: 10px;
+  overflow: hidden;
+  transition: width 0.3s ease, background 0.5s ease;
+}
+
+.add-row p {
+  display: inline-flex;
+  visibility:hidden;
+  opacity:0;
+  transition: opacity 0.5s ease;
+  white-space: nowrap;
+}
+
+.add-row:hover {
+  width: 120px;
+  background: rgba(255, 255, 255, 0.772);
+}
+.add-row:hover p{
+  visibility:visible;
+  opacity:1;
 }
 
 .table-view th {
@@ -28,43 +72,15 @@
 .table-view td {
   padding: 10px;
   border-top: 1px solid #eee;
-  cursor: pointer;
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  position: static !important;
-  z-index:1;
-  overflow: visible !important;
+  cursor: pointer;
 }
 
-.table-view td:hover {
+.table-row:hover {
   background: #f9f9ff;
-}
-
-.edit-card{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.edit-card input{
-  font-size: 12px;
-  flex: 0.5;
-  max-width: 100px;
-  height: 100%;
-  padding-left: 5px;
-  border-radius: 5px;
-  outline: 2px solid  #6617e5;
-}
-
-.edit-card button{
-  background: #0052cc;
-  color: white;
-  font-size: 12px;
-  padding: 5px;
-  border-radius: 5px;
-
 }
 
 .column-selector {
@@ -120,6 +136,86 @@
   vertical-align:top;
 }
 
+.deadline{
+  word-wrap: break-word;       
+  overflow-wrap: break-word; 
+  white-space: normal;
+}
+
+.add-card-format{
+  margin-bottom: 270px;
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  gap: 10px;
+}
+.add-card-format input {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  max-width: 100%;
+  width: 40%;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+.select-column{
+  width: 30%;
+  max-width: 300px;
+  display:flex;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+}
+.view-columns-tb{
+  width: 300px;
+  position: absolute;
+  z-index: 100;
+  margin-bottom: 200px;
+  top: 30px;
+  left:0px;
+  background: #fff;
+  color: black;
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  height: 200px;
+  overflow-y: scroll;
+}
+.view-columns-tb li {
+  padding:10px 30px;
+  font-size: 16px;
+  width:100%;
+  word-wrap: break-word;       
+  overflow-wrap: break-word; 
+  align-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+.view-columns-tb li:hover {
+  background: #eee;
+}
+.view-columns-tb .active-column{
+    background: #a2c2ff;
+}
+.selected-column{
+  width: 100%;
+}
+.add-card-format button{
+  flex:1;
+  width: 15%;
+}
+.new-list{
+  display: flex;
+  gap: 5px;
+}
+.new-list{
+  width: 100px;
+}
+.card-detail{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 @keyframes fadeIn {
   from {opacity: 0; transform: scale(0.97);}

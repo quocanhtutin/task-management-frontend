@@ -6,6 +6,12 @@
   display: flex;
   flex-direction: column;
   padding-top: 16px;
+  overflow-y: auto;       
+  scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;          /* Chrome, Edge, Safari ẩn scroll */
 }
 
 .sidebar-options {

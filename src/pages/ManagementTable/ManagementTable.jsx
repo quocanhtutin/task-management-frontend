@@ -4,11 +4,18 @@ import Inbox from '../../components/Inbox/Inbox.jsx'
 import Planner from '../../components/Planner/Planner.jsx'
 import TaskBoard from '../../components/TaskBoard/TaskBoard.jsx'
 import CardDetailPopup from '../../components/CardDetailPopup/CardDetailPopup.jsx'
-import { fillOffset } from 'framer-motion'
+import SharingPopup from '../../components/SharingPopup/SharingPopup.jsx'
+import MenuBoardPopup from '../../components/MenuBoardPopup/MenuBoardPopup.jsx'
 
 const ManagementTable = () => {
+
     const [showCardDetailPopup, setShowCardDetailPopup] = useState(false)
     const [cardDetail, setCardDetail] = useState(null)
+
+    const [showSharePopup, setShowSharePopup] = useState(false);
+
+    const [showMenuBoardPopup, setShowMenuBoardPopup] = useState(false)
+
     const [columns, setColumns] = useState([
         { title: 'Hướng dẫn', cards: ['Bắt đầu sử dụng Trello', 'Học cách dùng Trello'], addCard: false },
         { title: 'Hôm nay', cards: [], addCard: false },
@@ -36,11 +43,41 @@ const ManagementTable = () => {
         console.log(field, value)
     };
 
+    const addNewList = (listTitle) => {
+        if (listTitle) setColumns([...columns, { title: listTitle, cards: [] }]);
+    }
+
+    const addCard = (col, cardTitle) => {
+        if (cardTitle.trim()) {
+            const updated = [...columns];
+            updated[col].cards.push({
+                id: crypto.randomUUID(),
+                title: cardTitle,
+                column: updated[col].title,
+                label: null,
+                members: [],
+                deadline: null,
+                check: false,
+                description: null,
+                edit: false,
+            });
+            setColumns(updated);
+        }
+    }
+
     const boardWide = (!showInbox && !showPlanner) ? "full-board" : (!showInbox || !showPlanner) ? "wide-board" : "normal-board"
 
     return (
         <div className="man-table-container">
-            {showCardDetailPopup && <CardDetailPopup card={cardDetail} onClose={() => setShowCardDetailPopup(false)} updateCardInColumn={updateCardInColumn} />}
+            {showCardDetailPopup && <CardDetailPopup card={cardDetail} onClose={() => setShowCardDetailPopup(false)} updateCardInColumn={updateCardInColumn} columns={columns} setColumns={setColumns} />}
+            {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
+            {showMenuBoardPopup &&
+                <MenuBoardPopup
+                    onClose={() => setShowMenuBoardPopup(false)}
+                    setShowSharePopup={setShowSharePopup}
+
+                />
+            }
 
             <div className={`main-content ${boardWide}`}>
                 {showInbox && (
@@ -57,6 +94,10 @@ const ManagementTable = () => {
                     updateCardInColumn={updateCardInColumn}
                     columns={columns}
                     setColumns={setColumns}
+                    addNewList={addNewList}
+                    addCard={addCard}
+                    setShowSharePopup={setShowSharePopup}
+                    setShowMenuBoardPopup={setShowMenuBoardPopup}
                 />
             </div>
 

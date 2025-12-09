@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import './Inbox.css'
+import { X } from "lucide-react";
 
 const Inbox = ({ onClose }) => {
     const [tags, setTags] = useState([]);
@@ -26,7 +27,7 @@ const Inbox = ({ onClose }) => {
                     <div key={i} className="tag-item">{tag}</div>
                 ))}
             </div>
-            <div className="close-component" onClick={onClose}>X</div>
+            <X size={20} className='close-component' onClick={onClose} />
         </div>
     );
 }
