@@ -5,12 +5,16 @@ import Planner from '../../components/Planner/Planner.jsx'
 import TaskBoard from '../../components/TaskBoard/TaskBoard.jsx'
 import CardDetailPopup from '../../components/CardDetailPopup/CardDetailPopup.jsx'
 import SharingPopup from '../../components/SharingPopup/SharingPopup.jsx'
+import MenuBoardPopup from '../../components/MenuBoardPopup/MenuBoardPopup.jsx'
 
 const ManagementTable = () => {
+
     const [showCardDetailPopup, setShowCardDetailPopup] = useState(false)
     const [cardDetail, setCardDetail] = useState(null)
 
     const [showSharePopup, setShowSharePopup] = useState(false);
+
+    const [showMenuBoardPopup, setShowMenuBoardPopup] = useState(false)
 
     const [columns, setColumns] = useState([
         { title: 'Hướng dẫn', cards: ['Bắt đầu sử dụng Trello', 'Học cách dùng Trello'], addCard: false },
@@ -67,6 +71,13 @@ const ManagementTable = () => {
         <div className="man-table-container">
             {showCardDetailPopup && <CardDetailPopup card={cardDetail} onClose={() => setShowCardDetailPopup(false)} updateCardInColumn={updateCardInColumn} columns={columns} setColumns={setColumns} />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
+            {showMenuBoardPopup &&
+                <MenuBoardPopup
+                    onClose={() => setShowMenuBoardPopup(false)}
+                    setShowSharePopup={setShowSharePopup}
+
+                />
+            }
 
             <div className={`main-content ${boardWide}`}>
                 {showInbox && (
@@ -86,6 +97,7 @@ const ManagementTable = () => {
                     addNewList={addNewList}
                     addCard={addCard}
                     setShowSharePopup={setShowSharePopup}
+                    setShowMenuBoardPopup={setShowMenuBoardPopup}
                 />
             </div>
 

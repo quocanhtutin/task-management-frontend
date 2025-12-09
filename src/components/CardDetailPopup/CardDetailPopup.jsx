@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./CardDetailPopup.css";
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, X, Pencil, PencilOff, Archive } from 'lucide-react';
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 const MOCK_USERS = [
@@ -151,10 +151,11 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 :
                                 <textarea className="cdp-title" value={title} onChange={(e) => setTitle(e.target.value)} />}
                             {!editTitle ?
-                                <p className="edit-title" onClick={() => setEditTitle(true)}>Sửa</p>
+                                <Pencil className="edit-title" onClick={() => setEditTitle(true)} />
                                 :
-                                <p className="edit-title" onClick={() => { setEditTitle(false); saveTitle() }}>Lưu</p>
+                                <PencilOff className="edit-title" onClick={() => { setEditTitle(false); saveTitle() }} />
                             }
+                            {completed && <Archive className="store-card" size={22} onClick={() => updateCardInColumn(card.column, card.id, "stored", true)} />}
 
                         </div>
 
@@ -337,7 +338,7 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                         </div>
                     </div>
                 </div>
-                <button className="cdp-close" onClick={onClose}>✕</button>
+                <X size={14} className="cdp-close" onClick={onClose} />
             </div>
         </div>
     );

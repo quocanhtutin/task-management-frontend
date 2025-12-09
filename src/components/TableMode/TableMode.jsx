@@ -1,14 +1,11 @@
 import React, { useState } from 'react'
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Archive } from 'lucide-react';
 import './TableMode.css'
 
 
 const TableMode = ({
     cards,
     setColumns,
-    cardEdit,
-    setCardEdit,
-    updateCardEdit,
     columns,
     setCardDetail,
     setShowCardDetailPopup,
@@ -49,22 +46,16 @@ const TableMode = ({
                     <tr><th></th><th>Thẻ</th><th>Danh sách</th><th>Nhãn</th><th>Thành viên</th><th>Ngày hết hạn</th></tr>
                 </thead>
                 <tbody>
-                    {cards.map((card, cardIndex) => (
+                    {cards.map((card, cardIndex) => !card.stored && (
                         <tr key={cardIndex} className="table-row">
                             <td className="row-check">
                                 <input type='checkbox' checked={card.check} onChange={(e) => updateCardInColumn(card.column, card.id, "check", e.target.checked)} />
                             </td>
-                            <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
-                                {!card.edit ?
-                                    <div >
-                                        {card.title}
-                                    </div>
-                                    :
-                                    <div className='edit-card'>
-                                        <input type='text' value={cardEdit} onChange={(e) => setCardEdit(e.target.value)} />
-                                        <button className="update-card" onClick={() => updateCardEdit(card, cardIndex)}>Lưu</button>
-                                    </div>
-                                }
+                            <td className='card-detail' >
+                                <div className='card-title' onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
+                                    {card.title}
+                                </div>
+                                {card.check && <Archive className='store-btn' size={20} onClick={() => updateCardInColumn(card.column, card.id, "stored", true)} />}
                             </td>
                             <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
                                 <div className="column-selector" onClick={(e) => setPopupInfo(cardIndex)}>

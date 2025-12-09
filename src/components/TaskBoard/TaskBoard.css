@@ -86,6 +86,18 @@
   background: #a2c2ff;
 }
 
+.menu-board{
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.menu-board:hover{
+  background: rgba(255,255,255,0.3);
+}
+
 @keyframes fadeIn {
   from {opacity: 0; transform: scale(0.97);}
   to {opacity: 1; transform: scale(1);}

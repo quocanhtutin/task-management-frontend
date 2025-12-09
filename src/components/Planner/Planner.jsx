@@ -8,7 +8,7 @@ const Planner = ({ onClose }) => {
             <h2>Trình lập kế hoạch</h2>
             <p>Kết nối lịch của bạn để xem song song Trình lập kế hoạch và việc cần làm.</p>
             <button>Kết nối với một lịch</button>
-            <X size={20} onClick={onClose} />
+            <X size={20} className='close-component' onClick={onClose} />
         </div>
     );
 }

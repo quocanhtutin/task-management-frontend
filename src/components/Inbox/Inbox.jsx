@@ -27,7 +27,7 @@ const Inbox = ({ onClose }) => {
                     <div key={i} className="tag-item">{tag}</div>
                 ))}
             </div>
-            <X size={20} onClick={onClose} />
+            <X size={20} className='close-component' onClick={onClose} />
         </div>
     );
 }

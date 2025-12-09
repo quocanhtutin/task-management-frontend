@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./SharingPopup.css";
-import { X } from "lucide-react";
+import { X, Link } from "lucide-react";
 
 const SharingPopup = ({ onClose }) => {
     const [tab, setTab] = useState("members")
@@ -26,7 +26,8 @@ const SharingPopup = ({ onClose }) => {
 
                 <div className="share-link-section">
                     <div className="share-link-row">
-                        <span>🔗 Chia sẻ bảng này bằng liên kết</span>
+                        <Link size={20} />
+                        <span> Chia sẻ bảng này bằng liên kết</span>
                         <button className="share-create-link-btn">Tạo liên kết</button>
                     </div>
                 </div>
@@ -38,7 +39,7 @@ const SharingPopup = ({ onClose }) => {
                 {tab === "members" ?
                     <div className="member-list">
                         <div className="member-item">
-                            <div className="member-avatar">QN</div>
+                            <div className="member-avatar">QA</div>
                             <div className="member-info">
                                 <p className="member-name">Quốc Anh Nguyễn (bạn)</p>
                                 <p className="member-username">@qucanhnguyen26</p>

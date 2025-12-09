@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './TaskBoard.css'
-import { Plus, ChevronDown } from 'lucide-react';
+import { Plus, ChevronDown, EllipsisVertical } from 'lucide-react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import TableMode from '../TableMode/TableMode';
 import ColumnMode from '../ColumnMode/ColumnMode';
@@ -13,7 +13,8 @@ const TaskBoard = ({
     setColumns,
     addNewList,
     addCard,
-    setShowSharePopup
+    setShowSharePopup,
+    setShowMenuBoardPopup
 }) => {
 
     const [cards, setCards] = useState([
@@ -27,6 +28,7 @@ const TaskBoard = ({
             checked: false,
             description: null,
             edit: false,
+            stored: false
         }
     ])
 
@@ -39,8 +41,6 @@ const TaskBoard = ({
     const [input, setInput] = useState('')
     const [viewMode, setViewMode] = useState('column')
     const [showViewMenu, setShowViewMenu] = useState(false)
-    const [popupInfo, setPopupInfo] = useState(null)
-    const [cardEdit, setCardEdit] = useState('')
     const [isStarred, setIsStarred] = useState(false);
 
 
@@ -94,6 +94,7 @@ const TaskBoard = ({
                 check: false,
                 description: false,
                 edit: false,
+                stored: false
             }))
         }));
 
@@ -103,10 +104,8 @@ const TaskBoard = ({
             const baseColor = rawColor.split(",")[0];
             setHeaderColor(darkenColor(baseColor, 30));
 
-            // gradient
             setColor(`linear-gradient(135deg, ${rawColor})`);
         } else {
-            // màu đơn
             setHeaderColor(darkenColor(rawColor, 30));
             setColor(rawColor);
         }
@@ -121,59 +120,6 @@ const TaskBoard = ({
         const allCards = columns.flatMap(column => column.cards);
         setCards(allCards);
     }, [columns]);
-
-    const selectCardEdit = (card, cardIndex) => {
-        if (cardEdit) return;
-        const allCards = cards.map((card, i) => i === cardIndex ? { ...card, edit: true } : card)
-        setCards(allCards)
-        setCardEdit(card.title)
-        console.log(cardEdit)
-    }
-
-    const updateCardEdit = (card, cardIndex) => {
-        if (!cardEdit.trim()) return;
-        const allCards = cards.map((c, i) => i === cardIndex ? { ...c, title: cardEdit, edit: false } : c)
-        setCards(allCards)
-        setCardEdit("")
-        console.log(cardEdit)
-        console.log(cards)
-    }
-
-    const openMovePopup = (cardIndex, e) => {
-        e.stopPropagation();
-        const board = document.querySelector('.trello-board');
-        const boardRect = board.getBoundingClientRect();
-        const rect = e.currentTarget.getBoundingClientRect();
-
-        let top = rect.bottom - boardRect.top + 4;
-        let left = rect.left - boardRect.left;
-
-        // Giới hạn popup không tràn ra ngoài vùng trello-board
-        const popupWidth = 150;
-        const popupHeight = 150;
-        const maxLeft = boardRect.width - popupWidth - 10;
-        const maxTop = boardRect.height - popupHeight - 10;
-
-        if (left > maxLeft) left = maxLeft;
-        if (top > maxTop) top = maxTop;
-
-        setPopupInfo({
-            cardIndex,
-            top,
-            left,
-            fromTable: true,
-        });
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (!e.target.closest('.move-popup-inline') && !e.target.closest('.column-selector')) {
-                setPopupInfo(null);
-            }
-        };
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
 
     return (
         <div className="trello-board" style={{ background: color }}>
@@ -207,6 +153,9 @@ const TaskBoard = ({
                     <button className="share-btn" onClick={() => setShowSharePopup(true)}>
                         + Chia sẻ
                     </button>
+                    <button className='menu-board' onClick={() => setShowMenuBoardPopup(true)}>
+                        <EllipsisVertical />
+                    </button>
                 </div>
             </div>
 
@@ -229,9 +178,6 @@ const TaskBoard = ({
             {viewMode === 'table' && (
                 <TableMode
                     cards={cards}
-                    cardEdit={cardEdit}
-                    setCardEdit={setCardEdit}
-                    updateCardEdit={updateCardEdit}
                     columns={columns}
                     setColumns={setColumns}
                     setCardDetail={setCardDetail}
