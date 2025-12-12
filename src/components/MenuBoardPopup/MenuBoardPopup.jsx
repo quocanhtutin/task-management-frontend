@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./MenuBoardPopup.css";
-import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound } from "lucide-react";
+import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound, Archive, Trash2, ArchiveX } from "lucide-react";
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 
@@ -12,7 +12,10 @@ const MenuBoardPopup = ({
     isStarred,
     setIsStarred,
     boardDes,
-    setBoardDes
+    setBoardDes,
+    storedCards,
+    setShowCardDetailPopup,
+    setCardDetail
 }) => {
     const [backgroundType, setBackgroundType] = useState("gradient");
     const gradientOptions = [
@@ -42,6 +45,9 @@ const MenuBoardPopup = ({
     const [isEditingDesc, setIsEditingDesc] = useState(false)
     const [desc, setDesc] = useState(boardDes)
 
+    const [showStore, setShowStore] = useState(false)
+    const [storedCategory, setStoredCategory] = useState("card")
+
     return (
         <div className="menu-overlay" onClick={onClose}>
             <div
@@ -49,7 +55,7 @@ const MenuBoardPopup = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 {changeBackground &&
-                    <div className="change-bg-container">
+                    <div className="menu-container">
                         <div className="menu-header">
                             <h3>Phông nền</h3>
                             <ArrowLeft className="close-btn" size={28} onClick={() => setChangeBackground(false)} />
@@ -109,8 +115,50 @@ const MenuBoardPopup = ({
                         </div>
                     </div>
                 }
+
+                {showStore &&
+                    <div className="menu-container">
+                        <div className="menu-header">
+                            <h3>Kho lưu trữ</h3>
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setShowStore(false)} />
+                        </div>
+
+                        <div className="store-cat">
+                            <button
+                                onClick={() => setStoredCategory("card")}
+                                className={storedCategory === "card" ? "active-tab" : "tab"}
+                            >
+                                Thẻ nhiệm vụ
+                            </button>
+                            <button
+                                onClick={() => setStoredCategory("list")}
+                                className={storedCategory === "list" ? "active-tab" : "tab"}
+                            >
+                                Danh sách
+                            </button>
+                        </div>
+
+                        <div className="store">
+                            {storedCategory === "card" &&
+                                storedCards.map((card, i) =>
+                                    <div
+                                        key={i}
+                                        className="stored-card-item"
+                                        style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}
+                                    >
+                                        <input type="checkbox" checked={card.check} />
+                                        <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true), onClose() }}>{card.title}</p>
+                                        <ArchiveX size={20} />
+                                        <Trash2 size={20} />
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </div>
+                }
+
                 {showInfo &&
-                    <div className="change-bg-container">
+                    <div className="menu-container">
                         <div className="menu-header">
                             <h3>Thông tin</h3>
                             <ArrowLeft className="close-btn" size={28} onClick={() => setShowInfo(false)} />
@@ -178,6 +226,11 @@ const MenuBoardPopup = ({
                     <li>
                         <Settings size={20} />
                         <span>Cài đặt</span>
+                    </li>
+
+                    <li onClick={() => setShowStore(true)}>
+                        <Archive size={20} />
+                        <span>Lưu trữ</span>
                     </li>
 
                     <li onClick={() => setChangeBackground(true)}>

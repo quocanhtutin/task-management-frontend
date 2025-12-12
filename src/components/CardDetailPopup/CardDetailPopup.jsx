@@ -138,6 +138,7 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                             ))}
                         </ul>
                     )}
+                    {card.storedDate && <h2>Thẻ được lưu trữ vào {card.storedDate}</h2>}
                 </div>
                 <div className="cdp-under">
                     {/* Left column */}

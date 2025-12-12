@@ -60,13 +60,13 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s ease;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .menu-list li:hover {
   background: #f4f4f4;
 }
-.change-bg-container{
+.menu-container{
   background: #fff;
   height: 100%;
   width: 100%;
@@ -130,6 +130,39 @@
   display: flex;
   align-items: center;
   gap:10px;
+}
+.store-cat{
+  display: flex;
+  width: 100%;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.store-cat button{
+  flex: 1;
+}
+.stored-card-item {
+  border-radius: 6px;
+  padding: 8px;
+  padding-left: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  cursor: pointer;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.stored-card-item p {
+  max-width: 80%;
+  width: 80%;
+  word-wrap: break-word;       
+  overflow-wrap: break-word; 
+  white-space: normal;
+}
+
+.store {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 /* Animation */
 @keyframes slideIn {

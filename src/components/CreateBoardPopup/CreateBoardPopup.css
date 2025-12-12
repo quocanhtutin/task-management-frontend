@@ -53,9 +53,9 @@
 }
 
 .active-tab {
-  background: #0079bf;
+  background: #0052cc;
   color: #fff;
-  border-color: #0079bf;
+  border-color: #0052cc;
 }
 
 .bg-grid {
@@ -80,7 +80,7 @@
 }
 
 .active-bg{
-  outline: 2px solid  #6617e5;
+  outline: 2px solid  #0052cc;
   outline-offset: 2px;
 }
 .section-cbp {
@@ -146,7 +146,7 @@
   margin-top: 18px;
   padding: 12px;
   border-radius: 6px;
-  background: #0079bf;
+  background: #0052cc;
   color: #fff;
   border: none;
   cursor: pointer;

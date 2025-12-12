@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './ManagementTable.css'
 import { useSearchParams } from 'react-router-dom'
 import Inbox from '../../components/Inbox/Inbox.jsx'
@@ -11,7 +11,7 @@ import MenuBoardPopup from '../../components/MenuBoardPopup/MenuBoardPopup.jsx'
 const ManagementTable = () => {
 
     const [showCardDetailPopup, setShowCardDetailPopup] = useState(false)
-    const [cardDetail, setCardDetail] = useState(null)
+    const [cardDetail, setCardDetail] = useState({})
 
     const [showSharePopup, setShowSharePopup] = useState(false);
 
@@ -23,6 +23,49 @@ const ManagementTable = () => {
         { title: 'Tuần này', cards: [], addCard: false },
         { title: 'Sau này', cards: [], addCard: false },
     ]);
+
+    const [cards, setCards] = useState([
+        {
+            id: null,
+            title: null,
+            column: null,
+            label: null,
+            members: [],
+            deadline: null,
+            checked: false,
+            description: null,
+            edit: false,
+            storedDate: null
+        }
+    ])
+
+    const [storedCards, setStoredCards] = useState([])
+
+    useEffect(() => {
+        const updatedColumns = columns.map(column => ({
+            ...column,
+            cards: column.cards.map(card => ({
+                id: crypto.randomUUID(),
+                title: card,
+                column: column.title,
+                label: null,
+                members: [],
+                deadline: null,
+                check: false,
+                description: false,
+                edit: false,
+                storedDate: null
+            }))
+        }));
+
+        setColumns(updatedColumns);
+    }, []);
+
+    useEffect(() => {
+        const allCards = columns.flatMap(column => column.cards);
+        setCards(allCards);
+    }, [columns]);
+
     const [showInbox, setShowInbox] = useState(false);
     const [showPlanner, setShowPlanner] = useState(false);
 
@@ -32,7 +75,6 @@ const ManagementTable = () => {
     const [isStarred, setIsStarred] = useState(false);
 
     const [boardDes, setBoardDes] = useState("")
-
 
     const updateCardInColumn = (columnTitle, cardId, field, value) => {
         setColumns(prev =>
@@ -52,6 +94,28 @@ const ManagementTable = () => {
         console.log(field, value)
     };
 
+    const storeCard = (card) => {
+        const now = new Date().toLocaleString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+        const updated = [...columns]
+        const col = updated.findIndex(c => c.title === card.column)
+        const cardIndex = updated[col].cards.findIndex(c => c.id === card.id)
+        const [movedCard] = updated[col].cards.splice(cardIndex, 1);
+        const storedCard = { ...movedCard, storedDate: now }
+        setStoredCards(prev => [...prev, storedCard])
+        setColumns(updated)
+    }
+
+    useState(() => {
+        console.log(storedCards)
+    }, [storedCards])
+
     const addNewList = (listTitle) => {
         if (listTitle) setColumns([...columns, { title: listTitle, cards: [] }]);
     }
@@ -69,6 +133,7 @@ const ManagementTable = () => {
                 check: false,
                 description: null,
                 edit: false,
+                storedDate: null
             });
             setColumns(updated);
         }
@@ -78,7 +143,15 @@ const ManagementTable = () => {
 
     return (
         <div className="man-table-container">
-            {showCardDetailPopup && <CardDetailPopup card={cardDetail} onClose={() => setShowCardDetailPopup(false)} updateCardInColumn={updateCardInColumn} columns={columns} setColumns={setColumns} />}
+            {showCardDetailPopup &&
+                <CardDetailPopup
+                    card={cardDetail}
+                    onClose={() => setShowCardDetailPopup(false)}
+                    updateCardInColumn={updateCardInColumn}
+                    columns={columns}
+                    setColumns={setColumns}
+                    storeCard={storeCard}
+                />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
             {showMenuBoardPopup &&
                 <MenuBoardPopup
@@ -90,6 +163,9 @@ const ManagementTable = () => {
                     isStarred={isStarred}
                     boardDes={boardDes}
                     setBoardDes={setBoardDes}
+                    storedCards={storedCards}
+                    setShowCardDetailPopup={setShowCardDetailPopup}
+                    setCardDetail={setCardDetail}
                 />
             }
 
@@ -103,6 +179,8 @@ const ManagementTable = () => {
                 )}
 
                 <TaskBoard
+                    cards={cards}
+                    setCards={setCards}
                     setShowCardDetailPopup={setShowCardDetailPopup}
                     setCardDetail={setCardDetail}
                     updateCardInColumn={updateCardInColumn}
@@ -115,6 +193,7 @@ const ManagementTable = () => {
                     rawColor={rawColor}
                     isStarred={isStarred}
                     setIsStarred={setIsStarred}
+                    storeCard={storeCard}
                 />
             </div>
 
