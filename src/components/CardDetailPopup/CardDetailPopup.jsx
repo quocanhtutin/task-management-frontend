@@ -16,9 +16,9 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     const [editTitle, setEditTitle] = useState(false)
 
     // Column
-    const [column, setColumn] = useState(card.column)
+    const active_index = columns.findIndex(col => col.id === card.columnId)
+    const [column, setColumn] = useState(columns[active_index].title)
     const [showColumns, setShowColumns] = useState(false)
-    const active_index = columns.findIndex(col => col.title === card.column)
 
     // Labels
     const labelColors = ["#FF7043", "#FFA726", "#FFEB3B", "#66BB6A", "#42A5F5", "#AB47BC"];
@@ -74,13 +74,13 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
 
     const saveDescription = () => {
         setIsEditingDesc(false);
-        updateCardInColumn(card.column, card.id, "description", desc)
+        updateCardInColumn(card.columnId, card.id, "description", desc)
     }
 
     const saveTitle = () => {
         setEditTitle(false);
         if (title) {
-            updateCardInColumn(card.column, card.id, "title", title)
+            updateCardInColumn(card.columnId, card.id, "title", title)
         }
     }
 
@@ -97,30 +97,30 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     }
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "label", label)
+        updateCardInColumn(card.columnId, card.id, "label", label)
     }, [label])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "deadline", deadline)
+        updateCardInColumn(card.columnId, card.id, "deadline", deadline)
     }, [deadline])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "members", members)
+        updateCardInColumn(card.columnId, card.id, "members", members)
     }, [members])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "check", completed)
+        updateCardInColumn(card.columnId, card.id, "check", completed)
     }, [completed])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "reminder", reminder)
+        updateCardInColumn(card.columnId, card.id, "reminder", reminder)
     }, [reminder])
 
     const handleChangeColumn = (toCol) => {
         const updated = [...columns]
         const cardIndex = updated[active_index].cards.findIndex(c => c.id === card.id)
         const [movedCard] = updated[active_index].cards.splice(cardIndex, 1);
-        updated[toCol].cards.push({ ...movedCard, column: updated[toCol].title });
+        updated[toCol].cards.push({ ...movedCard, columnId: updated[toCol].id });
         setColumns(updated)
         setShowColumns(false)
     }
@@ -134,7 +134,7 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                     {showColumns && (
                         <ul className="view-columns">
                             {columns.map((col, i) => (
-                                <li className={col.title === card.column ? "active-column" : ""} key={i} onClick={() => { setColumn(col.title); handleChangeColumn(i) }}>{col.title}</li>
+                                <li className={col.id === card.columnId ? "active-column" : ""} key={i} onClick={() => { setColumn(col.title); handleChangeColumn(i) }}>{col.title}</li>
                             ))}
                         </ul>
                     )}
@@ -156,7 +156,7 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 :
                                 <PencilOff className="edit-title" onClick={() => { setEditTitle(false); saveTitle() }} />
                             }
-                            {completed && <Archive className="store-card" size={22} onClick={() => updateCardInColumn(card.column, card.id, "stored", true)} />}
+                            {completed && <Archive className="store-card" size={22} onClick={() => updateCardInColumn(card.columnId, card.id, "stored", true)} />}
 
                         </div>
 

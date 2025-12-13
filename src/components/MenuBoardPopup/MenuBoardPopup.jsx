@@ -15,7 +15,10 @@ const MenuBoardPopup = ({
     setBoardDes,
     storedCards,
     setShowCardDetailPopup,
-    setCardDetail
+    setCardDetail,
+    activateCard,
+    storedColumns,
+    activateColumn
 }) => {
     const [backgroundType, setBackgroundType] = useState("gradient");
     const gradientOptions = [
@@ -148,8 +151,20 @@ const MenuBoardPopup = ({
                                     >
                                         <input type="checkbox" checked={card.check} />
                                         <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true), onClose() }}>{card.title}</p>
-                                        <ArchiveX size={20} />
-                                        <Trash2 size={20} />
+                                        <ArchiveX className="activate-btn" size={20} onClick={() => activateCard(i)} />
+                                        <Trash2 className="delete-btn" size={20} />
+                                    </div>
+                                )
+                            }
+                            {storedCategory === "list" &&
+                                storedColumns.map((col, i) =>
+                                    <div
+                                        key={i}
+                                        className="stored-column-item"
+                                    >
+                                        <p >{col.title}</p>
+                                        <ArchiveX className="activate-btn" size={20} onClick={() => activateColumn(i)} />
+                                        <Trash2 className="delete-btn" size={20} />
                                     </div>
                                 )
                             }

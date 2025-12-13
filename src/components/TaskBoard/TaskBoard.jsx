@@ -20,7 +20,9 @@ const TaskBoard = ({
     setIsStarred,
     cards,
     setCards,
-    storeCard
+    storeCard,
+    storeColumn,
+    updateTitleColumn
 }) => {
 
 
@@ -134,6 +136,8 @@ const TaskBoard = ({
                     updateCardInColumn={updateCardInColumn}
                     addNewList={addNewList}
                     storeCard={storeCard}
+                    storeColumn={storeColumn}
+                    updateTitleColumn={updateTitleColumn}
                 />
             )}
 

@@ -158,6 +158,30 @@
   overflow-wrap: break-word; 
   white-space: normal;
 }
+.stored-column-item {
+  border-radius: 4px;
+  padding: 8px;
+  border: 1px solid #eee;
+  padding-left: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.stored-column-item p {
+  max-width: 70%;
+  width: 70%;
+  word-wrap: break-word;       
+  overflow-wrap: break-word; 
+  white-space: normal;
+}
+.activate-btn, .delete-btn{
+  color: #333333a7;
+  cursor: pointer;
+}
+.activate-btn:hover, .delete-btn:hover{
+  color: #333;
+}
 
 .store {
   display: flex;

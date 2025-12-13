@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './ColumnMode.css'
-import { Archive } from 'lucide-react'
+import { Archive, PenSquareIcon } from 'lucide-react'
 
 const ColumnMode = ({
     columns,
@@ -13,11 +13,36 @@ const ColumnMode = ({
     setShowCardDetailPopup,
     updateCardInColumn,
     addNewList,
-    storeCard
+    storeCard,
+    storeColumn,
+    updateTitleColumn
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
     const [newColumn, setNewColumn] = useState("")
+
+    const [editingColId, setEditingColId] = useState(null);
+    const [columnTitleInput, setColumnTitleInput] = useState("");
+    const [titleError, setTitleError] = useState("");
+
+    const startEditColumn = (col) => {
+        setEditingColId(col.id);
+        setColumnTitleInput(col.title);
+        setTitleError("");
+    };
+
+    const handleColumnTitleBlur = (col) => {
+        if (!columnTitleInput.trim()) {
+            setTitleError("Tên cột không được để trống");
+            return;
+        }
+
+        // gọi hàm cha (bạn tự implement trong parent)
+        updateTitleColumn(col.id, columnTitleInput.trim());
+
+        setEditingColId(null);
+        setTitleError("");
+    };
 
     const onDragStart = (e, fromCol, fromIndex) => {
         e.dataTransfer.setData("type", "card");
@@ -43,7 +68,7 @@ const ColumnMode = ({
 
         const updated = [...columns];
         const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[toCol].cards.push({ ...movedCard, column: updated[toCol].title });
+        updated[toCol].cards.push({ ...movedCard, columnId: updated[toCol].id });
 
         setColumns(updated);
     };
@@ -58,7 +83,7 @@ const ColumnMode = ({
 
         const updated = [...columns];
         const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[atCol].cards.splice(beforeCard, 0, { ...movedCard, column: updated[atCol].title });
+        updated[atCol].cards.splice(beforeCard, 0, { ...movedCard, columnId: updated[atCol].id });
         setColumns(updated);
     };
 
@@ -99,13 +124,53 @@ const ColumnMode = ({
                     }}
                     onDragOver={allowDrop}
                 >
-                    <h3
-                        draggable
-                        onDragStart={(e) => onColumnDragStart(e, i)}
-                    >{col.title}</h3>
+                    {editingColId === col.id ? (
+                        <div className='column-header'>
+                            <input
+                                className="edit-column-input"
+                                value={columnTitleInput}
+                                autoFocus
+                                onChange={(e) => {
+                                    setColumnTitleInput(e.target.value);
+                                    if (e.target.value.trim()) setTitleError("");
+                                }}
+                                onBlur={() => handleColumnTitleBlur(col)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") e.target.blur();
+                                    if (e.key === "Escape") {
+                                        setEditingColId(null);
+                                        setTitleError("");
+                                    }
+                                }}
+                            />
+                            {titleError && <span className="error-text">{titleError}</span>}
+                        </div>
+                    ) : (
+                        <div className='column-header'>
+                            <h3
+                                draggable
+                                onDragStart={(e) => onColumnDragStart(e, i)}
+                            >
+                                {col.title}
+                            </h3>
+                            <div className='column-tool'>
+                                <PenSquareIcon
+                                    className="edit-column-name-btn"
+                                    size={20}
+                                    onClick={() => startEditColumn(col)}
+                                />
+
+                                <Archive
+                                    className='store-column-btn'
+                                    size={20}
+                                    onClick={() => storeColumn(i)}
+                                />
+                            </div></div>
+                    )}
+
 
                     <div className="card-list">
-                        {col.cards.map((card, j) => !card.stored && (
+                        {col.cards.map((card, j) => (
                             <div
                                 key={j}
                                 className="card-item"
@@ -124,7 +189,7 @@ const ColumnMode = ({
                                 onDragOver={allowDrop}
                                 style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}
                             >
-                                <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.title, card.id, "check", e.target.checked)} />
+                                <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.id, card.id, "check", e.target.checked)} />
                                 <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
                                 {card.check && <Archive size={20} onClick={() =>
                                     // updateCardInColumn(col.title, card.id, "stored", true)

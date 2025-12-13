@@ -25,12 +25,37 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   margin-bottom: 135px;
 }
-
-.board-column h3 {
-  font-size: 16px;
-  margin-bottom: 8px;
+.column-header{
+  display: flex;
+  width: 100%;
+  margin-bottom: 10px;
+  align-items: center;
 }
-
+.column-header h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+  width: 80%;
+}
+.column-header h3:active {
+  opacity: 0.6;
+  cursor: grabbing;
+}
+.column-tool {
+  display: flex;
+  gap: 6px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: #333333a7;
+}
+.edit-column-name-btn:hover, .store-column-btn:hover {
+  color: #333;
+  cursor: pointer;
+}
+.column-header:hover .column-tool{
+  visibility: visible;
+  opacity: 1;
+}
 .card-list {
   display: flex;
   flex-direction: column;
@@ -149,4 +174,14 @@
   white-space: normal;
   overflow-wrap: break-word;
 }
+.edit-column-input {
+  width: 100%;
+  font-size: 16px;
+}
+
+.error-text {
+  color: red;
+  font-size: 12px;
+}
+
 

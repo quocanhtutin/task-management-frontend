@@ -22,6 +22,7 @@ const TableMode = ({
     const [newColumn, setNewColumn] = useState(null)
     const [showAddColumn, setShowAddColumn] = useState("")
 
+
     const addColumn = () => {
         const title = newColumn;
         addNewList(title)
@@ -46,10 +47,10 @@ const TableMode = ({
                     <tr><th></th><th>Thẻ</th><th>Danh sách</th><th>Nhãn</th><th>Thành viên</th><th>Ngày hết hạn</th></tr>
                 </thead>
                 <tbody>
-                    {cards.map((card, cardIndex) => !card.stored && (
+                    {columns.map((col, i) => col.cards.map((card, cardIndex) => (
                         <tr key={cardIndex} className="table-row">
                             <td className="row-check">
-                                <input type='checkbox' checked={card.check} onChange={(e) => updateCardInColumn(card.column, card.id, "check", e.target.checked)} />
+                                <input type='checkbox' checked={card.check} onChange={(e) => updateCardInColumn(card.columnId, card.id, "check", e.target.checked)} />
                             </td>
                             <td className='card-detail' >
                                 <div className='card-title' onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
@@ -58,9 +59,7 @@ const TableMode = ({
                                 {card.check && <Archive className='store-btn' size={20} onClick={() => updateCardInColumn(card.column, card.id, "stored", true)} />}
                             </td>
                             <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
-                                <div className="column-selector" onClick={(e) => setPopupInfo(cardIndex)}>
-                                    <p>{card.column}</p>
-                                </div>
+                                <p>{col.title}</p>
                             </td>
 
                             <td onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
@@ -79,7 +78,7 @@ const TableMode = ({
                                 {card.deadline ? <p className="deadline">{new Date(card.deadline).toLocaleString()}</p> : "."}
                             </td>
                         </tr>
-                    ))}
+                    )))}
                 </tbody>
             </table>
             {!showAddCard ?
@@ -99,7 +98,7 @@ const TableMode = ({
                         {showColumns && (
                             <ul className="view-columns-tb">
                                 {columns.map((col, i) => (
-                                    <li key={i} onClick={() => { setCardColumn(col.title); setShowColumns(false) }}>{col.title}</li>
+                                    <li key={i} onClick={() => { setCardColumn(col.id); setShowColumns(false) }}>{col.title}</li>
                                 ))}
                                 {!showAddColumn ?
                                     <li onClick={() => setShowAddColumn(true)}>+ Thêm danh sách</li>
@@ -118,7 +117,7 @@ const TableMode = ({
                         )}
                     </div>
                     <button className="add-card blue" onClick={() => {
-                        const columnIndex = columns.findIndex(col => col.title === cardColumn);
+                        const columnIndex = columns.findIndex(col => col.id === cardColumn);
                         addCard(columnIndex);
                         setShowAddCard(false);
                         setCardColumn("");
