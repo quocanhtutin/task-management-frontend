@@ -77,6 +77,11 @@
   padding: 16px;
   box-shadow: -2px 0 10px rgba(0,0,0,0.2);
   animation: slideIn 0.2s ease-out;
+  overflow-y: auto;
+}
+
+.menu-container::-webkit-scrollbar {
+  display: none;         
 }
 
 .bg-grid-menu {
@@ -182,12 +187,102 @@
 .activate-btn:hover, .delete-btn:hover{
   color: #333;
 }
-
 .store {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+.new-label-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 cột */
+  gap: 8px;
+}
+
+.new-label-item {
+  width: 100%;
+  aspect-ratio: 2 / 1;      /* hình chữ nhật bo góc */
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.new-label-itemm:hover {
+  opacity: 0.85;
+}
+
+/* Màu đang được chọn */
+.new-label-item.active {
+  outline: 2px solid  #0052cc;
+  outline-offset: 2px;
+}
+.add-label-btb{
+  background: #0052cc;
+  color: white;
+  border-radius: 6px;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+.add-label{
+  position: relative;
+  padding-top: 10px;
+}
+.add-label-popup{
+  position: absolute;
+  top:0;
+  width: 100%;
+  left: 0;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.12)
+
+}
+.label-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.label-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.label-item:hover {
+  background: #f4f5f7;
+}
+.label-item span {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+
+  max-width: 180px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.label-item svg {
+  cursor: pointer;
+  color: #6b778c;
+  transition: color 0.15s ease;
+}
+
+.label-item svg:hover {
+  color: #172b4d;
+}
+
+
 /* Animation */
 @keyframes slideIn {
   from {

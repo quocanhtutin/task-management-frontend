@@ -204,6 +204,11 @@ const ManagementTable = () => {
         setLabels(labels.filter(label => label.id !== labelId))
     }
 
+    const updateLabel = (labelId, labelColor, labelTitle) => {
+        const newLabels = labels.map(l => l.id === labelId ? { ...l, color: labelColor, title: labelTitle } : l)
+        setLabels(newLabels)
+    }
+
     const boardWide = (!showInbox && !showPlanner) ? "full-board" : (!showInbox || !showPlanner) ? "wide-board" : "normal-board"
 
     return (
@@ -234,6 +239,10 @@ const ManagementTable = () => {
                     activateCard={activateCard}
                     storedColumns={storedColumns}
                     activateColumn={activateColumn}
+                    labels={labels}
+                    addLabel={addLabel}
+                    deleteLabel={deleteLabel}
+                    updateLabel={updateLabel}
                 />
             }
 

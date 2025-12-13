@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./MenuBoardPopup.css";
-import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound, Archive, Trash2, ArchiveX } from "lucide-react";
+import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound, Archive, Trash2, ArchiveX, Tags, Edit, XCircle } from "lucide-react";
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 
@@ -18,7 +18,11 @@ const MenuBoardPopup = ({
     setCardDetail,
     activateCard,
     storedColumns,
-    activateColumn
+    activateColumn,
+    labels,
+    addLabel,
+    deleteLabel,
+    updateLabel
 }) => {
     const [backgroundType, setBackgroundType] = useState("gradient");
     const gradientOptions = [
@@ -41,6 +45,14 @@ const MenuBoardPopup = ({
         "#ee3dd9ff",
         "#241f61ff",
     ];
+    const LABEL_COLORS = [
+        "#BAF3DB", "#F8E6A0", "#FFE2A8", "#FFD5D2", "#EBD9FF",
+        "#4BCE97", "#E2B203", "#FF9F1A", "#FF7452", "#C77DFF",
+        "#1F845A", "#946F00", "#C25100", "#C9372C", "#8F46C1",
+        "#D6E4FF", "#C6EDFB", "#D3F1A7", "#FDD0EC", "#DFE1E6",
+        "#6B9EFF", "#6CC3E0", "#94C748", "#E774BB", "#8C8F97",
+        "#1D6CE0", "#227D9B", "#5B7F24", "#A64D79", "#6B6E76"
+    ]
     const imageOptions = [];
     const [changeBackground, setChangeBackground] = useState(false)
     const [showInfo, setShowInfo] = useState(false)
@@ -50,6 +62,11 @@ const MenuBoardPopup = ({
 
     const [showStore, setShowStore] = useState(false)
     const [storedCategory, setStoredCategory] = useState("card")
+
+    const [showLabel, setShowLabel] = useState(false)
+    const [showAddLabel, setShowAddLabel] = useState(false)
+    const [newLabelColor, setNewLabelColor] = useState("")
+    const [newLabelTitle, setNewLabelTitle] = useState("")
 
     return (
         <div className="menu-overlay" onClick={onClose}>
@@ -209,6 +226,54 @@ const MenuBoardPopup = ({
                     </div>
                 }
 
+                {showLabel &&
+                    <div className="menu-container">
+                        <div className="menu-header">
+                            <h3>Nhãn đánh dấu</h3>
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setShowLabel(false)} />
+                        </div>
+                        <div className="add-label">
+                            <button className="add-label-btn" onClick={() => setShowAddLabel(true)}>Thêm nhãn</button>
+                            {showAddLabel &&
+                                <div className="add-label-popup">
+                                    <input value={newLabelTitle} onChange={(e) => setNewLabelTitle(e.target.value)} />
+                                    <div className="new-label-grid">
+                                        {LABEL_COLORS.map((color, i) => (
+                                            <div
+                                                key={i}
+                                                className={`new-label-item ${newLabelColor === color ? "active" : ""}`}
+                                                style={{ backgroundColor: color }}
+                                                onClick={() => setNewLabelColor(color)} />
+                                        ))}
+                                    </div>
+                                    <div>
+                                        <button className="add-card blue" onClick={() => {
+                                            addLabel(newLabelColor, newLabelTitle)
+                                            setShowAddLabel(false)
+                                            setNewLabelColor("")
+                                            setNewLabelTitle("")
+                                        }}>Lưu</button>
+                                        <button className="add-card white" onClick={() => {
+                                            setShowAddLabel(false)
+                                            setNewLabelColor("")
+                                            setNewLabelTitle("")
+                                        }}>Hủy</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div className="label-list">
+                            {labels.map((label, i) => (
+                                <div key={i} className="label-item">
+                                    <span style={{ background: `${label.color}` }} > {label.title}</span>
+                                    <Edit size={20} />
+                                    <XCircle size={20} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                }
+
 
                 <div className="menu-header">
                     <h3>Menu</h3>
@@ -243,6 +308,11 @@ const MenuBoardPopup = ({
                         <span>Cài đặt</span>
                     </li>
 
+                    <li onClick={() => setShowLabel(true)} >
+                        <Tags size={20} />
+                        <span>Nhãn</span>
+                    </li>
+
                     <li onClick={() => setShowStore(true)}>
                         <Archive size={20} />
                         <span>Lưu trữ</span>
@@ -255,7 +325,7 @@ const MenuBoardPopup = ({
                     </li>
                 </ul>
             </div>
-        </div>
+        </div >
     );
 };
 
