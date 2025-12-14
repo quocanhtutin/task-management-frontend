@@ -196,14 +196,15 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr); /* 5 cột */
   gap: 8px;
+  margin-bottom: 8px;
 }
 
 .new-label-item {
   width: 100%;
-  aspect-ratio: 2 / 1;      /* hình chữ nhật bo góc */
   border-radius: 6px;
   border: none;
   cursor: pointer;
+  height: 30px;
   position: relative;
 }
 
@@ -216,18 +217,32 @@
   outline: 2px solid  #0052cc;
   outline-offset: 2px;
 }
-.add-label-btb{
+.add-label-btn{
   background: #0052cc;
   color: white;
   border-radius: 6px;
-  width: 100%;
+  width: 30%;
   cursor: pointer;
-  margin-bottom: 20px;
+  padding: 3px 0;
+  justify-self: right;
+  margin-left: auto;
+}
+.add-label-btn:hover {
+  background: #f2f2f2;
 }
 .add-label{
   position: relative;
+  width: 100%;
   padding-top: 10px;
+  display:flex;
 }
+
+.add-label-btns{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .add-label-popup{
   position: absolute;
   top:0;
@@ -235,8 +250,15 @@
   left: 0;
   padding: 8px;
   border-radius: 8px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.12)
-
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  background: #fff;
+}
+.add-label-popup input{
+  margin-bottom: 8px;
+  padding: 3px;
+  width: 100%;
+  border: 2px solid #afafaf;
+  border-radius: 8px;
 }
 .label-list {
   margin-top: 12px;
@@ -266,20 +288,21 @@
   color: #fff;
   font-size: 14px;
   font-weight: 500;
-
-  max-width: 180px;
+  color: #333;
+  width: 80%;
+  height: 30px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 .label-item svg {
   cursor: pointer;
-  color: #6b778c;
+  color: #333333a7;
   transition: color 0.15s ease;
 }
 
 .label-item svg:hover {
-  color: #172b4d;
+  color: #333;
 }
 
 

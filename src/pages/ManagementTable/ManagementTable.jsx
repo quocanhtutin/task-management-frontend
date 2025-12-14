@@ -80,15 +80,18 @@ const ManagementTable = () => {
 
     const labelColors = ["#FF7043", "#FFA726", "#FFEB3B", "#66BB6A", "#42A5F5", "#AB47BC"];
 
-    const [labels, setLabels] = useState([
-        { id: null, color: null, title: null }
-    ])
+    const [labels, setLabels] = useState([])
 
     useEffect(() => {
-        labelColors.map(color => {
-            setLabels(pre => [...pre, { id: crypto.randomUUID(), color: color, title: null }])
-        })
+        setLabels(
+            labelColors.map(color => ({
+                id: crypto.randomUUID(),
+                color,
+                title: null
+            }))
+        )
     }, [])
+
 
     const updateCardInColumn = (columnId, cardId, field, value) => {
         setColumns(prev =>
@@ -221,6 +224,7 @@ const ManagementTable = () => {
                     columns={columns}
                     setColumns={setColumns}
                     storeCard={storeCard}
+                    labels={labels}
                 />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
             {showMenuBoardPopup &&

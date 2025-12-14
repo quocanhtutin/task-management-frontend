@@ -24,6 +24,8 @@ const MenuBoardPopup = ({
     deleteLabel,
     updateLabel
 }) => {
+    const [tab, setTab] = useState("menu")
+
     const [backgroundType, setBackgroundType] = useState("gradient");
     const gradientOptions = [
         "#9abcf2ff, #dff4ffff",
@@ -54,16 +56,12 @@ const MenuBoardPopup = ({
         "#1D6CE0", "#227D9B", "#5B7F24", "#A64D79", "#6B6E76"
     ]
     const imageOptions = [];
-    const [changeBackground, setChangeBackground] = useState(false)
-    const [showInfo, setShowInfo] = useState(false)
 
     const [isEditingDesc, setIsEditingDesc] = useState(false)
     const [desc, setDesc] = useState(boardDes)
 
-    const [showStore, setShowStore] = useState(false)
     const [storedCategory, setStoredCategory] = useState("card")
 
-    const [showLabel, setShowLabel] = useState(false)
     const [showAddLabel, setShowAddLabel] = useState(false)
     const [newLabelColor, setNewLabelColor] = useState("")
     const [newLabelTitle, setNewLabelTitle] = useState("")
@@ -74,11 +72,11 @@ const MenuBoardPopup = ({
                 className="menu-panel"
                 onClick={(e) => e.stopPropagation()}
             >
-                {changeBackground &&
+                {tab === "background" &&
                     <div className="menu-container">
                         <div className="menu-header">
                             <h3>Phông nền</h3>
-                            <ArrowLeft className="close-btn" size={28} onClick={() => setChangeBackground(false)} />
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
 
                         <div className="bg-tabs">
@@ -136,11 +134,11 @@ const MenuBoardPopup = ({
                     </div>
                 }
 
-                {showStore &&
+                {tab === "achieve" &&
                     <div className="menu-container">
                         <div className="menu-header">
                             <h3>Kho lưu trữ</h3>
-                            <ArrowLeft className="close-btn" size={28} onClick={() => setShowStore(false)} />
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
 
                         <div className="store-cat">
@@ -189,11 +187,11 @@ const MenuBoardPopup = ({
                     </div>
                 }
 
-                {showInfo &&
+                {tab === "info" &&
                     <div className="menu-container">
                         <div className="menu-header">
                             <h3>Thông tin</h3>
-                            <ArrowLeft className="close-btn" size={28} onClick={() => setShowInfo(false)} />
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
                         <div className="owner">
                             <div className="owner-section">
@@ -226,11 +224,11 @@ const MenuBoardPopup = ({
                     </div>
                 }
 
-                {showLabel &&
+                {tab === "label" &&
                     <div className="menu-container">
                         <div className="menu-header">
                             <h3>Nhãn đánh dấu</h3>
-                            <ArrowLeft className="close-btn" size={28} onClick={() => setShowLabel(false)} />
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
                         <div className="add-label">
                             <button className="add-label-btn" onClick={() => setShowAddLabel(true)}>Thêm nhãn</button>
@@ -246,7 +244,7 @@ const MenuBoardPopup = ({
                                                 onClick={() => setNewLabelColor(color)} />
                                         ))}
                                     </div>
-                                    <div>
+                                    <div className="add-label-btns">
                                         <button className="add-card blue" onClick={() => {
                                             addLabel(newLabelColor, newLabelTitle)
                                             setShowAddLabel(false)
@@ -274,56 +272,58 @@ const MenuBoardPopup = ({
                     </div>
                 }
 
+                {tab === "menu" && <div className="menu-container">
+                    <div className="menu-header">
+                        <h3>Menu</h3>
+                        <X size={28} className="close-btn" onClick={onClose} />
+                    </div>
 
-                <div className="menu-header">
-                    <h3>Menu</h3>
-                    <X size={28} className="close-btn" onClick={onClose} />
+                    <ul className="menu-list">
+                        <li onClick={() => { onClose(); setShowSharePopup(true) }}>
+                            <UserPlus size={20} />
+                            <span>Chia sẻ</span>
+                        </li>
+
+                        <li onClick={() => setTab("info")}>
+                            <Info size={20} />
+                            <span>Về bảng này</span>
+                        </li>
+
+                        <li>
+                            <Share2 size={20} />
+                            <span>In, xuất và chia sẻ</span>
+                        </li>
+
+                        <li onClick={() => setIsStarred(prev => !prev)}>
+                            <button className="star-btn-menu">
+                                {isStarred ? "★" : "☆"}
+                            </button>
+                            <span>Gắn sao</span>
+                        </li>
+
+                        <li>
+                            <Settings size={20} />
+                            <span>Cài đặt</span>
+                        </li>
+
+                        <li onClick={() => setTab("label")} >
+                            <Tags size={20} />
+                            <span>Nhãn</span>
+                        </li>
+
+                        <li onClick={() => setTab("achieve")}>
+                            <Archive size={20} />
+                            <span>Lưu trữ</span>
+                        </li>
+
+                        <li onClick={() => setTab("background")}>
+                            <Image size={20} />
+                            <span>Thay đổi hình nền</span>
+
+                        </li>
+                    </ul>
                 </div>
-
-                <ul className="menu-list">
-                    <li onClick={() => { onClose(); setShowSharePopup(true) }}>
-                        <UserPlus size={20} />
-                        <span>Chia sẻ</span>
-                    </li>
-
-                    <li onClick={() => setShowInfo(true)}>
-                        <Info size={20} />
-                        <span>Về bảng này</span>
-                    </li>
-
-                    <li>
-                        <Share2 size={20} />
-                        <span>In, xuất và chia sẻ</span>
-                    </li>
-
-                    <li onClick={() => setIsStarred(prev => !prev)}>
-                        <button className="star-btn-menu">
-                            {isStarred ? "★" : "☆"}
-                        </button>
-                        <span>Gắn sao</span>
-                    </li>
-
-                    <li>
-                        <Settings size={20} />
-                        <span>Cài đặt</span>
-                    </li>
-
-                    <li onClick={() => setShowLabel(true)} >
-                        <Tags size={20} />
-                        <span>Nhãn</span>
-                    </li>
-
-                    <li onClick={() => setShowStore(true)}>
-                        <Archive size={20} />
-                        <span>Lưu trữ</span>
-                    </li>
-
-                    <li onClick={() => setChangeBackground(true)}>
-                        <Image size={20} />
-                        <span>Thay đổi hình nền</span>
-
-                    </li>
-                </ul>
+                }
             </div>
         </div >
     );

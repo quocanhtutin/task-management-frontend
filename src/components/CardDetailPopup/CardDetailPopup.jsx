@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import "./CardDetailPopup.css";
 import { ChevronDown, X, Pencil, PencilOff, Archive } from 'lucide-react';
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
+import ChecklistSection from "../CheckList/ChecklistSection";
+import { DragDropContext } from "@hello-pangea/dnd";
 
 const MOCK_USERS = [
     { id: 1, name: "Nguyễn Văn A", avatarColor: "#F44336" },
@@ -10,7 +12,7 @@ const MOCK_USERS = [
     { id: 4, name: "Phạm D", avatarColor: "#4CAF50" },
 ];
 
-export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn, columns, setColumns }) {
+export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn, columns, setColumns, labels }) {
     const [completed, setCompleted] = useState(card.check || false);
     const [title, setTitle] = useState(card.title);
     const [editTitle, setEditTitle] = useState(false)
@@ -21,7 +23,6 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     const [showColumns, setShowColumns] = useState(false)
 
     // Labels
-    const labelColors = ["#FF7043", "#FFA726", "#FFEB3B", "#66BB6A", "#42A5F5", "#AB47BC"];
     const [label, setLabel] = useState(card.label || null);
     const [showLabelSelect, setShowLabelSelect] = useState(false);
 
@@ -48,6 +49,10 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     const [commentText, setCommentText] = useState("");
     const [comments, setComments] = useState(card.comments || []);
     const [editingCommentId, setEditingCommentId] = useState(null);
+
+    //task
+    const [checklists, setChecklists] = useState(card.checklists || []);
+
 
     useEffect(() => {
         function onDocClick(e) {
@@ -116,6 +121,11 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         updateCardInColumn(card.columnId, card.id, "reminder", reminder)
     }, [reminder])
 
+    useEffect(() => {
+        updateCardInColumn(card.columnId, card.id, "checklists", checklists);
+    }, [checklists]);
+
+
     const handleChangeColumn = (toCol) => {
         const updated = [...columns]
         const cardIndex = updated[active_index].cards.findIndex(c => c.id === card.id)
@@ -124,6 +134,39 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         setColumns(updated)
         setShowColumns(false)
     }
+
+    const handleDragEnd = (result) => {
+        const { source, destination } = result;
+        if (!destination) return;
+
+        setChecklists(prev => {
+            const sourceIdx = prev.findIndex(c => c.id === source.droppableId);
+            const destIdx = prev.findIndex(c => c.id === destination.droppableId);
+
+            const sourceCl = prev[sourceIdx];
+            const destCl = prev[destIdx];
+
+            const sourceItems = [...sourceCl.items];
+            const [moved] = sourceItems.splice(source.index, 1);
+
+            if (sourceIdx === destIdx) {
+                sourceItems.splice(destination.index, 0, moved);
+                return prev.map((c, i) =>
+                    i === sourceIdx ? { ...c, items: sourceItems } : c
+                );
+            }
+
+            const destItems = [...destCl.items];
+            destItems.splice(destination.index, 0, moved);
+
+            return prev.map((c, i) => {
+                if (i === sourceIdx) return { ...c, items: sourceItems };
+                if (i === destIdx) return { ...c, items: destItems };
+                return c;
+            });
+        });
+    };
+
 
     return (
         <div className="cdp-overlay">
@@ -170,14 +213,11 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 {label && <span className="label-preview" style={{ background: label }} />}
                                 {showLabelSelect && (
                                     <div className="label-select">
-                                        <div className="label-grid">
-                                            {labelColors.map((c) => (
-                                                <button
-                                                    key={c}
-                                                    className="color-item"
-                                                    style={{ background: c }}
-                                                    onClick={() => setLabel(c)}
-                                                />
+                                        <div className="label-list">
+                                            {labels.map((label, i) => (
+                                                <div key={i} className="label-item">
+                                                    <span style={{ background: `${label.color}` }} onClick={() => setLabel(label.color)}> {label.title}</span>
+                                                </div>
                                             ))}
                                             <button className="color-item clear" onClick={() => setLabel(null)}>Xóa</button>
                                         </div>
@@ -297,6 +337,14 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 </div>
                             )}
                         </div>
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <ChecklistSection
+                                checklists={checklists}
+                                setChecklists={setChecklists}
+                            />
+                        </DragDropContext>
+
+
                     </div>
 
                     {/* Right column */}

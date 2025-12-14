@@ -140,6 +140,7 @@
     border-radius:8px;
     box-shadow:0 6px 18px rgba(0,0,0,0.12);
     z-index:30;
+    width: 200px;
 }
 .label-grid{
     display:flex;

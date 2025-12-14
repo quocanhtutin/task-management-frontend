@@ -43,18 +43,13 @@
 .column-tool {
   display: flex;
   gap: 6px;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  visibility: visible;
+  transition: color 0.3s ease;
   color: #333333a7;
 }
 .edit-column-name-btn:hover, .store-column-btn:hover {
   color: #333;
   cursor: pointer;
-}
-.column-header:hover .column-tool{
-  visibility: visible;
-  opacity: 1;
 }
 .card-list {
   display: flex;

@@ -1,0 +1,17 @@
+.checklist { margin-top:16px }
+.progress-row { display:flex; gap:8px; align-items:center }
+.progress-bar { flex:1; height:8px; background:#eee; border-radius:4px }
+.progress-bar div { height:100%; background:#0079BF }
+
+.checklist-item {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px;
+  border-radius:6px;
+}
+.checklist-item:hover .item-actions { opacity:1 }
+.item-actions { margin-left:auto; opacity:0; display:flex; gap:6px }
+
+.add-item-box input { width:100%; padding:8px }
+.add-item-box .actions { display:flex; gap:8px; align-items:center }
