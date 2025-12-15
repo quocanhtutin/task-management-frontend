@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./MenuBoardPopup.css";
-import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound } from "lucide-react";
+import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound, Archive, Trash2, ArchiveX, Tags, Edit, XCircle } from "lucide-react";
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 
@@ -12,8 +12,20 @@ const MenuBoardPopup = ({
     isStarred,
     setIsStarred,
     boardDes,
-    setBoardDes
+    setBoardDes,
+    storedCards,
+    setShowCardDetailPopup,
+    setCardDetail,
+    activateCard,
+    storedColumns,
+    activateColumn,
+    labels,
+    addLabel,
+    deleteLabel,
+    updateLabel
 }) => {
+    const [tab, setTab] = useState("menu")
+
     const [backgroundType, setBackgroundType] = useState("gradient");
     const gradientOptions = [
         "#9abcf2ff, #dff4ffff",
@@ -35,12 +47,24 @@ const MenuBoardPopup = ({
         "#ee3dd9ff",
         "#241f61ff",
     ];
+    const LABEL_COLORS = [
+        "#BAF3DB", "#F8E6A0", "#FFE2A8", "#FFD5D2", "#EBD9FF",
+        "#4BCE97", "#E2B203", "#FF9F1A", "#FF7452", "#C77DFF",
+        "#1F845A", "#946F00", "#C25100", "#C9372C", "#8F46C1",
+        "#D6E4FF", "#C6EDFB", "#D3F1A7", "#FDD0EC", "#DFE1E6",
+        "#6B9EFF", "#6CC3E0", "#94C748", "#E774BB", "#8C8F97",
+        "#1D6CE0", "#227D9B", "#5B7F24", "#A64D79", "#6B6E76"
+    ]
     const imageOptions = [];
-    const [changeBackground, setChangeBackground] = useState(false)
-    const [showInfo, setShowInfo] = useState(false)
 
     const [isEditingDesc, setIsEditingDesc] = useState(false)
     const [desc, setDesc] = useState(boardDes)
+
+    const [storedCategory, setStoredCategory] = useState("card")
+
+    const [showAddLabel, setShowAddLabel] = useState(false)
+    const [newLabelColor, setNewLabelColor] = useState("")
+    const [newLabelTitle, setNewLabelTitle] = useState("")
 
     return (
         <div className="menu-overlay" onClick={onClose}>
@@ -48,11 +72,11 @@ const MenuBoardPopup = ({
                 className="menu-panel"
                 onClick={(e) => e.stopPropagation()}
             >
-                {changeBackground &&
-                    <div className="change-bg-container">
+                {tab === "background" &&
+                    <div className="menu-container">
                         <div className="menu-header">
                             <h3>Phông nền</h3>
-                            <ArrowLeft className="close-btn" size={28} onClick={() => setChangeBackground(false)} />
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
 
                         <div className="bg-tabs">
@@ -109,11 +133,65 @@ const MenuBoardPopup = ({
                         </div>
                     </div>
                 }
-                {showInfo &&
-                    <div className="change-bg-container">
+
+                {tab === "achieve" &&
+                    <div className="menu-container">
+                        <div className="menu-header">
+                            <h3>Kho lưu trữ</h3>
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
+                        </div>
+
+                        <div className="store-cat">
+                            <button
+                                onClick={() => setStoredCategory("card")}
+                                className={storedCategory === "card" ? "active-tab" : "tab"}
+                            >
+                                Thẻ nhiệm vụ
+                            </button>
+                            <button
+                                onClick={() => setStoredCategory("list")}
+                                className={storedCategory === "list" ? "active-tab" : "tab"}
+                            >
+                                Danh sách
+                            </button>
+                        </div>
+
+                        <div className="store">
+                            {storedCategory === "card" &&
+                                storedCards.map((card, i) =>
+                                    <div
+                                        key={i}
+                                        className="stored-card-item"
+                                        style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}
+                                    >
+                                        <input type="checkbox" checked={card.check} />
+                                        <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true), onClose() }}>{card.title}</p>
+                                        <ArchiveX className="activate-btn" size={20} onClick={() => activateCard(i)} />
+                                        <Trash2 className="delete-btn" size={20} />
+                                    </div>
+                                )
+                            }
+                            {storedCategory === "list" &&
+                                storedColumns.map((col, i) =>
+                                    <div
+                                        key={i}
+                                        className="stored-column-item"
+                                    >
+                                        <p >{col.title}</p>
+                                        <ArchiveX className="activate-btn" size={20} onClick={() => activateColumn(i)} />
+                                        <Trash2 className="delete-btn" size={20} />
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </div>
+                }
+
+                {tab === "info" &&
+                    <div className="menu-container">
                         <div className="menu-header">
                             <h3>Thông tin</h3>
-                            <ArrowLeft className="close-btn" size={28} onClick={() => setShowInfo(false)} />
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
                         <div className="owner">
                             <div className="owner-section">
@@ -146,48 +224,108 @@ const MenuBoardPopup = ({
                     </div>
                 }
 
+                {tab === "label" &&
+                    <div className="menu-container">
+                        <div className="menu-header">
+                            <h3>Nhãn đánh dấu</h3>
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
+                        </div>
+                        <div className="add-label">
+                            <button className="add-label-btn" onClick={() => setShowAddLabel(true)}>Thêm nhãn</button>
+                            {showAddLabel &&
+                                <div className="add-label-popup">
+                                    <input value={newLabelTitle} onChange={(e) => setNewLabelTitle(e.target.value)} />
+                                    <div className="new-label-grid">
+                                        {LABEL_COLORS.map((color, i) => (
+                                            <div
+                                                key={i}
+                                                className={`new-label-item ${newLabelColor === color ? "active" : ""}`}
+                                                style={{ backgroundColor: color }}
+                                                onClick={() => setNewLabelColor(color)} />
+                                        ))}
+                                    </div>
+                                    <div className="add-label-btns">
+                                        <button className="add-card blue" onClick={() => {
+                                            addLabel(newLabelColor, newLabelTitle)
+                                            setShowAddLabel(false)
+                                            setNewLabelColor("")
+                                            setNewLabelTitle("")
+                                        }}>Lưu</button>
+                                        <button className="add-card white" onClick={() => {
+                                            setShowAddLabel(false)
+                                            setNewLabelColor("")
+                                            setNewLabelTitle("")
+                                        }}>Hủy</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div className="label-list">
+                            {labels.map((label, i) => (
+                                <div key={i} className="label-item">
+                                    <span style={{ background: `${label.color}` }} > {label.title}</span>
+                                    <Edit size={20} />
+                                    <XCircle size={20} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                }
 
-                <div className="menu-header">
-                    <h3>Menu</h3>
-                    <X size={28} className="close-btn" onClick={onClose} />
+                {tab === "menu" && <div className="menu-container">
+                    <div className="menu-header">
+                        <h3>Menu</h3>
+                        <X size={28} className="close-btn" onClick={onClose} />
+                    </div>
+
+                    <ul className="menu-list">
+                        <li onClick={() => { onClose(); setShowSharePopup(true) }}>
+                            <UserPlus size={20} />
+                            <span>Chia sẻ</span>
+                        </li>
+
+                        <li onClick={() => setTab("info")}>
+                            <Info size={20} />
+                            <span>Về bảng này</span>
+                        </li>
+
+                        <li>
+                            <Share2 size={20} />
+                            <span>In, xuất và chia sẻ</span>
+                        </li>
+
+                        <li onClick={() => setIsStarred(prev => !prev)}>
+                            <button className="star-btn-menu">
+                                {isStarred ? "★" : "☆"}
+                            </button>
+                            <span>Gắn sao</span>
+                        </li>
+
+                        <li>
+                            <Settings size={20} />
+                            <span>Cài đặt</span>
+                        </li>
+
+                        <li onClick={() => setTab("label")} >
+                            <Tags size={20} />
+                            <span>Nhãn</span>
+                        </li>
+
+                        <li onClick={() => setTab("achieve")}>
+                            <Archive size={20} />
+                            <span>Lưu trữ</span>
+                        </li>
+
+                        <li onClick={() => setTab("background")}>
+                            <Image size={20} />
+                            <span>Thay đổi hình nền</span>
+
+                        </li>
+                    </ul>
                 </div>
-
-                <ul className="menu-list">
-                    <li onClick={() => { onClose(); setShowSharePopup(true) }}>
-                        <UserPlus size={20} />
-                        <span>Chia sẻ</span>
-                    </li>
-
-                    <li onClick={() => setShowInfo(true)}>
-                        <Info size={20} />
-                        <span>Về bảng này</span>
-                    </li>
-
-                    <li>
-                        <Share2 size={20} />
-                        <span>In, xuất và chia sẻ</span>
-                    </li>
-
-                    <li onClick={() => setIsStarred(prev => !prev)}>
-                        <button className="star-btn-menu">
-                            {isStarred ? "★" : "☆"}
-                        </button>
-                        <span>Gắn sao</span>
-                    </li>
-
-                    <li>
-                        <Settings size={20} />
-                        <span>Cài đặt</span>
-                    </li>
-
-                    <li onClick={() => setChangeBackground(true)}>
-                        <Image size={20} />
-                        <span>Thay đổi hình nền</span>
-
-                    </li>
-                </ul>
+                }
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import "./CardDetailPopup.css";
 import { ChevronDown, X, Pencil, PencilOff, Archive } from 'lucide-react';
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
+import ChecklistSection from "../CheckList/ChecklistSection";
+import { DragDropContext } from "@hello-pangea/dnd";
 
 const MOCK_USERS = [
     { id: 1, name: "Nguyễn Văn A", avatarColor: "#F44336" },
@@ -10,18 +12,17 @@ const MOCK_USERS = [
     { id: 4, name: "Phạm D", avatarColor: "#4CAF50" },
 ];
 
-export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn, columns, setColumns }) {
+export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn, columns, setColumns, labels }) {
     const [completed, setCompleted] = useState(card.check || false);
     const [title, setTitle] = useState(card.title);
     const [editTitle, setEditTitle] = useState(false)
 
     // Column
-    const [column, setColumn] = useState(card.column)
+    const active_index = columns.findIndex(col => col.id === card.columnId)
+    const [column, setColumn] = useState(columns[active_index].title)
     const [showColumns, setShowColumns] = useState(false)
-    const active_index = columns.findIndex(col => col.title === card.column)
 
     // Labels
-    const labelColors = ["#FF7043", "#FFA726", "#FFEB3B", "#66BB6A", "#42A5F5", "#AB47BC"];
     const [label, setLabel] = useState(card.label || null);
     const [showLabelSelect, setShowLabelSelect] = useState(false);
 
@@ -49,6 +50,10 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     const [comments, setComments] = useState(card.comments || []);
     const [editingCommentId, setEditingCommentId] = useState(null);
 
+    //task
+    const [checklists, setChecklists] = useState(card.checklists || []);
+
+
     useEffect(() => {
         function onDocClick(e) {
             if (!e.target.closest(".label-select") && !e.target.closest(".label-btn")) setShowLabelSelect(false);
@@ -74,13 +79,13 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
 
     const saveDescription = () => {
         setIsEditingDesc(false);
-        updateCardInColumn(card.column, card.id, "description", desc)
+        updateCardInColumn(card.columnId, card.id, "description", desc)
     }
 
     const saveTitle = () => {
         setEditTitle(false);
         if (title) {
-            updateCardInColumn(card.column, card.id, "title", title)
+            updateCardInColumn(card.columnId, card.id, "title", title)
         }
     }
 
@@ -97,33 +102,71 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     }
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "label", label)
+        updateCardInColumn(card.columnId, card.id, "label", label)
     }, [label])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "deadline", deadline)
+        updateCardInColumn(card.columnId, card.id, "deadline", deadline)
     }, [deadline])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "members", members)
+        updateCardInColumn(card.columnId, card.id, "members", members)
     }, [members])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "check", completed)
+        updateCardInColumn(card.columnId, card.id, "check", completed)
     }, [completed])
 
     useEffect(() => {
-        updateCardInColumn(card.column, card.id, "reminder", reminder)
+        updateCardInColumn(card.columnId, card.id, "reminder", reminder)
     }, [reminder])
+
+    useEffect(() => {
+        updateCardInColumn(card.columnId, card.id, "checklists", checklists);
+    }, [checklists]);
+
 
     const handleChangeColumn = (toCol) => {
         const updated = [...columns]
         const cardIndex = updated[active_index].cards.findIndex(c => c.id === card.id)
         const [movedCard] = updated[active_index].cards.splice(cardIndex, 1);
-        updated[toCol].cards.push({ ...movedCard, column: updated[toCol].title });
+        updated[toCol].cards.push({ ...movedCard, columnId: updated[toCol].id });
         setColumns(updated)
         setShowColumns(false)
     }
+
+    const handleDragEnd = (result) => {
+        const { source, destination } = result;
+        if (!destination) return;
+
+        setChecklists(prev => {
+            const sourceIdx = prev.findIndex(c => c.id === source.droppableId);
+            const destIdx = prev.findIndex(c => c.id === destination.droppableId);
+
+            const sourceCl = prev[sourceIdx];
+            const destCl = prev[destIdx];
+
+            const sourceItems = [...sourceCl.items];
+            const [moved] = sourceItems.splice(source.index, 1);
+
+            if (sourceIdx === destIdx) {
+                sourceItems.splice(destination.index, 0, moved);
+                return prev.map((c, i) =>
+                    i === sourceIdx ? { ...c, items: sourceItems } : c
+                );
+            }
+
+            const destItems = [...destCl.items];
+            destItems.splice(destination.index, 0, moved);
+
+            return prev.map((c, i) => {
+                if (i === sourceIdx) return { ...c, items: sourceItems };
+                if (i === destIdx) return { ...c, items: destItems };
+                return c;
+            });
+        });
+    };
+
 
     return (
         <div className="cdp-overlay">
@@ -134,10 +177,11 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                     {showColumns && (
                         <ul className="view-columns">
                             {columns.map((col, i) => (
-                                <li className={col.title === card.column ? "active-column" : ""} key={i} onClick={() => { setColumn(col.title); handleChangeColumn(i) }}>{col.title}</li>
+                                <li className={col.id === card.columnId ? "active-column" : ""} key={i} onClick={() => { setColumn(col.title); handleChangeColumn(i) }}>{col.title}</li>
                             ))}
                         </ul>
                     )}
+                    {card.storedDate && <h2>Thẻ được lưu trữ vào {card.storedDate}</h2>}
                 </div>
                 <div className="cdp-under">
                     {/* Left column */}
@@ -155,7 +199,7 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 :
                                 <PencilOff className="edit-title" onClick={() => { setEditTitle(false); saveTitle() }} />
                             }
-                            {completed && <Archive className="store-card" size={22} onClick={() => updateCardInColumn(card.column, card.id, "stored", true)} />}
+                            {completed && <Archive className="store-card" size={22} onClick={() => updateCardInColumn(card.columnId, card.id, "stored", true)} />}
 
                         </div>
 
@@ -169,14 +213,11 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 {label && <span className="label-preview" style={{ background: label }} />}
                                 {showLabelSelect && (
                                     <div className="label-select">
-                                        <div className="label-grid">
-                                            {labelColors.map((c) => (
-                                                <button
-                                                    key={c}
-                                                    className="color-item"
-                                                    style={{ background: c }}
-                                                    onClick={() => setLabel(c)}
-                                                />
+                                        <div className="label-list">
+                                            {labels.map((label, i) => (
+                                                <div key={i} className="label-item">
+                                                    <span style={{ background: `${label.color}` }} onClick={() => setLabel(label.color)}> {label.title}</span>
+                                                </div>
                                             ))}
                                             <button className="color-item clear" onClick={() => setLabel(null)}>Xóa</button>
                                         </div>
@@ -296,6 +337,14 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 </div>
                             )}
                         </div>
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <ChecklistSection
+                                checklists={checklists}
+                                setChecklists={setChecklists}
+                            />
+                        </DragDropContext>
+
+
                     </div>
 
                     {/* Right column */}

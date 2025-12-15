@@ -1,0 +1,110 @@
+.checklist { 
+  margin-top:16px 
+}
+.progress-row { 
+  display:flex; 
+  gap:8px; 
+  align-items:center 
+}
+.progress-bar { 
+  flex:1; 
+  height:8px; 
+  background:#eee; 
+  border-radius:4px;
+  overflow: hidden; 
+}
+.progress-bar div { 
+  height:100%; 
+  background:#0079BF 
+}
+.progress-bar-percent{
+  border-radius: 4px;
+  transition:  width 0.3s ease;
+}
+
+.checklist-item {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px;
+  border-radius:6px;
+}
+.checklist-item:hover .item-actions { 
+  opacity:1 
+}
+.checklist-item:hover {
+  background: #f4f5f7;
+}
+.item-actions { 
+    margin-left:auto; 
+    opacity:0; 
+    display:flex; 
+    gap:6px 
+}
+
+.add-item-box input { 
+    width:100%; 
+    padding:3px 6px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    margin-top: 10px;
+    border: 1px solid #afafaf;
+}
+.add-item-box .actions { 
+    display:flex; 
+    gap:8px; 
+    align-items:center;
+    margin-bottom: 10px;
+}
+.checklist-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.checklist-header h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.header-actions svg{
+  cursor: pointer;
+  color: #333333a7;
+}
+.header-actions svg:hover{
+  color: #333;
+}
+
+
+.edit-input {
+  width: 100%;
+  padding: 0px 6px;
+  font-size: 16px;
+}
+
+.btn-add-item {
+  background: #ddd;
+  color: black;
+  cursor: pointer;
+  padding: 2px 8px;
+  margin-bottom: 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+}
+.btn-add-item:hover{
+  background: #eee;
+}
+
+.add-checklist{
+  margin-top: 10px;
+}
+.add-checklist:hover{
+  background: #eee;
+}

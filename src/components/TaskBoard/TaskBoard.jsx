@@ -17,29 +17,20 @@ const TaskBoard = ({
     setShowMenuBoardPopup,
     rawColor,
     isStarred,
-    setIsStarred
+    setIsStarred,
+    cards,
+    setCards,
+    storeCard,
+    storeColumn,
+    updateTitleColumn
 }) => {
 
-    const [cards, setCards] = useState([
-        {
-            id: null,
-            title: null,
-            column: null,
-            label: null,
-            members: [],
-            deadline: null,
-            checked: false,
-            description: null,
-            edit: false,
-            stored: false
-        }
-    ])
 
     const { title } = useParams()
     const board_title = title
     const [color, setColor] = useState("");
     const [headerColor, setHeaderColor] = useState("")
-    const [input, setInput] = useState('')
+    const [input, setInput] = useState("")
     const [viewMode, setViewMode] = useState('column')
     const [showViewMenu, setShowViewMenu] = useState(false)
 
@@ -83,26 +74,6 @@ const TaskBoard = ({
     }
 
     useEffect(() => {
-        const updatedColumns = columns.map(column => ({
-            ...column,
-            cards: column.cards.map(card => ({
-                id: crypto.randomUUID(),
-                title: card,
-                column: column.title,
-                label: null,
-                members: [],
-                deadline: null,
-                check: false,
-                description: false,
-                edit: false,
-                stored: false
-            }))
-        }));
-
-        setColumns(updatedColumns);
-    }, []);
-
-    useEffect(() => {
         if (rawColor.includes(",")) {
             const baseColor = rawColor.split(",")[0];
             setHeaderColor(darkenColor(baseColor, 30));
@@ -113,15 +84,6 @@ const TaskBoard = ({
             setColor(rawColor);
         }
     }, [rawColor])
-
-    useEffect(() => {
-        console.log(color)
-    }, [])
-
-    useEffect(() => {
-        const allCards = columns.flatMap(column => column.cards);
-        setCards(allCards);
-    }, [columns]);
 
     return (
         <div className="trello-board" style={{ background: color }}>
@@ -173,6 +135,9 @@ const TaskBoard = ({
                     setShowCardDetailPopup={setShowCardDetailPopup}
                     updateCardInColumn={updateCardInColumn}
                     addNewList={addNewList}
+                    storeCard={storeCard}
+                    storeColumn={storeColumn}
+                    updateTitleColumn={updateTitleColumn}
                 />
             )}
 
