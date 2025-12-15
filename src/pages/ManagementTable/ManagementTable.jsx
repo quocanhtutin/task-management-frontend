@@ -29,7 +29,7 @@ const ManagementTable = () => {
             id: null,
             title: null,
             columnId: null,
-            label: null,
+            label: [],
             members: [],
             deadline: null,
             checked: false,
@@ -49,7 +49,7 @@ const ManagementTable = () => {
                 id: crypto.randomUUID(),
                 title: card,
                 columnId: column.id,
-                label: null,
+                label: [],
                 members: [],
                 deadline: null,
                 check: false,
@@ -179,7 +179,7 @@ const ManagementTable = () => {
                 id: crypto.randomUUID(),
                 title: cardTitle,
                 columnId: updated[col].id,
-                label: null,
+                label: [],
                 members: [],
                 deadline: null,
                 check: false,
@@ -225,6 +225,9 @@ const ManagementTable = () => {
                     setColumns={setColumns}
                     storeCard={storeCard}
                     labels={labels}
+                    setLabels={setLabels}
+                    addLabel={addLabel}
+                    updateLabel={updateLabel}
                 />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
             {showMenuBoardPopup &&
