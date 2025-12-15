@@ -1,14 +1,41 @@
-import { Plus, X, Clock, User } from "lucide-react";
+import { Plus, X, Clock, User, Trash2, Pencil, SquareCheckBig } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useState } from "react";
 import './ChecklistSection.css'
 
 function ChecklistItems({ checklist, index, checklists, setChecklists }) {
+    const [editingId, setEditingId] = useState(null);
+    const [tempText, setTempText] = useState("");
+
     const toggleDone = (itemId) => {
-        const updated = [...checklists];
-        const item = updated[index].items.find(i => i.id === itemId);
-        item.done = !item.done;
-        setChecklists(updated);
+        setChecklists(prev =>
+            prev.map((cl, i) =>
+                i !== index
+                    ? cl
+                    : {
+                        ...cl,
+                        items: cl.items.map(it =>
+                            it.id === itemId ? { ...it, done: !it.done } : it
+                        )
+                    }
+            )
+        );
+    };
+
+    const saveEdit = (itemId) => {
+        setChecklists(prev =>
+            prev.map((cl, i) =>
+                i !== index
+                    ? cl
+                    : {
+                        ...cl,
+                        items: cl.items.map(it =>
+                            it.id === itemId ? { ...it, text: tempText } : it
+                        )
+                    }
+            )
+        );
+        setEditingId(null);
     };
 
     return (
@@ -30,9 +57,26 @@ function ChecklistItems({ checklist, index, checklists, setChecklists }) {
                                         onChange={() => toggleDone(item.id)}
                                     />
 
-                                    <span className={item.done ? "done" : ""}>
-                                        {item.text}
-                                    </span>
+                                    {editingId === item.id ? (
+                                        <input
+                                            className="edit-input"
+                                            autoFocus
+                                            value={tempText}
+                                            onChange={(e) => setTempText(e.target.value)}
+                                            onBlur={() => saveEdit(item.id)}
+                                            onKeyDown={(e) => e.key === "Enter" && saveEdit(item.id)}
+                                        />
+                                    ) : (
+                                        <span
+                                            className={item.done ? "done" : ""}
+                                            onDoubleClick={() => {
+                                                setEditingId(item.id);
+                                                setTempText(item.text);
+                                            }}
+                                        >
+                                            {item.text}
+                                        </span>
+                                    )}
 
                                     <div className="item-actions">
                                         <Clock size={16} />
@@ -49,25 +93,27 @@ function ChecklistItems({ checklist, index, checklists, setChecklists }) {
     );
 }
 
+
 function AddChecklistItem({ onAdd }) {
     const [open, setOpen] = useState(false);
     const [text, setText] = useState("");
 
     if (!open)
-        return <button onClick={() => setOpen(true)}>Thêm một mục</button>;
+        return <button className="btn-add-item" onClick={() => setOpen(true)}>+ Thêm mục</button>;
 
     return (
         <div className="add-item-box">
             <input
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Thêm công việc..."
+                placeholder="Thêm một mục"
             />
 
             <div className="actions">
                 <button
                     className="btn primary"
                     onClick={() => {
+                        if (!text.trim()) return;
                         onAdd(text);
                         setText("");
                         setOpen(false);
@@ -84,33 +130,74 @@ function AddChecklistItem({ onAdd }) {
 }
 
 
+
 function Checklist({ checklist, index, checklists, setChecklists }) {
+    const [editing, setEditing] = useState(false);
+    const [tempTitle, setTempTitle] = useState(checklist.title);
+
     const doneCount = checklist.items.filter(i => i.done).length;
     const percent = checklist.items.length
         ? Math.round((doneCount / checklist.items.length) * 100)
         : 0;
 
+    const saveTitle = () => {
+        setChecklists(prev =>
+            prev.map((cl, i) =>
+                i === index ? { ...cl, title: tempTitle } : cl
+            )
+        );
+        setEditing(false);
+    };
+
+    const removeChecklist = () => {
+        setChecklists(prev => prev.filter(c => c.id !== checklist.id));
+    };
+
     const addItem = (text) => {
-        const updated = [...checklists];
-        updated[index].items.push({
-            id: crypto.randomUUID(),
-            text,
-            done: false,
-            members: [],
-            deadline: null
-        });
-        setChecklists(updated);
+        setChecklists(prev =>
+            prev.map((cl, i) =>
+                i === index
+                    ? {
+                        ...cl,
+                        items: [
+                            ...cl.items,
+                            { id: crypto.randomUUID(), text, done: false }
+                        ]
+                    }
+                    : cl
+            )
+        );
     };
 
     return (
         <div className="checklist">
-            <h3>{checklist.title}</h3>
+            <div className="checklist-header">
+                <SquareCheckBig size={18} />
+                {editing ? (
+                    <input
+                        className="edit-input"
+                        autoFocus
+                        value={tempTitle}
+                        onChange={(e) => setTempTitle(e.target.value)}
+                        onBlur={saveTitle}
+                        onKeyDown={(e) => e.key === "Enter" && saveTitle()}
+                    />
+                ) : (
+                    <h3>{checklist.title}</h3>
+                )}
 
-            {/* Progress */}
+                {!editing && (
+                    <div className="header-actions">
+                        <Pencil size={16} onClick={() => setEditing(true)} />
+                        <Trash2 size={16} onClick={removeChecklist} />
+                    </div>
+                )}
+            </div>
+
             <div className="progress-row">
                 <span>{percent}%</span>
                 <div className="progress-bar">
-                    <div style={{ width: `${percent}%` }} />
+                    <div className="progress-bar-percent" style={{ width: `${percent}%` }} />
                 </div>
             </div>
 
@@ -127,12 +214,19 @@ function Checklist({ checklist, index, checklists, setChecklists }) {
 }
 
 
+
 const ChecklistSection = ({ checklists, setChecklists }) => {
+    const [adding, setAdding] = useState(false);
+    const [title, setTitle] = useState("");
+
     const addChecklist = () => {
+        if (!title.trim()) return;
         setChecklists([
             ...checklists,
-            { id: crypto.randomUUID(), title: "Việc cần làm", items: [] }
+            { id: crypto.randomUUID(), title, items: [] }
         ]);
+        setTitle("");
+        setAdding(false);
     };
 
     return (
@@ -147,11 +241,24 @@ const ChecklistSection = ({ checklists, setChecklists }) => {
                 />
             ))}
 
-            <button className="btn add-checklist" onClick={addChecklist}>
-                + Thêm việc cần làm
-            </button>
+            {adding ? (
+                <input
+                    className="edit-input"
+                    autoFocus
+                    placeholder="Tiêu đề việc cần làm"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onBlur={addChecklist}
+                    onKeyDown={(e) => e.key === "Enter" && addChecklist()}
+                />
+            ) : (
+                <button className="btn add-checklist" onClick={() => setAdding(true)}>
+                    + Thêm việc cần làm
+                </button>
+            )}
         </div>
     );
-}
+};
+
 
 export default ChecklistSection
