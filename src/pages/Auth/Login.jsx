@@ -1,16 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { StoreContext } from '../../context/StoreContext.jsx'
+import axios from 'axios';
 import './Login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const { setAccessToken, setRefreshToken, setEmail, setName, url } = useContext(StoreContext)
+  const navigate = useNavigate()
+  const [data, setData] = useState({
+    email: "",
+    password: ""
+  })
+
+  const onChangeHandler = (event) => {
+    const name = event.target.id;
+    const value = event.target.value;
+    setData(data => ({ ...data, [name]: value }))
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password });
-    navigate('/main/boards')
+    const newUrl = url + "/Auth/Login"
+
+    const response = await axios.post(newUrl, { email: data.email, password: data.password });
+
+    if (response.data.isSuccess) {
+      setAccessToken(response.data.value.accessToken);
+      setRefreshToken(response.data.value.refreshToken);
+      setEmail(data.email);
+      navigate('/main/boards');
+    }
+    else {
+      alert(response.data.message)
+    }
+
   };
 
   return (
@@ -24,8 +48,8 @@ const Login = () => {
           <input
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={data.email}
+            onChange={onChangeHandler}
             required
           />
         </div>
@@ -35,8 +59,8 @@ const Login = () => {
           <input
             type="password"
             id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={data.password}
+            onChange={onChangeHandler}
             required
           />
         </div>

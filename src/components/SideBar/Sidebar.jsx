@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
-import { Layout, FileStack, Home, Users, Settings, CreditCard, ChevronDown, ChevronRight } from 'lucide-react';
+import { Layout, FileStack, Home, Users, Settings, ChevronDown, ChevronRight, CirclePlus } from 'lucide-react';
 
 const Sidebar = () => {
     const [showTemplates, setShowTemplates] = useState(false);
+    const [activeWorkspace, setActiveWorkspace] = useState(1);
+
+    const workspaceList = [
+        { id: 1, name: 'Trello Không gian làm việc' },
+        { id: 2, name: 'Project Alpha' },
+        { id: 3, name: 'Project Beta' }
+    ];
 
     return (
         <div className="sidebar">
@@ -15,15 +22,15 @@ const Sidebar = () => {
                 </NavLink>
 
                 <div
-                    className="sidebar-option template-toggle"
+                    className={`sidebar-option`}
                     onClick={() => setShowTemplates(!showTemplates)}
                 >
                     <FileStack size={18} />
                     <p>Mẫu</p>
                     {showTemplates ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </div>
-
-                {showTemplates && (
+                <div className={`template-wrapper ${showTemplates ? "open" : ""}`}>
+                    {/* {showTemplates && ( */}
                     <div className="template-list">
                         <NavLink to="/templates/business" className="template-item">Business</NavLink>
                         <NavLink to="/templates/design" className="template-item">Thiết kế</NavLink>
@@ -31,7 +38,8 @@ const Sidebar = () => {
                         <NavLink to="/templates/engineering" className="template-item">Kỹ thuật</NavLink>
                         <NavLink to="/templates/marketing" className="template-item">Marketing</NavLink>
                     </div>
-                )}
+                    {/* )} */}
+                </div>
 
                 <NavLink to="/home" className="sidebar-option">
                     <Home size={18} />
@@ -47,11 +55,43 @@ const Sidebar = () => {
                     <Settings size={18} />
                     <p>Cài đặt</p>
                 </NavLink>
+            </div>
+            <div className="workspace">
+                <div className="workspace-header">
+                    <h2>Không gian làm việc</h2>
+                    <CirclePlus size={22} />
+                </div>
 
-                <NavLink to="/billing" className="sidebar-option">
-                    <CreditCard size={18} />
-                    <p>Thanh toán</p>
-                </NavLink>
+                <div className="workspace-list">
+                    {workspaceList.map(ws => (
+                        <div>
+                            <div
+                                key={ws.id}
+                                className={`workspace-item ${activeWorkspace === ws.id ? 'active' : ''}`}
+                                onClick={() => { if (activeWorkspace === ws.id) { setActiveWorkspace('') } else { setActiveWorkspace(ws.id) } }}
+                            >
+                                <div className="workspace-avatar">
+                                    {ws.name.charAt(0)}
+                                </div>
+                                <h2>{ws.name}</h2>
+                            </div>
+                            <div className={`workspace-wrapper ${activeWorkspace === ws.id ? 'open' : ''}`}>
+                                <NavLink to="/" className="workspace-option">
+                                    <Layout size={18} />
+                                    <p>Bảng</p>
+                                </NavLink>
+                                <NavLink to="/" className="workspace-option">
+                                    <Users size={18} />
+                                    <p>Thành viên</p>
+                                </NavLink>
+                                <NavLink to="/" className="workspace-option">
+                                    <Settings size={18} />
+                                    <p>Cài đặt</p>
+                                </NavLink>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
