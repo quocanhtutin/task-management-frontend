@@ -11,20 +11,15 @@ const StoreContextProvider = (props) => {
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [isLoaded, setIsLoaded] = useState(false);
+    const [workSpaces, setWorkSpaces] = useState([])
+    const [currentWorkSpace, setCurrentWorkSpace] = useState({})
 
     const navigate = useNavigate()
 
     const url = "https://workflow-0euv.onrender.com"
 
-
-    const fetchWorkspaces = async () => {
-        const response = await axios.get(url + "/");
-    }
-
-
     useEffect(() => {
         async function loadData() {
-            // await fetchWorkspaces()
             const savedAccessToken = localStorage.getItem("accessToken");
             if (savedAccessToken) {
                 setAccessToken(savedAccessToken);
@@ -44,6 +39,7 @@ const StoreContextProvider = (props) => {
             localStorage.setItem("email", email);
             localStorage.setItem("name", name);
         }
+        console.log(accessToken)
     }, [accessToken, refreshToken, name, email]);
 
     const logout = () => {
@@ -55,14 +51,32 @@ const StoreContextProvider = (props) => {
         navigate('/')
     };
 
+    const selectWorkspace = (ws) => {
+        setCurrentWorkSpace(ws);
+        localStorage.setItem("currentWorkspace", JSON.stringify(ws));
+    };
+
+    useEffect(() => {
+        const savedWorkspace = localStorage.getItem("currentWorkspace");
+        if (savedWorkspace) {
+            setCurrentWorkSpace(JSON.parse(savedWorkspace));
+        }
+    }, []);
+
+
     const contextValue = {
         url,
-        fetchWorkspaces,
         logout,
         setAccessToken,
         setRefreshToken,
         setEmail,
-        setName
+        setName,
+        workSpaces,
+        setWorkSpaces,
+        accessToken,
+        currentWorkSpace,
+        setCurrentWorkSpace,
+        selectWorkspace
     }
 
     // if (!isLoaded) {

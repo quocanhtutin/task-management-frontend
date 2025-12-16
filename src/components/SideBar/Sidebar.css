@@ -2,7 +2,6 @@
   width: 240px;
   background: #f9fafb;
   border-right: 1px solid #e5e7eb;
-  height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
   padding-top: 16px;

@@ -1,17 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 import { Layout, FileStack, Home, Users, Settings, ChevronDown, ChevronRight, CirclePlus } from 'lucide-react';
+import { StoreContext } from '../../context/StoreContext';
+import axios from 'axios';
 
 const Sidebar = () => {
     const [showTemplates, setShowTemplates] = useState(false);
     const [activeWorkspace, setActiveWorkspace] = useState(1);
+    const { workSpaces, setWorkSpaces, url, accessToken, setCurrentWorkSpace, selectWorkspace } = useContext(StoreContext)
 
-    const workspaceList = [
-        { id: 1, name: 'Trello Không gian làm việc' },
-        { id: 2, name: 'Project Alpha' },
-        { id: 3, name: 'Project Beta' }
-    ];
+    const fetchWorkspaces = async () => {
+        try {
+            const response = await axios.get(url + "/WorkSpace", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            if (response.data.isSuccess) {
+                setWorkSpaces(response.data.value);
+            }
+        } catch (error) {
+            console.error("Fetch workspace error:", error.response?.status);
+        }
+    };
+
+    useEffect(() => {
+        if (accessToken) {
+            fetchWorkspaces();
+        }
+        if (workSpaces) {
+            setCurrentWorkSpace(workSpaces[0])
+        }
+    }, [accessToken]);
+
 
     return (
         <div className="sidebar">
@@ -63,12 +86,12 @@ const Sidebar = () => {
                 </div>
 
                 <div className="workspace-list">
-                    {workspaceList.map(ws => (
-                        <div>
+                    {workSpaces.map(ws => (
+                        <div key={ws.id}>
                             <div
-                                key={ws.id}
+
                                 className={`workspace-item ${activeWorkspace === ws.id ? 'active' : ''}`}
-                                onClick={() => { if (activeWorkspace === ws.id) { setActiveWorkspace('') } else { setActiveWorkspace(ws.id) } }}
+                                onClick={() => { if (activeWorkspace === ws.id) { setActiveWorkspace('') } else { setActiveWorkspace(ws.id), setCurrentWorkSpace(ws) } }}
                             >
                                 <div className="workspace-avatar">
                                     {ws.name.charAt(0)}
