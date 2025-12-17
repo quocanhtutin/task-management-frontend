@@ -49,29 +49,4 @@
   background-color: #ffffff;
 }
 
-/* Bố cục mặc định: có sidebar */
-.main-layout {
-  padding-top: 50px;
-  display: flex;
-  flex: 1;
-}
 
-.sidebar {
-  width: 240px;
-  border-right: 1px solid #ddd;
-  background-color: #fafafa;
-}
-
-.page-content {
-  flex: 1;
-  padding: 35px;
-  overflow-y: auto;
-}
-
-/* Trang full màn hình (chỉ có Navbar trên) */
-.fullpage-content {
-  padding-top: 50px;
-  flex: 1;
-  height: calc(100vh - 60px); /* trừ chiều cao navbar */
-  overflow: hidden;
-}

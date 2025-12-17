@@ -1,5 +1,4 @@
 import React, { useState, useContext, useEffect } from 'react';
-import WorkspaceHeader from '../../components/WorkspaceHeader/WorkspaceHeader.jsx';
 import BoardCard from '../../components/BoardCard/BoardCard.jsx';
 import { useNavigate } from 'react-router-dom';
 import './BoardsPage.css';
@@ -11,6 +10,11 @@ export default function BoardsPage() {
     const { currentWorkSpace, accessToken, url } = useContext(StoreContext)
 
     const [boards, setBoards] = useState([])
+    const [searchText, setSearchText] = useState('');
+
+    const filteredBoards = boards.filter(board =>
+        board.title.toLowerCase().includes(searchText.toLowerCase())
+    );
 
     const fetchBoards = async () => {
         try {
@@ -36,9 +40,6 @@ export default function BoardsPage() {
             fetchBoards();
         }
     }, [currentWorkSpace, accessToken]);
-
-
-
 
     const [showCreateBoardPopup, setShowCreateBoardPopup] = useState(false)
 
@@ -71,12 +72,32 @@ export default function BoardsPage() {
     return (
         <div className="boards-page">
             {showCreateBoardPopup && <CreateBoardPopup onClose={() => setShowCreateBoardPopup(false)} addNewBoard={addNewBoard} />}
-            <WorkspaceHeader />
+            <div className="workspace-header-01">
+                <div className="workspace-info">
+                    <div className="workspace-icon">
+                        {currentWorkSpace.name.charAt(0)}
+                    </div>
+                    <div>
+                        <h2>{currentWorkSpace.name}</h2>
+                        <p>{currentWorkSpace.description}</p>
+                    </div>
+                </div>
+
+                <div className="board-search">
+                    <p>Tìm kiếm bảng</p>
+                    <input
+                        type="text"
+                        placeholder="Tên bảng..."
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                    />
+                </div>
+            </div>
 
             <div className="user-boards">
                 <h3>Các bảng của bạn</h3>
                 <div className="user-board-cards">
-                    {boards.map((t, i) => t.background && (
+                    {filteredBoards.map((t, i) => t.background && (
                         <BoardCard key={i} title={t.title} color={t.background} />
                     ))}
                     <BoardCard title="Create board" add color="#E2E4E6" showPopup={() => setShowCreateBoardPopup(true)} />

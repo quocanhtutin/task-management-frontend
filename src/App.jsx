@@ -8,6 +8,8 @@ import Login from './pages/Auth/Login.jsx';
 import Register from './pages/Auth/Register.jsx';
 import ForgotPassword from './pages/Auth/ForgotPassword.jsx';
 import BoardLayout from './layouts/BoardLayout.jsx';
+import WorkspaceMember from './pages/WorkspaceMember/WorkspaceMember.jsx';
+import Home from './pages/Home/Home.jsx';
 
 const App = () => {
   return (
@@ -19,7 +21,9 @@ const App = () => {
       </Route>
 
       <Route element={<MainLayout />}>
-        <Route path="/main/boards" element={<BoardsPage />} />
+        <Route path='/home' element={<Home />} />
+        <Route path="/workspace/:title/boards" element={<BoardsPage />} />
+        <Route path="/workspace/:title/members" element={<WorkspaceMember />} />
       </Route>
 
       <Route element={<BoardLayout />}>

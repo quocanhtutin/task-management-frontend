@@ -29,7 +29,7 @@ const Login = () => {
       setAccessToken(response.data.value.accessToken);
       setRefreshToken(response.data.value.refreshToken);
       setEmail(data.email);
-      navigate('/main/boards');
+      navigate('/home');
     }
     else {
       alert(response.data.message)
