@@ -4,6 +4,7 @@ import './Sidebar.css';
 import { Layout, FileStack, Home, Users, Settings, ChevronDown, ChevronRight, CirclePlus } from 'lucide-react';
 import { StoreContext } from '../../context/StoreContext';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Sidebar = () => {
     const [showTemplates, setShowTemplates] = useState(false);
@@ -67,6 +68,42 @@ const Sidebar = () => {
         }
     }, [accessToken]);
 
+    const handleAddWorkspace = async () => {
+        try {
+            if (workSpace.name && workSpace.background && workSpace.description && workSpace.type) {
+                const response = await axios.post(url + "/WorkSpace/Create", { workSpace }, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                })
+                if (response.data.isSuccess) {
+                    toast.success("Thêm không gian làm việc thành công!")
+                    fetchWorkspaces()
+                    setWorkSpace({
+                        name: "",
+                        description: "",
+                        background: "",
+                        type: 0,
+                    })
+                    setShowAddWorkSpace(false)
+                }
+                else {
+                    toast.error("Thêm không gian làm việc thất bại")
+                    setWorkSpace({
+                        name: "",
+                        description: "",
+                        background: "",
+                        type: 0,
+                    })
+                    setShowAddWorkSpace(false)
+                }
+            }
+        } catch (error) {
+            console.error("Create workspace error:", error.response?.status);
+            console.log(workSpace)
+        }
+    }
+
 
     return (
         <div className="sidebar">
@@ -118,7 +155,6 @@ const Sidebar = () => {
                 <div className={`add-workspace ${showAddWorkspace ? "open" : ""}`}>
                     <h3>Tạo không gian làm việc</h3>
 
-                    {/* NAME */}
                     <div className="form-group">
                         <label>Tên</label>
                         <input
@@ -129,7 +165,6 @@ const Sidebar = () => {
                         />
                     </div>
 
-                    {/* DESCRIPTION */}
                     <div className="form-group">
                         <label>Mô tả</label>
                         <input
@@ -140,7 +175,6 @@ const Sidebar = () => {
                         />
                     </div>
 
-                    {/* BACKGROUND */}
                     <div className="form-group">
                         <label>Background</label>
                         <div
@@ -203,7 +237,7 @@ const Sidebar = () => {
                     </div>
 
                     {/* SUBMIT */}
-                    <button className="add-workspace-btn">
+                    <button className="add-workspace-btn" onClick={handleAddWorkspace}>
                         Thêm không gian
                     </button>
                 </div>
