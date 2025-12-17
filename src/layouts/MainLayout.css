@@ -14,12 +14,6 @@
   height: calc(100vh - 50px); 
 }
 
-.sidebar {
-  width: 240px;
-  border-right: 1px solid #ddd;
-  background-color: #fafafa;
-  overflow-y: auto; 
-}
 
 .page-content {
   flex: 1;

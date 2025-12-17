@@ -23,7 +23,7 @@ const Sidebar = () => {
                     {showTemplates ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </div>
 
-                {showTemplates && (
+                <div className={`template-wrapper ${showTemplates ? "open" : ""}`}>
                     <div className="template-list">
                         <NavLink to="/templates/business" className="template-item">Business</NavLink>
                         <NavLink to="/templates/design" className="template-item">Thiết kế</NavLink>
@@ -31,7 +31,7 @@ const Sidebar = () => {
                         <NavLink to="/templates/engineering" className="template-item">Kỹ thuật</NavLink>
                         <NavLink to="/templates/marketing" className="template-item">Marketing</NavLink>
                     </div>
-                )}
+                </div>
 
                 <NavLink to="/home" className="sidebar-option">
                     <Home size={18} />
