@@ -122,8 +122,8 @@ function AddChecklistItem({ onAdd }) {
                     Thêm
                 </button>
                 <button className="btn" onClick={() => setOpen(false)}>Hủy</button>
-                <Clock size={18} />
-                <User size={18} />
+                <Clock size={24} />
+                <User size={24} />
             </div>
         </div>
     );

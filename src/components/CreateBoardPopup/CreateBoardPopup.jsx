@@ -4,7 +4,7 @@ import "./CreateBoardPopup.css";
 
 const CreateBoardPopup = ({ onClose, addNewBoard }) => {
     const [title, setTitle] = useState("");
-    const [viewType, setViewType] = useState("workspace");
+    const [viewType, setViewType] = useState(2);
     const [showViewSelect, setShowViewSelect] = useState(false);
 
     const [backgroundType, setBackgroundType] = useState("gradient");
@@ -40,7 +40,7 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
     ];
 
     const handleCreateBoard = () => {
-        addNewBoard(title, selectedBg)
+        addNewBoard(title, selectedBg, viewType)
         setTitle("")
         setSelectedBg(null)
         onClose()
@@ -127,16 +127,16 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
                         onClick={() => setShowViewSelect(!showViewSelect)}
                         className="dropdown-btn"
                     >
-                        {viewType === "private" && "Riêng tư"}
-                        {viewType === "workspace" && "Không gian làm việc"}
-                        {viewType === "public" && "Công khai"}
+                        {viewType === 0 && "Riêng tư"}
+                        {viewType === 2 && "Không gian làm việc"}
+                        {viewType === 1 && "Công khai"}
                     </button>
 
                     {showViewSelect && (
                         <div className="dropdown-menu">
                             <div
                                 onClick={() => {
-                                    setViewType("private");
+                                    setViewType(0);
                                     setShowViewSelect(false);
                                 }}
                                 className="dropdown-item"
@@ -147,7 +147,7 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
 
                             <div
                                 onClick={() => {
-                                    setViewType("workspace");
+                                    setViewType(2);
                                     setShowViewSelect(false);
                                 }}
                                 className="dropdown-item"
@@ -158,7 +158,7 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
 
                             <div
                                 onClick={() => {
-                                    setViewType("public");
+                                    setViewType(1);
                                     setShowViewSelect(false);
                                 }}
                                 className="dropdown-item"

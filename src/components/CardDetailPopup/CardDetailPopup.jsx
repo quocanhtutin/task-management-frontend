@@ -4,6 +4,7 @@ import { ChevronDown, X, Pencil, PencilOff, Archive } from 'lucide-react';
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 import ChecklistSection from "../CheckList/ChecklistSection";
 import { DragDropContext } from "@hello-pangea/dnd";
+import { label } from "framer-motion/client";
 
 const MOCK_USERS = [
     { id: 1, name: "Nguyễn Văn A", avatarColor: "#F44336" },
@@ -12,7 +13,26 @@ const MOCK_USERS = [
     { id: 4, name: "Phạm D", avatarColor: "#4CAF50" },
 ];
 
-export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn, columns, setColumns, labels }) {
+const LABEL_COLORS = [
+    "#BAF3DB", "#F8E6A0", "#FFE2A8", "#FFD5D2", "#EBD9FF",
+    "#4BCE97", "#E2B203", "#FF9F1A", "#FF7452", "#C77DFF",
+    "#1F845A", "#946F00", "#C25100", "#C9372C", "#8F46C1",
+    "#D6E4FF", "#C6EDFB", "#D3F1A7", "#FDD0EC", "#DFE1E6",
+    "#6B9EFF", "#6CC3E0", "#94C748", "#E774BB", "#8C8F97",
+    "#1D6CE0", "#227D9B", "#5B7F24", "#A64D79", "#6B6E76"
+]
+
+export default function CardDetailPopup({
+    card = {},
+    onClose,
+    updateCardInColumn,
+    columns,
+    setColumns,
+    labels,
+    setLabels,
+    addLabel,
+    updateLabel
+}) {
     const [completed, setCompleted] = useState(card.check || false);
     const [title, setTitle] = useState(card.title);
     const [editTitle, setEditTitle] = useState(false)
@@ -23,8 +43,17 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
     const [showColumns, setShowColumns] = useState(false)
 
     // Labels
-    const [label, setLabel] = useState(card.label || null);
+    // const [label, setLabel] = useState(card.label || null);
     const [showLabelSelect, setShowLabelSelect] = useState(false);
+
+    const [selectedLabels, setSelectedLabels] = useState(card.label || []);
+
+    const [showAddLabel, setShowAddLabel] = useState(false);
+    const [editingLabel, setEditingLabel] = useState(null);
+
+    const [newLabelTitle, setNewLabelTitle] = useState("");
+    const [newLabelColor, setNewLabelColor] = useState("");
+
 
     // Due date
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -56,19 +85,42 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
 
     useEffect(() => {
         function onDocClick(e) {
-            if (!e.target.closest(".label-select") && !e.target.closest(".label-btn")) setShowLabelSelect(false);
-            if (!e.target.closest(".member-search") && !e.target.closest(".member-btn")) setShowMemberSearch(false);
-            if (!e.target.closest(".date-popup") && !e.target.closest(".date-btn")) setShowDatePicker(false);
+            if (
+                !e.target.closest(".label-select") &&
+                !e.target.closest(".label-btn") &&
+                !e.target.closest(".add-label-popup")
+            ) {
+                setShowLabelSelect(false);
+                setShowAddLabel(false);
+                setEditingLabel(null);
+            }
+
+            if (!e.target.closest(".member-search") && !e.target.closest(".member-btn"))
+                setShowMemberSearch(false);
+
+            if (!e.target.closest(".date-popup") && !e.target.closest(".date-btn"))
+                setShowDatePicker(false);
         }
-        document.addEventListener("click", onDocClick);
-        return () => document.removeEventListener("click", onDocClick);
+
+        document.addEventListener("mousedown", onDocClick);
+        return () => document.removeEventListener("mousedown", onDocClick);
     }, []);
+
 
     const toggleMember = (user) => {
         const exists = members.find(m => m.id === user.id);
         if (exists) setMembers(members.filter(m => m.id !== user.id));
         else setMembers([...members, user]);
     }
+
+    const toggleLabel = (labelId) => {
+        setSelectedLabels(prev =>
+            prev.includes(labelId)
+                ? prev.filter(id => id !== labelId)
+                : [...prev, labelId]
+        );
+    };
+
 
     const saveDate = () => {
         if (!dateInput) return;
@@ -101,9 +153,14 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         setEditingCommentId(null);
     }
 
+    // useEffect(() => {
+    //     updateCardInColumn(card.columnId, card.id, "label", label)
+    // }, [label])
+
     useEffect(() => {
-        updateCardInColumn(card.columnId, card.id, "label", label)
-    }, [label])
+        updateCardInColumn(card.columnId, card.id, "label", selectedLabels);
+    }, [selectedLabels]);
+
 
     useEffect(() => {
         updateCardInColumn(card.columnId, card.id, "deadline", deadline)
@@ -167,6 +224,22 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
         });
     };
 
+    const saveLabel = () => {
+        if (!newLabelColor) return;
+
+        if (editingLabel) {
+            updateLabel(editingLabel.id, newLabelColor, newLabelTitle)
+        } else {
+            addLabel(newLabelColor, newLabelTitle)
+        }
+
+        setShowAddLabel(false);
+        setEditingLabel(null);
+        setNewLabelTitle("");
+        setNewLabelColor("");
+    };
+
+
 
     return (
         <div className="cdp-overlay">
@@ -210,16 +283,112 @@ export default function CardDetailPopup({ card = {}, onClose, updateCardInColumn
                                 <button className="action-btn label-btn" onClick={() => setShowLabelSelect(!showLabelSelect)}>
                                     Nhãn
                                 </button>
-                                {label && <span className="label-preview" style={{ background: label }} />}
-                                {showLabelSelect && (
+                                {selectedLabels &&
+                                    <div className="preview-labels">
+                                        {selectedLabels.map((labelId, i) => {
+                                            const label = labels.find(l => l.id === labelId);
+                                            if (!label) return null;
+
+                                            return (
+                                                <span
+                                                    key={label.id}
+                                                    className="label-preview-item"
+                                                    style={{ backgroundColor: label.color }}
+                                                >
+                                                    {label.title}
+                                                </span>
+                                            );
+                                        }
+                                        )}
+                                    </div>
+                                }
+                                {showLabelSelect && !showAddLabel && (
                                     <div className="label-select">
-                                        <div className="label-list">
-                                            {labels.map((label, i) => (
-                                                <div key={i} className="label-item">
-                                                    <span style={{ background: `${label.color}` }} onClick={() => setLabel(label.color)}> {label.title}</span>
-                                                </div>
+                                        <div className="label-list-cdp">
+                                            {labels.map(label => {
+                                                const checked = selectedLabels.includes(label.id);
+
+                                                return (
+                                                    <div className="card-label-item" key={label.id}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={checked}
+                                                            onChange={() => toggleLabel(label.id)}
+                                                        />
+
+                                                        <div
+                                                            className="label-color"
+                                                            style={{ background: label.color }}
+                                                            onClick={() => toggleLabel(label.id)}
+                                                        >
+                                                            {label.title}
+                                                        </div>
+
+                                                        <Pencil
+                                                            size={14}
+                                                            className="edit-icon"
+                                                            onClick={() => {
+                                                                setEditingLabel(label);
+                                                                setNewLabelTitle(label.title);
+                                                                setNewLabelColor(label.color);
+                                                                setShowAddLabel(true);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+
+                                            <button
+                                                className="add-card white"
+                                                onClick={() => {
+                                                    setEditingLabel(null);
+                                                    setNewLabelTitle("");
+                                                    setNewLabelColor("");
+                                                    setShowAddLabel(true);
+                                                }}
+                                            >
+                                                Tạo nhãn mới
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                )}
+                                {showAddLabel && (
+                                    <div className="label-select">
+                                        <input
+                                            className="new-label-title"
+                                            placeholder="Tên nhãn"
+                                            value={newLabelTitle}
+                                            onChange={(e) => setNewLabelTitle(e.target.value)}
+                                        />
+
+                                        <div className="new-label-grid">
+                                            {LABEL_COLORS.map((color, i) => (
+                                                <div
+                                                    key={i}
+                                                    className={`new-label-item ${newLabelColor === color ? "active" : ""
+                                                        }`}
+                                                    style={{ backgroundColor: color }}
+                                                    onClick={() => setNewLabelColor(color)}
+                                                />
                                             ))}
-                                            <button className="color-item clear" onClick={() => setLabel(null)}>Xóa</button>
+                                        </div>
+
+                                        <div className="add-label-btns">
+                                            <button className="add-card blue" onClick={saveLabel}>
+                                                Lưu
+                                            </button>
+
+                                            <button
+                                                className="add-card white"
+                                                onClick={() => {
+                                                    setShowAddLabel(false);
+                                                    setEditingLabel(null);
+                                                    setShowLabelSelect(true)
+                                                }}
+                                            >
+                                                Hủy
+                                            </button>
                                         </div>
                                     </div>
                                 )}

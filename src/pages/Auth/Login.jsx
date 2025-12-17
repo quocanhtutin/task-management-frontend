@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
 import axiosClient from '../../utils/axiosConfig';
 import './Login.css';
 
@@ -56,6 +57,43 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
+=======
+import { StoreContext } from '../../context/StoreContext.jsx'
+import axios from 'axios';
+import './Login.css';
+
+const Login = () => {
+
+  const { setAccessToken, setRefreshToken, setEmail, setName, url } = useContext(StoreContext)
+  const navigate = useNavigate()
+  const [data, setData] = useState({
+    email: "",
+    password: ""
+  })
+
+  const onChangeHandler = (event) => {
+    const name = event.target.id;
+    const value = event.target.value;
+    setData(data => ({ ...data, [name]: value }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newUrl = url + "/Auth/Login"
+
+    const response = await axios.post(newUrl, { email: data.email, password: data.password });
+
+    if (response.data.isSuccess) {
+      setAccessToken(response.data.value.accessToken);
+      setRefreshToken(response.data.value.refreshToken);
+      setEmail(data.email);
+      navigate('/home');
+    }
+    else {
+      alert(response.data.message)
+    }
+
+>>>>>>> page
   };
 
   return (
@@ -68,8 +106,14 @@ const Login = () => {
           <label style={{display:'block', marginBottom:'.5rem', fontWeight:'600'}}>Email</label>
           <input
             type="email"
+<<<<<<< HEAD
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+=======
+            id="email"
+            value={data.email}
+            onChange={onChangeHandler}
+>>>>>>> page
             required
             style={{width: '100%', padding: '.75rem', borderRadius: '4px', border: '1px solid #ddd'}}
             disabled={isLoading}
@@ -80,8 +124,14 @@ const Login = () => {
           <label style={{display:'block', marginBottom:'.5rem', fontWeight:'600'}}>Mật khẩu</label>
           <input
             type="password"
+<<<<<<< HEAD
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+=======
+            id="password"
+            value={data.password}
+            onChange={onChangeHandler}
+>>>>>>> page
             required
             style={{width: '100%', padding: '.75rem', borderRadius: '4px', border: '1px solid #ddd'}}
             disabled={isLoading}

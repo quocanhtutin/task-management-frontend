@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./MenuBoardPopup.css";
-import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound, Archive, Trash2, ArchiveX, Tags, Edit, XCircle } from "lucide-react";
+import { X, UserPlus, Settings, Image, Share2, Info, ArrowLeft, UserRound, Archive, Trash2, ArchiveX, Tags, Edit, XCircle, UserCogIcon, Check } from "lucide-react";
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 
 
@@ -65,6 +65,19 @@ const MenuBoardPopup = ({
     const [showAddLabel, setShowAddLabel] = useState(false)
     const [newLabelColor, setNewLabelColor] = useState("")
     const [newLabelTitle, setNewLabelTitle] = useState("")
+
+    const [showVisibility, setShowVisibility] = useState(false)
+    const [viewType, setViewType] = useState("workspace")
+
+    useEffect(() => {
+        function onDocClick(e) {
+            if (!e.target.closest(".show-visibility"))
+                setShowVisibility(false);
+        }
+
+        document.addEventListener("mousedown", onDocClick);
+        return () => document.removeEventListener("mousedown", onDocClick);
+    }, []);
 
     return (
         <div className="menu-overlay" onClick={onClose}>
@@ -272,6 +285,74 @@ const MenuBoardPopup = ({
                     </div>
                 }
 
+                {tab === "setting" &&
+                    <div className="menu-container">
+                        <div className="menu-header">
+                            <h3>Nhãn đánh dấu</h3>
+                            <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
+                        </div>
+                        <div className="bs-content">
+                            <section className="bs-section">
+                                <h3>Không gian làm việc</h3>
+                                <p className="bs-muted">Trello Không gian làm việc</p>
+                            </section>
+
+                            <section className="bs-section">
+                                <h3>Quyền</h3>
+
+                                <div className="bs-item active">
+                                    <div>
+                                        <div className="bs-item-title">Nhận xét</div>
+                                        <div className="bs-item-desc">Thành viên</div>
+                                    </div>
+                                </div>
+
+                                <div className="bs-item">
+                                    <div>
+                                        <div className="bs-item-title">Thêm và xóa thành viên</div>
+                                        <div className="bs-item-desc">Thành viên</div>
+                                    </div>
+                                </div>
+
+                                <div className="bs-item">
+                                    <div>
+                                        <div className="bs-item-title">
+                                            Chỉnh sửa Không gian làm việc
+                                            <Check size={14} className="bs-check" />
+                                        </div>
+                                        <div className="bs-item-desc">
+                                            Mọi thành viên của Không gian làm việc đều có thể chỉnh sửa và
+                                            tham gia vào bảng này.
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="bs-section">
+                                <h3>Trạng thái hoàn tất</h3>
+
+                                <div className="bs-item">
+                                    <div className="bs-item-title">
+                                        Hiển thị trạng thái hoàn tất ở mặt trước thẻ
+                                        <Check size={14} className="bs-check" />
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="bs-section">
+                                <h3>Ảnh bìa</h3>
+
+                                <div className="bs-item">
+                                    <div className="bs-item-title">
+                                        Đã bật ảnh bìa thẻ
+                                        <Check size={14} className="bs-check" />
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                }
+
                 {tab === "menu" && <div className="menu-container">
                     <div className="menu-header">
                         <h3>Menu</h3>
@@ -289,6 +370,58 @@ const MenuBoardPopup = ({
                             <span>Về bảng này</span>
                         </li>
 
+                        <li className={`show-visibility ${showVisibility ? "open" : ""}`} onClick={() => setShowVisibility(true)}>
+                            <UserCogIcon size={20} />
+                            <div className="select-visibility-content">
+                                <span>Khả năng hiển thị</span>
+                                <div className="visibility-wrapper">
+                                    {showVisibility && (
+                                        <div className="visibility-drop">
+                                            <div
+                                                className="dropdown-item"
+                                                onClick={() => {
+                                                    setViewType("private");
+                                                    setShowVisibility(false);
+                                                }}
+                                            >
+                                                <p className="item-title">Riêng tư</p>
+                                                <p className="item-desc">
+                                                    Tất cả thành viên có thể xem. Quản trị viên có thể đóng hoặc xóa thành viên
+                                                </p>
+                                                {viewType === "private" && <Check className="check-icon" size={14} />}
+                                            </div>
+
+                                            <div
+                                                className="dropdown-item"
+                                                onClick={() => {
+                                                    setViewType("workspace");
+                                                    setShowVisibility(false);
+                                                }}
+                                            >
+                                                <p className="item-title">Không gian làm việc</p>
+                                                <p className="item-desc">Tất cả thành viên có thể xem và sửa</p>
+                                                {viewType === "workspace" && <Check className="check-icon" size={14} />}
+                                            </div>
+
+                                            <div
+                                                className="dropdown-item"
+                                                onClick={() => {
+                                                    setViewType("public");
+                                                    setShowVisibility(false);
+                                                }}
+                                            >
+                                                <p className="item-title">Công khai</p>
+                                                <p className="item-desc">
+                                                    Tất cả mọi người đều có thể xem. Chỉ thành viên mới có thể sửa
+                                                </p>
+                                                {viewType === "public" && <Check className="check-icon" size={14} />}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </li>
+
                         <li>
                             <Share2 size={20} />
                             <span>In, xuất và chia sẻ</span>
@@ -301,7 +434,7 @@ const MenuBoardPopup = ({
                             <span>Gắn sao</span>
                         </li>
 
-                        <li>
+                        <li onClick={() => setTab("setting")}>
                             <Settings size={20} />
                             <span>Cài đặt</span>
                         </li>
