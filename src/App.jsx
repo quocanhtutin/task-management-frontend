@@ -10,6 +10,7 @@ import ForgotPassword from './pages/Auth/ForgotPassword.jsx';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import PublicRoute from './components/ProtectedRoute/PublicRoute';
 import BoardLayout from './layouts/BoardLayout.jsx';
+import SettingsPage from './pages/Settings/SettingsPage';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/main/boards" element={<BoardsPage />} />
+          <Route path="/main/settings" element={<SettingsPage />} />
         </Route>
         <Route element={<BoardLayout />}>
           <Route path="/boards/:title" element={<ManagementTable />} />
