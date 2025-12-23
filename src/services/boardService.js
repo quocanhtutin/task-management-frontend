@@ -23,11 +23,43 @@ const boardService = {
     },
 
     updateTitle: (boardId, title) => {
-        return axiosClient.put(`/Board/${boardId}/Title`, { string: title }); // Lưu ý key body là "string" theo swagger
+        return axiosClient.put(
+            `/Board/${boardId}/Title`, 
+            JSON.stringify(title),
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        ); 
     },
 
     updateDescription: (boardId, description) => {
-        return axiosClient.put(`/Board/${boardId}/Description`, { string: description });
+        return axiosClient.put(
+            `/Board/${boardId}/Description`, 
+            JSON.stringify(description), 
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+    },
+
+    updateBackground: (boardId, background) => {
+        return axiosClient.put(
+            `/Board/${boardId}/Background`, 
+            JSON.stringify(background), 
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+    },
+
+    updateVisibility: (boardId, visibility) => {
+        return axiosClient.put(
+            `/Board/${boardId}/Visibility`, 
+            visibility, 
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        ); 
     },
 
     delete: (boardId) => {
