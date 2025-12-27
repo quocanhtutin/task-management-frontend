@@ -14,6 +14,7 @@ import { WORKSPACE_TYPES } from '../../components/CreateWorkspaceModal/CreateWor
 export default function BoardsPage() {
     const [workspaces, setWorkspaces] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     
     const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
     const [selectedWorkspace, setSelectedWorkspace] = useState(null);
@@ -82,11 +83,13 @@ export default function BoardsPage() {
 
         try {
             const payload = {
-                workspaceId: activeWorkspaceIdForBoard,
-                title: boardData.title,
-                description: boardData.description || '',
-                background: boardData.background || '#0079bf',
-                visibility: 0
+                board: {
+                    workspaceId: activeWorkspaceIdForBoard,
+                    title: boardData.title,
+                    description: boardData.description || '',
+                    background: boardData.background || '#0079bf',
+                    visibility: (boardData.visibility !== undefined) ? boardData.visibility : 0
+                }
             };
 
             await boardService.create(payload);
@@ -94,8 +97,7 @@ export default function BoardsPage() {
             setShowCreateBoardPopup(false);
             setActiveWorkspaceIdForBoard(null);
             
-            alert("Tạo bảng thành công!");
-            window.location.reload();
+            setRefreshTrigger(prev => prev + 1);
             
         } catch (error) {
             console.error("Lỗi tạo board:", error);
@@ -149,6 +151,7 @@ export default function BoardsPage() {
                             <WorkspaceBoardList 
                                 workspaceId={ws.id || ws.Id} 
                                 onOpenCreateBoard={handleOpenCreateBoard}
+                                refreshTrigger={refreshTrigger}
                             />
 
                         </div>

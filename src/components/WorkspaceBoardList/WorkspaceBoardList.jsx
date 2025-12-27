@@ -3,19 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import BoardCard from '../BoardCard/BoardCard.jsx';
 import boardService from '../../services/boardService';
 
-const WorkspaceBoardList = ({ workspaceId, onOpenCreateBoard }) => {
+const WorkspaceBoardList = ({ workspaceId, onOpenCreateBoard, refreshTrigger }) => {
     const [boards, setBoards] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchBoards();
-    }, [workspaceId]);
+    }, [workspaceId, refreshTrigger]);
 
     const fetchBoards = async () => {
         try {
             const res = await boardService.getBoards(workspaceId);
-            setBoards(res.data.value || res.data || []);
+            const data = res.data && res.data.value ? res.data.value : [];
+            setBoards(data);
         } catch (error) {
             console.error(`Lỗi tải board cho workspace ${workspaceId}:`, error);
         } finally {
@@ -40,7 +41,7 @@ const WorkspaceBoardList = ({ workspaceId, onOpenCreateBoard }) => {
                 title="Tạo bảng mới" 
                 add 
                 color="#E2E4E6" 
-                showPopup={() => onOpenCreateBoard(workspaceId)}
+                onClick={() => onOpenCreateBoard(workspaceId)}
             />
         </div>
     );

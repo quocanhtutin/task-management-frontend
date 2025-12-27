@@ -1,15 +1,35 @@
 import React from 'react';
 import './BoardCard.css';
-import { useNavigate } from 'react-router-dom';
 
-export default function BoardCard({ title, color, add, showPopup }) {
-    const navigate = useNavigate()
-    const bg = color.includes(",") ? `linear-gradient(135deg, ${color})` : color
+export default function BoardCard({ title, color, add, onClick }) {
+    
+    const getBackgroundStyle = (bgString) => {
+        if (!bgString) return { background: '#0079bf' };
+
+        if (bgString.startsWith('http')) {
+            return { 
+                backgroundImage: `url(${bgString})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            };
+        }
+        
+        if (bgString.includes(',')) {
+            return { background: `linear-gradient(135deg, ${bgString})` };
+        }
+
+        return { background: bgString };
+    };
 
     return (
-        <div className={`board-card ${add ? 'add-card' : ''}`} style={{ background: bg }} onClick={() => { if (title === "Create board") { showPopup() } else { navigate(`/boards/${title}?color=${encodeURIComponent(color)}`) } }}>
-            <p>{title}</p>
-            {add && <span>+</span>}
+        <div 
+            className={`board-card ${add ? 'add-card' : ''}`} 
+            style={getBackgroundStyle(color)} 
+            onClick={onClick}
+        >
+
+            <p style={{position: 'relative', zIndex: 1}}>{title}</p>
+            {add && <span style={{position: 'relative', zIndex: 1}}>+</span>}
         </div>
     );
 }

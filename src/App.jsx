@@ -30,7 +30,7 @@ const App = () => {
           <Route path="/main/settings" element={<SettingsPage />} />
         </Route>
         <Route element={<BoardLayout />}>
-          <Route path="/boards/:title" element={<ManagementTable />} />
+          <Route path="/board/:boardId" element={<ManagementTable />} />
         </Route>
 
       <Route element={<MainLayout />}>
