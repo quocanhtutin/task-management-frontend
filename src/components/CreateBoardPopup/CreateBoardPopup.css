@@ -126,6 +126,7 @@
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
+  position: relative;
 }
 
 .dropdown-item:hover {
