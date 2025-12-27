@@ -121,6 +121,7 @@ const Sidebar = () => {
                     <p>Mẫu</p>
                     {showTemplates ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </div>
+
                 <div className={`template-wrapper ${showTemplates ? "open" : ""}`}>
                     <div className="template-list">
                         <NavLink to="/templates/business" className="template-item">Business</NavLink>

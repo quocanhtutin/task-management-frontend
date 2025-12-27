@@ -10,6 +10,7 @@ import ForgotPassword from './pages/Auth/ForgotPassword.jsx';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import PublicRoute from './components/ProtectedRoute/PublicRoute';
 import BoardLayout from './layouts/BoardLayout.jsx';
+import SettingsPage from './pages/Settings/SettingsPage';
 import WorkspaceMember from './pages/WorkspaceMember/WorkspaceMember.jsx';
 import Home from './pages/Home/Home.jsx';
 
@@ -23,9 +24,14 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
       </Route>
-      <Route element={<BoardLayout />}>
-        <Route path="/boards/:title" element={<ManagementTable />} />
-      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+          <Route path="/main/boards" element={<BoardsPage />} />
+          <Route path="/main/settings" element={<SettingsPage />} />
+        </Route>
+        <Route element={<BoardLayout />}>
+          <Route path="/boards/:title" element={<ManagementTable />} />
+        </Route>
 
       <Route element={<MainLayout />}>
         <Route path='/home' element={<Home />} />

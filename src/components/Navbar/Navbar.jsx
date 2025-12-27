@@ -29,6 +29,11 @@ const Navbar = () => {
         }
     };
 
+    const handleNavigate = (path) => {
+        navigate(path);
+        setShowMenu(false);
+    }
+
     return (
         <div className="navbar">
             <div className="navbar-left">
@@ -44,7 +49,9 @@ const Navbar = () => {
                         <div className="navbar-dropdown-menu">
                             <ul>
                                 <li>Tài khoản</li>
-                                <li>Cài đặt</li>
+                                <li onClick={() => handleNavigate('/main/settings')}>
+                                    Cài đặt
+                                </li>
                                 <li>Chủ đề</li>
                                 <li>Trợ giúp</li>
                                 <li><button onClick={handleLogout} className="logout-btn">
