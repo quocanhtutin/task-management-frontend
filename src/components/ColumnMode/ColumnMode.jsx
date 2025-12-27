@@ -187,7 +187,7 @@ const ColumnMode = ({
                                         onDropBeforeCard(e, j, i)
                                 }}
                                 onDragOver={allowDrop}
-                                style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}
+                            // style={card.label != [] ? { backgroundColor: card.label[0], color: "white" } : { background: "white" }}
                             >
                                 <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.id, card.id, "check", e.target.checked)} />
                                 <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>

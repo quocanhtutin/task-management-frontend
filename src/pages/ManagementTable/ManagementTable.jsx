@@ -269,6 +269,9 @@ const ManagementTable = () => {
                     setColumns={setColumns}
                     storeCard={storeCard}
                     labels={labels}
+                    setLabels={setLabels}
+                    addLabel={addLabel}
+                    updateLabel={updateLabel}
                 />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
             

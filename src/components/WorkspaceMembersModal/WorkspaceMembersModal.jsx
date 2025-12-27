@@ -42,12 +42,12 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
             if (searchQuery.trim().length > 0 && showSuggestions) {
                 try {
                     const res = await userService.search(searchQuery);
-                    
+
                     const users = res.data.value?.items || [];
-                    
+
                     const existingIds = members.map(m => m.userId);
                     const filteredUsers = users.filter(u => !existingIds.includes(u.id));
-                    
+
                     setSearchResults(filteredUsers);
                 } catch (error) {
                     console.error("Lỗi tìm kiếm user:", error);
@@ -74,7 +74,7 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
 
     const handleSelectUser = (user) => {
         setNewUserId(user.id);
-        setSearchQuery(user.name || user.email); 
+        setSearchQuery(user.name || user.email);
         setShowSuggestions(false);
     };
 
@@ -89,7 +89,7 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
             setIsAdding(true);
             await workspaceMemberService.addMember(workspace.id, newUserId, newUserRole);
             alert("Thêm thành viên thành công!");
-            
+
             setNewUserId('');
             setSearchQuery('');
             fetchMembers();
@@ -104,7 +104,7 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
     const handleChangeRole = async (userId, newRole) => {
         try {
             await workspaceMemberService.updateRole(workspace.id, userId, newRole);
-            setMembers(prev => prev.map(m => 
+            setMembers(prev => prev.map(m =>
                 m.userId === userId ? { ...m, role: Number(newRole) } : m
             ));
         } catch (error) {
@@ -125,28 +125,28 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content member-modal" style={{maxWidth: '600px', minHeight: '500px'}}>
-                <div className="modal-header" style={{display:'flex', justifyContent:'space-between', marginBottom:'20px'}}>
+            <div className="modal-content member-modal" style={{ maxWidth: '600px', minHeight: '500px' }}>
+                <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <h3>Thành viên: {workspace.name}</h3>
-                    <button onClick={onClose} style={{background:'none', border:'none', cursor:'pointer'}}><X /></button>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X /></button>
                 </div>
 
-                <div className="add-member-section" style={{background: '#f4f5f7', padding: '15px', borderRadius: '8px', marginBottom: '20px'}}>
+                <div className="add-member-section" style={{ background: '#f4f5f7', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
                     <h4>Thêm thành viên</h4>
-                    <form onSubmit={handleAddMember} style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
-                        
-                        <div style={{flex: 1, position: 'relative', zIndex: 100}} ref={wrapperRef}>
-                            <input 
-                                type="text" 
-                                placeholder="Nhập tên hoặc email..." 
+                    <form onSubmit={handleAddMember} style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+
+                        <div style={{ flex: 1, position: 'relative', zIndex: 100 }} ref={wrapperRef}>
+                            <input
+                                type="text"
+                                placeholder="Nhập tên hoặc email..."
                                 value={searchQuery}
                                 onChange={(e) => {
                                     setSearchQuery(e.target.value);
                                     setShowSuggestions(true);
-                                    if(e.target.value === '') setNewUserId('');
+                                    if (e.target.value === '') setNewUserId('');
                                 }}
                                 onFocus={() => setShowSuggestions(true)}
-                                style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd'}}
+                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                             />
 
                             {showSuggestions && searchQuery && (
@@ -158,8 +158,8 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
                                 }}>
                                     {searchResults.length > 0 ? (
                                         searchResults.map(user => (
-                                            <div 
-                                                key={user.id} 
+                                            <div
+                                                key={user.id}
                                                 onClick={() => handleSelectUser(user)}
                                                 style={{
                                                     padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #eee',
@@ -169,11 +169,11 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
                                                 onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                                             >
                                                 {user.avatarUrl ? (
-                                                     <img 
-                                                        src={user.avatarUrl} 
-                                                        alt="avatar" 
-                                                        style={{width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover'}} 
-                                                     />
+                                                    <img
+                                                        src={user.avatarUrl}
+                                                        alt="avatar"
+                                                        style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
+                                                    />
                                                 ) : (
                                                     <div style={{
                                                         width: '24px', height: '24px', background: '#0079bf', color: 'white',
@@ -184,17 +184,17 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
                                                 )}
 
                                                 <div>
-                                                    <div style={{fontWeight: 500, fontSize: '14px'}}>
+                                                    <div style={{ fontWeight: 500, fontSize: '14px' }}>
                                                         {user.name || 'No Name'}
                                                     </div>
-                                                    <div style={{fontSize: '12px', color: '#666'}}>
+                                                    <div style={{ fontSize: '12px', color: '#666' }}>
                                                         {user.email}
                                                     </div>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div style={{padding: '10px', color: '#888', textAlign: 'center', fontSize: '13px'}}>
+                                        <div style={{ padding: '10px', color: '#888', textAlign: 'center', fontSize: '13px' }}>
                                             Không tìm thấy kết quả
                                         </div>
                                     )}
@@ -202,58 +202,58 @@ export default function WorkspaceMembersModal({ workspace, onClose }) {
                             )}
                         </div>
 
-                        <select 
-                            value={newUserRole} 
+                        <select
+                            value={newUserRole}
                             onChange={(e) => setNewUserRole(e.target.value)}
-                            style={{padding: '8px', borderRadius: '4px', border: '1px solid #ddd'}}
+                            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                         >
                             {Object.entries(ROLES).map(([key, label]) => (
                                 <option key={key} value={key}>{label}</option>
                             ))}
                         </select>
                         <button type="submit" className="btn-primary" disabled={isAdding}>
-                            {isAdding ? '...' : <UserPlus size={18}/>}
+                            {isAdding ? '...' : <UserPlus size={18} />}
                         </button>
                     </form>
-                    {newUserId && <div style={{marginTop: '5px', fontSize: '12px', color: 'green'}}>Đã chọn: {searchQuery}</div>}
+                    {newUserId && <div style={{ marginTop: '5px', fontSize: '12px', color: 'green' }}>Đã chọn: {searchQuery}</div>}
                 </div>
 
-                <div className="members-list" style={{maxHeight: '350px', overflowY: 'auto'}}>
+                <div className="members-list" style={{ maxHeight: '350px', overflowY: 'auto' }}>
                     {isLoading ? <p>Đang tải...</p> : (
-                        <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
-                                <tr style={{borderBottom: '2px solid #eee', textAlign: 'left'}}>
-                                    <th style={{padding: '10px'}}>Tên / ID</th>
-                                    <th style={{padding: '10px'}}>Ngày tham gia</th>
-                                    <th style={{padding: '10px'}}>Vai trò</th>
-                                    <th style={{padding: '10px'}}>Hành động</th>
+                                <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
+                                    <th style={{ padding: '10px' }}>Tên / ID</th>
+                                    <th style={{ padding: '10px' }}>Ngày tham gia</th>
+                                    <th style={{ padding: '10px' }}>Vai trò</th>
+                                    <th style={{ padding: '10px' }}>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {members.map((member) => (
-                                    <tr key={member.userId} style={{borderBottom: '1px solid #eee'}}>
-                                        <td style={{padding: '10px'}}>
-                                            <div style={{fontWeight: 'bold'}}>{member.name || 'No Name'}</div>
-                                            <div style={{fontSize: '11px', color: '#888'}}>{member.userId}</div>
+                                    <tr key={member.userId} style={{ borderBottom: '1px solid #eee' }}>
+                                        <td style={{ padding: '10px' }}>
+                                            <div style={{ fontWeight: 'bold' }}>{member.name || 'No Name'}</div>
+                                            <div style={{ fontSize: '11px', color: '#888' }}>{member.email}</div>
                                         </td>
-                                        <td style={{padding: '10px'}}>
+                                        <td style={{ padding: '10px' }}>
                                             {new Date(member.joinedAt).toLocaleDateString('vi-VN')}
                                         </td>
-                                        <td style={{padding: '10px'}}>
-                                            <select 
+                                        <td style={{ padding: '10px' }}>
+                                            <select
                                                 value={member.role}
                                                 onChange={(e) => handleChangeRole(member.userId, e.target.value)}
-                                                style={{padding: '5px', borderRadius: '4px'}}
+                                                style={{ padding: '5px', borderRadius: '4px' }}
                                             >
                                                 {Object.entries(ROLES).map(([key, label]) => (
                                                     <option key={key} value={key}>{label}</option>
                                                 ))}
                                             </select>
                                         </td>
-                                        <td style={{padding: '10px', textAlign: 'center'}}>
-                                            <button 
+                                        <td style={{ padding: '10px', textAlign: 'center' }}>
+                                            <button
                                                 onClick={() => handleRemoveMember(member.userId)}
-                                                style={{color: 'red', background: 'none', border: 'none', cursor: 'pointer'}}
+                                                style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}
                                                 title="Xóa thành viên"
                                             >
                                                 <Trash2 size={18} />

@@ -126,43 +126,136 @@
     border:1px solid #ddd;
     cursor:pointer
 }
-.label-preview{
-    display:inline-block;
-    width:50px;
-    height:35px;
-    border-radius:3px;
-    margin-left:8px;
-    vertical-align:top;
+.preview-labels {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top:8px
 }
+
+.label-preview-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 30px;
+  min-width: 40px;
+  padding: 0 10px;
+
+  border-radius: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #172b4d;
+
+  width: fit-content;
+  white-space: nowrap;
+}
+
 .label-select{
     position:absolute;
-    top:44px;
+    top:-80px;          
     left:0;
     background:#fff;
     border:1px solid #ddd;
-    padding:10px;
+    padding:8px;
     border-radius:8px;
     box-shadow:0 6px 18px rgba(0,0,0,0.12);
-    z-index:30;
-    width: 200px;
+    z-index:200;
+    width:260px;
+    overflow:auto;
 }
-.label-grid{
-    display:flex;
-    gap:10px;
-    align-items:center;
+.label-select .new-label-title{
+    width: 100%;
+    padding: 2px 4px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+    border-radius: 6px;
 }
-.color-item{
-    width:48px;
-    height:36px;
-    border-radius:6px;
-    border:1px solid rgba(0,0,0,0.08);
-    cursor:pointer;
+.label-list-cdp {
+  padding-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
-.color-item.clear{
-    padding:6px;
-    border-radius:6px;
-    background:#f5f5f5;
+.label-list-cdp::-webkit-scrollbar {
+  width: 6px;
 }
+.label-list-cdp::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+.label-list-cdp button{
+    margin-top: 10px;
+}
+
+.card-label-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.card-label-item input[type="checkbox"] {
+  cursor: pointer;
+}
+.label-color {
+  flex: 1;
+  height: 32px;
+  border-radius: 6px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #172b4d;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.label-color:hover {
+  filter: brightness(0.95);
+  transform: scale(1.02);
+}
+.card-label-item input:checked + .label-color {
+  outline: 2px solid #0052cc;
+  outline-offset: 2px;
+}
+.edit-icon {
+  cursor: pointer;
+  color: #6b778c;
+}
+
+.edit-icon:hover {
+  color: #172b4d;
+}
+.label-create,
+.add-label-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  background: #f4f5f7;
+  cursor: pointer;
+}
+
+.label-create:hover,
+.add-label-btn:hover {
+  background: #e4e6ea;
+}
+.add-label-popup {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+.add-label-popup input {
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+
+
 .date-popup{
     position:absolute;
     top:44px;

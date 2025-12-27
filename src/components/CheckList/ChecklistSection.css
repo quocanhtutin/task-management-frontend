@@ -108,3 +108,10 @@
 .add-checklist:hover{
   background: #eee;
 }
+.actions svg{
+  cursor: pointer;
+  color: #333333a7;
+}
+.actions svg:hover{
+  color: #333;
+}

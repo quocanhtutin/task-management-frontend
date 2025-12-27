@@ -11,6 +11,8 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import PublicRoute from './components/ProtectedRoute/PublicRoute';
 import BoardLayout from './layouts/BoardLayout.jsx';
 import SettingsPage from './pages/Settings/SettingsPage';
+import WorkspaceMember from './pages/WorkspaceMember/WorkspaceMember.jsx';
+import Home from './pages/Home/Home.jsx';
 
 const App = () => {
   return (
@@ -31,6 +33,10 @@ const App = () => {
           <Route path="/board/:boardId" element={<ManagementTable />} />
         </Route>
 
+      <Route element={<MainLayout />}>
+        <Route path='/home' element={<Home />} />
+        <Route path="/workspace/:title/boards" element={<BoardsPage />} />
+        <Route path="/workspace/:title/members" element={<WorkspaceMember />} />
       </Route>
       <Route path="/" element={<Navigate to="/login" replace />} />
 
