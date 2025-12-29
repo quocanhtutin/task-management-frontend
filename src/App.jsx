@@ -39,7 +39,7 @@ const App = () => {
         <Route path="/workspace/:title/members" element={<WorkspaceMember />} />
       </Route>
       <Route path="/" element={<Navigate to="/login" replace />} />
-
+      </Route>
     </Routes>
   );
 }

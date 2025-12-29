@@ -2,13 +2,15 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import FacebookLogin from '@greatsumini/react-facebook-login';
-import { jwtDecode } from "jwt-decode";
 import axiosClient from '../../utils/axiosConfig';
 import { StoreContext } from '../../context/StoreContext.jsx'
-import axios from 'axios';
 import './Login.css';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const performLogin = async (payload) => {
     setIsLoading(true);
@@ -36,10 +38,6 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
-    else {
-      alert(response.data.message)
-    }
-
   };
 
   const handleLocalLogin = (e) => {

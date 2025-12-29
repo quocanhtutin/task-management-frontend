@@ -1,6 +1,4 @@
-
 import { useState, useEffect } from 'react';
-import WorkspaceHeader from '../../components/WorkspaceHeader/WorkspaceHeader.jsx';
 import CreateBoardPopup from '../../components/CreateBoardPopup/CreateBoardPopup.jsx';
 import CreateWorkspaceModal from '../../components/CreateWorkspaceModal/CreateWorkspaceModal.jsx';
 import WorkspaceMembersModal from '../../components/WorkspaceMembersModal/WorkspaceMembersModal.jsx';
@@ -109,7 +107,6 @@ export default function BoardsPage() {
 
     return (
         <div className="boards-page">
-            <WorkspaceHeader />
             
             <div style={{marginBottom: '20px', textAlign: 'right'}}>
                  <button className="btn-create-ws" onClick={openCreateModal}>+ Tạo Workspace Mới</button>
