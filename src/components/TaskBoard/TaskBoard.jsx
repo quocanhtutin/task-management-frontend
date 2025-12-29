@@ -22,7 +22,8 @@ const TaskBoard = ({
     setCards,
     storeCard,
     storeColumn,
-    updateTitleColumn
+    updateTitleColumn,
+    handleDragEnd
 }) => {
 
 
@@ -138,6 +139,7 @@ const TaskBoard = ({
                     storeCard={storeCard}
                     storeColumn={storeColumn}
                     updateTitleColumn={updateTitleColumn}
+                    handleDragEnd={handleDragEnd}
                 />
             )}
 

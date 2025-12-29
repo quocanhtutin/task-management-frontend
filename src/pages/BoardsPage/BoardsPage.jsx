@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CreateBoardPopup from '../../components/CreateBoardPopup/CreateBoardPopup.jsx';
 import CreateWorkspaceModal from '../../components/CreateWorkspaceModal/CreateWorkspaceModal.jsx';
 import WorkspaceMembersModal from '../../components/WorkspaceMembersModal/WorkspaceMembersModal.jsx';
@@ -6,11 +7,13 @@ import WorkspaceBoardList from '../../components/WorkspaceBoardList/WorkspaceBoa
 import workspaceService from '../../services/workspaceService';
 import boardService from '../../services/boardService';
 import './BoardsPage.css';
-import { Trash2, Edit2, Users, Briefcase } from 'lucide-react';
+import { Trash2, Edit2, Users, Briefcase, Star } from 'lucide-react';
 import { WORKSPACE_TYPES } from '../../components/CreateWorkspaceModal/CreateWorkspaceModal.jsx';
 
 export default function BoardsPage() {
+    const navigate = useNavigate();
     const [workspaces, setWorkspaces] = useState([]);
+    const [starredBoards, setStarredBoards] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     
@@ -20,21 +23,43 @@ export default function BoardsPage() {
 
     const [showCreateBoardPopup, setShowCreateBoardPopup] = useState(false);
     const [activeWorkspaceIdForBoard, setActiveWorkspaceIdForBoard] = useState(null);
-    const fetchWorkspaces = async () => {
-        try {
-            const response = await workspaceService.getAll();
-            const data = response.data.value || response.data || [];
-            setWorkspaces(data);
-        } catch (error) {
-            console.error("Lỗi lấy danh sách Workspace:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     useEffect(() => {
-        fetchWorkspaces();
-    }, []);
+        const loadData = async () => {
+            setIsLoading(true);
+            try {
+                const wsRes = await workspaceService.getAll();
+                const workspacesData = wsRes.data.value || wsRes.data || [];
+                setWorkspaces(workspacesData);
+
+                if (Array.isArray(workspacesData) && workspacesData.length > 0) {
+                    const pinnedPromises = workspacesData.map(ws => 
+                        boardService.getBoards(ws.id || ws.Id, { pinned: true })
+                    );
+                    
+                    const responses = await Promise.all(pinnedPromises);
+                    const allPinnedBoards = responses.flatMap(res => {
+                        const bData = res.data.value || res.data || [];
+                        return Array.isArray(bData) ? bData : [];
+                    });
+
+                    const uniquePinned = allPinnedBoards.filter(b => b.pinned);
+                    
+                    setStarredBoards(uniquePinned);
+                } else {
+                    setStarredBoards([]);
+                }
+
+            } catch (error) {
+                console.error("Lỗi tải dữ liệu:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadData();
+    }, [refreshTrigger]);
+
     const openCreateModal = () => { setSelectedWorkspace(null); setShowCreateWorkspace(true); };
     const openEditModal = (ws) => { setSelectedWorkspace(ws); setShowCreateWorkspace(true); };
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -60,14 +85,16 @@ export default function BoardsPage() {
                 alert("Tạo mới thành công!");
             }
             setShowCreateWorkspace(false);
-            fetchWorkspaces();
+            setRefreshTrigger(prev => prev + 1);
         } catch (error) { console.error(error); alert("Lỗi xảy ra!"); }
     };
 
     const handleDeleteWorkspace = async (id) => {
         if (window.confirm("Xóa Workspace này?")) {
-            try { await workspaceService.delete(id); fetchWorkspaces(); } 
-            catch (error) { alert("Xóa thất bại."); }
+            try { 
+                await workspaceService.delete(id); 
+                setRefreshTrigger(prev => prev + 1); 
+            } catch (error) { alert("Xóa thất bại."); }
         }
     };
 
@@ -103,14 +130,82 @@ export default function BoardsPage() {
         }
     };
 
-    if (isLoading) return <div>Đang tải dữ liệu...</div>;
+    const getBoardStyle = (bg) => {
+        if (!bg) return { background: '#0079bf' };
+        if (bg.startsWith('http')) {
+            return { 
+                backgroundImage: `url(${bg})`, 
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            };
+        }
+        if (bg.includes(',')) {
+            return { background: `linear-gradient(135deg, ${bg})` };
+        }
+        return { background: bg };
+    };
+
+    if (isLoading) return <div className="loading-container">Đang tải dữ liệu...</div>;
 
     return (
         <div className="boards-page">
-            
             <div style={{marginBottom: '20px', textAlign: 'right'}}>
                  <button className="btn-create-ws" onClick={openCreateModal}>+ Tạo Workspace Mới</button>
             </div>
+
+            {starredBoards.length > 0 && (
+                <div className="starred-boards-section" style={{ marginBottom: '40px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', color: '#172b4d' }}>
+                        <Star size={24} fill="#e6c60d" color="#e6c60d" /> 
+                        <h3 style={{ margin: 0, fontWeight: '700', fontSize: '18px' }}>Các bảng đã gắn sao</h3>
+                    </div>
+                    
+                    <div className="board-list-grid" style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
+                        gap: '16px' 
+                    }}>
+                        {starredBoards.map(board => (
+                            <div 
+                                key={board.id} 
+                                className="board-card-item"
+                                onClick={() => navigate(`/board/${board.id}`)}
+                                style={{
+                                    ...getBoardStyle(board.background),
+                                    height: '100px',
+                                    borderRadius: '8px',
+                                    padding: '12px',
+                                    cursor: 'pointer',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    position: 'relative',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.1s',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between'
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.filter = 'brightness(0.9)'}
+                                onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
+                            >
+                                <span style={{ 
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.5)', 
+                                    display:'block', 
+                                    overflow:'hidden', 
+                                    textOverflow:'ellipsis', 
+                                    whiteSpace:'nowrap' 
+                                }}>
+                                    {board.title}
+                                </span>
+                                
+                                <div style={{ alignSelf: 'flex-end' }}>
+                                    <Star size={18} fill="#e6c60d" color="#e6c60d" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {workspaces.length === 0 ? (
                 <div className="empty-state">
