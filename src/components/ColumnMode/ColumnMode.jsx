@@ -15,7 +15,8 @@ const ColumnMode = ({
     addNewList,
     storeCard,
     storeColumn,
-    updateTitleColumn
+    updateTitleColumn,
+    handleDragEnd
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
@@ -89,16 +90,13 @@ const ColumnMode = ({
 
     const onColumnDrop = (e, targetColIndex) => {
         const type = e.dataTransfer.getData("type")
-        if (type !== "column") return   // Không phải column → bỏ qua
+        if (type !== "column") return   
 
-        const fromIndex = e.dataTransfer.getData("colIndex")
-        if (fromIndex === targetColIndex) return
-
-        const updated = [...columns]
-        const [movedCol] = updated.splice(fromIndex, 1)
-        updated.splice(targetColIndex, 0, movedCol)
-
-        setColumns(updated);
+        const fromIndex = parseInt(e.dataTransfer.getData("colIndex"), 10);
+        
+        if (fromIndex !== targetColIndex) {
+            handleDragEnd(fromIndex, targetColIndex);
+        }
     };
 
 

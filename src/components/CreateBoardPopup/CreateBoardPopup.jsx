@@ -27,8 +27,11 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
     ];
     const imageOptions = [
         "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+        "https://images.unsplash.com/photo-1707343843437-caacff5cfa74?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1707343848552-893e05dba6ac?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop"
     ];
 
     const canCreate = title.trim().length > 0;
