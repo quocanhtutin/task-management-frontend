@@ -9,6 +9,10 @@ import axios from 'axios';
 import './Login.css';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const performLogin = async (payload) => {
     setIsLoading(true);
@@ -36,10 +40,6 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
-    else {
-      alert(response.data.message)
-    }
-
   };
 
   const handleLocalLogin = (e) => {

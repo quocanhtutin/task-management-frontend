@@ -1,5 +1,6 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { StoreContext } from '../../context/StoreContext.jsx';
 import WorkspaceHeader from '../../components/WorkspaceHeader/WorkspaceHeader.jsx';
 import CreateBoardPopup from '../../components/CreateBoardPopup/CreateBoardPopup.jsx';
 import CreateWorkspaceModal from '../../components/CreateWorkspaceModal/CreateWorkspaceModal.jsx';
@@ -34,9 +35,12 @@ export default function BoardsPage() {
         }
     };
 
+    const { accessToken } = useContext(StoreContext);
+
     useEffect(() => {
+        if (!accessToken) return;
         fetchWorkspaces();
-    }, []);
+    }, [accessToken]);
     const openCreateModal = () => { setSelectedWorkspace(null); setShowCreateWorkspace(true); };
     const openEditModal = (ws) => { setSelectedWorkspace(ws); setShowCreateWorkspace(true); };
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));

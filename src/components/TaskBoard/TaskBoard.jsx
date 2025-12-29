@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import './TaskBoard.css'
-import { Plus, ChevronDown, EllipsisVertical } from 'lucide-react';
+import { Plus, ChevronDown, EllipsisVertical, Users } from 'lucide-react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import TableMode from '../TableMode/TableMode';
 import ColumnMode from '../ColumnMode/ColumnMode';
+import BoardMembersModal from '../BoardMembersModal/BoardMembersModal.jsx';
 
 const TaskBoard = ({
     setCardDetail,
@@ -22,17 +23,20 @@ const TaskBoard = ({
     setCards,
     storeCard,
     storeColumn,
-    updateTitleColumn
+    updateTitleColumn,
+    boardId,
+    boardTitle
 }) => {
 
 
     const { title } = useParams()
-    const board_title = title
+    const board_title = boardTitle || title
     const [color, setColor] = useState("");
     const [headerColor, setHeaderColor] = useState("")
     const [input, setInput] = useState("")
     const [viewMode, setViewMode] = useState('column')
     const [showViewMenu, setShowViewMenu] = useState(false)
+    const [showMembersModal, setShowMembersModal] = useState(false)
 
 
 
@@ -117,6 +121,9 @@ const TaskBoard = ({
                     <button className="share-btn" onClick={() => setShowSharePopup(true)}>
                         + Chia sẻ
                     </button>
+                    <button className="share-btn" onClick={() => setShowMembersModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <Users size={14} /> Thành viên
+                    </button>
                     <button className='menu-board' onClick={() => setShowMenuBoardPopup(true)}>
                         <EllipsisVertical />
                     </button>
@@ -155,6 +162,10 @@ const TaskBoard = ({
                     input={input}
                     setInput={setInput}
                 />
+            )}
+
+            {showMembersModal && (
+                <BoardMembersModal boardId={boardId} boardName={board_title} onClose={() => setShowMembersModal(false)} />
             )}
 
         </div>

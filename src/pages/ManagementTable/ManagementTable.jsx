@@ -357,6 +357,8 @@ const ManagementTable = () => {
                     storeCard={storeCard}
                     storeColumn={storeColumn}
                     updateTitleColumn={updateTitleColumn}
+                    boardId={boardId}
+                    boardTitle={boardTitle}
                 />
             </div>
 

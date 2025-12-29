@@ -18,14 +18,30 @@ const StoreContextProvider = (props) => {
 
     const url = "https://workflow-0euv.onrender.com"
 
+    const getLocal = (key) => {
+        const v = localStorage.getItem(key);
+        if (!v) return null;
+        const low = String(v).toLowerCase();
+        if (low === 'null' || low === 'undefined') return null;
+        return v;
+    };
+
     useEffect(() => {
         async function loadData() {
-            const savedAccessToken = localStorage.getItem("accessToken");
+            const savedAccessToken = getLocal("accessToken");
             if (savedAccessToken) {
                 setAccessToken(savedAccessToken);
-                setRefreshToken(localStorage.getItem("refreshToken"))
-                setName(localStorage.getItem("name"));
-                setEmail(localStorage.getItem("email"));
+                setRefreshToken(getLocal("refreshToken") || "");
+                setName(getLocal("name") || "");
+                setEmail(getLocal("email") || "");
+            }
+            const savedWorkspace = getLocal("currentWorkspace");
+            if (savedWorkspace) {
+                try {
+                    setCurrentWorkSpace(JSON.parse(savedWorkspace));
+                } catch (e) {
+                    setCurrentWorkSpace({});
+                }
             }
             setIsLoaded(true);
         }
@@ -35,9 +51,14 @@ const StoreContextProvider = (props) => {
     useEffect(() => {
         if (accessToken && accessToken !== "") {
             localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("refreshToken", refreshToken);
-            localStorage.setItem("email", email);
-            localStorage.setItem("name", name);
+            localStorage.setItem("refreshToken", refreshToken || "");
+            localStorage.setItem("email", email || "");
+            localStorage.setItem("name", name || "");
+        } else if (!accessToken) {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("email");
+            localStorage.removeItem("name");
         }
         console.log(accessToken)
     }, [accessToken, refreshToken, name, email]);
