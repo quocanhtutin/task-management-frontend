@@ -1,0 +1,39 @@
+.workspace-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+}
+
+.wh-left{
+    display:flex;
+    gap:12px;
+    align-items:center;
+}
+
+.wh-icon{
+    width:42px;
+    height:42px;
+    background:#0079bf;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:6px;
+}
+
+.wh-title{
+    font-weight:700;
+    font-size:18px;
+}
+
+.wh-sub{
+    font-size:12px;
+    color:#666;
+}
+
+.wh-right .wh-search{
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid #e6e6e6;
+}

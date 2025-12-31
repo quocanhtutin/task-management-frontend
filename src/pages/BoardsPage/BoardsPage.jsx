@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useContext } from 'react';
+import { StoreContext } from '../../context/StoreContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import WorkspaceHeader from '../../components/WorkspaceHeader/WorkspaceHeader.jsx';
 import CreateBoardPopup from '../../components/CreateBoardPopup/CreateBoardPopup.jsx';
 import CreateWorkspaceModal from '../../components/CreateWorkspaceModal/CreateWorkspaceModal.jsx';
 import WorkspaceMembersModal from '../../components/WorkspaceMembersModal/WorkspaceMembersModal.jsx';
@@ -24,7 +27,10 @@ export default function BoardsPage() {
     const [showCreateBoardPopup, setShowCreateBoardPopup] = useState(false);
     const [activeWorkspaceIdForBoard, setActiveWorkspaceIdForBoard] = useState(null);
 
+    const { accessToken } = useContext(StoreContext);
+
     useEffect(() => {
+        if (!accessToken) return;
         const loadData = async () => {
             setIsLoading(true);
             try {
@@ -58,7 +64,7 @@ export default function BoardsPage() {
         };
 
         loadData();
-    }, [refreshTrigger]);
+    }, [accessToken, refreshTrigger]);
 
     const openCreateModal = () => { setSelectedWorkspace(null); setShowCreateWorkspace(true); };
     const openEditModal = (ws) => { setSelectedWorkspace(ws); setShowCreateWorkspace(true); };

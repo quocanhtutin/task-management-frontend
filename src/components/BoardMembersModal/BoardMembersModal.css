@@ -1,0 +1,219 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content.member-modal {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 650px;
+    max-width: 95%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    animation: slideUp 0.3s ease-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #ebecf0;
+    padding-bottom: 16px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #172b4d;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.modal-header button {
+    color: #6b778c;
+    transition: all 0.2s;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.modal-header button:hover {
+    background-color: #ebecf0;
+    color: #172b4d;
+}
+
+.add-member-section {
+    background-color: #f4f5f7;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    border: 1px solid #ebecf0;
+}
+
+.add-member-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #5e6c84;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.add-member-section form {
+    display: flex;
+    gap: 12px;
+}
+
+.add-member-section input,
+.add-member-section select {
+    padding: 10px 12px;
+    border: 2px solid #dfe1e6;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: white;
+}
+
+.add-member-section input:focus,
+.add-member-section select:focus {
+    border-color: #0079bf;
+}
+
+.add-member-section input {
+    flex: 2;
+}
+
+.add-member-section select {
+    flex: 1;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #0079bf;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    min-width: 44px;
+}
+
+.btn-primary:hover {
+    background-color: #026aa7;
+}
+
+.btn-primary:disabled {
+    background-color: #dfe1e6;
+    color: #a5adba;
+    cursor: not-allowed;
+}
+
+.members-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.members-list::-webkit-scrollbar {
+    width: 8px;
+}
+.members-list::-webkit-scrollbar-track {
+    background: #f4f5f7;
+    border-radius: 4px;
+}
+.members-list::-webkit-scrollbar-thumb {
+    background: #bfc4ce;
+    border-radius: 4px;
+}
+.members-list::-webkit-scrollbar-thumb:hover {
+    background: #aeb4c0;
+}
+
+.members-list table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.members-list th {
+    position: sticky;
+    top: 0;
+    background: white;
+    color: #5e6c84;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 2px solid #ebecf0;
+    z-index: 10;
+}
+
+.members-list td {
+    padding: 14px 16px;
+    color: #172b4d;
+    border-bottom: 1px solid #ebecf0;
+    vertical-align: middle;
+}
+
+.members-list tr:last-child td {
+    border-bottom: none;
+}
+
+.members-list tr:hover td {
+    background-color: #fafbfc;
+}
+
+.members-list select {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #dfe1e6;
+    background-color: #f4f5f7;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #172b4d;
+}
+
+.members-list select:hover {
+    background-color: #ebecf0;
+}
+
+.members-list button {
+    opacity: 0.7;
+    transition: all 0.2s;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.members-list button:hover {
+    opacity: 1;
+    background-color: #ffebe6;
+    color: #bf2600 !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
