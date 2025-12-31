@@ -1,80 +1,103 @@
 .man-table-container {
     display: flex;
-    flex-direction: column;
-    height: 100vh; 
+    flex-direction: row;
     width: 100%;
+    min-height: 100vh;
+    height: auto;
     padding-top: 60px;
     box-sizing: border-box;
-    
     position: relative;
-    overflow: hidden; 
-    transition: background-color 0.3s ease; 
+    align-items: stretch;
+}
+
+.board-background-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    transition: background 0.3s ease, background-image 0.3s ease;
 }
 
 .board-top-bar {
+    position: sticky;
+    top: 60px;
+    z-index: 10;
     display: flex;
+    flex-direction: column;
     align-items: flex-start; 
-    justify-content: space-between;
-    padding: 8px 16px;
-    margin-bottom: 10px;
-    margin-top: 10px;
-    
-    background: rgba(0, 0, 0, 0.15); 
-    backdrop-filter: blur(4px);
+    justify-content: flex-start;
+    width: 320px;
+    height: calc(100vh - 60px);
+    flex-shrink: 0; 
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
     gap: 20px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+}
+
+.board-top-bar::-webkit-scrollbar {
+    width: 6px;
+}
+.board-top-bar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
 }
 
 .board-info-edit {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    flex: 1; 
+    gap: 10px; 
+    width: 100%;
+    flex-grow: 1;
 }
 
 .board-title-input {
     background: transparent;
-    border: none;
+    border: 1px solid transparent; 
     color: white;
-    font-size: 20px; 
+    font-size: 24px; 
     font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 8px;
+    border-radius: 6px;
     cursor: pointer;
     outline: none;
     width: 100%;
-    max-width: 600px;
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
+    white-space: normal; 
 }
 
 .board-title-input:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .board-title-input:focus {
     background: white;
     color: #172b4d; 
     cursor: text;
-    box-shadow: inset 0 0 0 2px #0079bf;
+    border-color: #0079bf;
 }
 
 .board-desc-input {
     background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid transparent;
+    color: rgba(255, 255, 255, 0.8);
     font-size: 14px;
     font-weight: 400;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 8px;
+    border-radius: 6px;
     cursor: pointer;
     outline: none;
     width: 100%;
-    max-width: 800px; 
     box-sizing: border-box;
-    margin-top: 2px;
     resize: none;
-    overflow: hidden;
-    min-height: 28px;
-    height: auto;
+    overflow: hidden; 
+    min-height: 60px; 
     white-space: pre-wrap;
     word-break: break-word;
     font-family: inherit;
@@ -82,35 +105,35 @@
 }
 
 .board-desc-input:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .board-desc-input:focus {
     background: white;
     color: #172b4d;
     cursor: text;
-    box-shadow: inset 0 0 0 2px #0079bf;
 }
 
 .board-desc-input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     font-style: italic;
 }
 
 .board-menu-btn {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     border: none;
     color: white;
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 10px 16px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
     font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-    height: 32px;
+    justify-content: center;
+    gap: 8px;
+    width: 100%; 
+    margin-top: 20px;
 }
 
 .board-menu-btn:hover {
@@ -118,17 +141,22 @@
 }
 
 .main-content {
-    flex: 1;
+    position: relative;
+    z-index: 1;
+    
+    flex: 1; 
     display: flex;
-    overflow-x: auto; 
-    overflow-y: hidden;
-    padding: 10px;
+    flex-direction: column; 
+    overflow-x: auto;
+    padding: 20px; 
     gap: 16px;
     align-items: flex-start;
+    min-height: calc(100vh - 60px);
 }
 
 .main-content::-webkit-scrollbar {
     height: 12px;
+    width: 12px;
 }
 
 .main-content::-webkit-scrollbar-thumb {
@@ -140,19 +168,17 @@
     background: rgba(0, 0, 0, 0.1);
 }
 
-.full-board {
-    width: 100%;
-}
+.full-board { width: 100%; }
 
 .toggle-floating-panel {
-    position: absolute;
+    position: fixed;
     right: 0;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 5;
+    z-index: 50;
 }
 
 .toggle-icon {
@@ -175,6 +201,8 @@
 }
 
 .loading-container {
+    position: relative;
+    z-index: 1;
     height: 100vh;
     display: flex;
     align-items: center;

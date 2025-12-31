@@ -2,10 +2,8 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import FacebookLogin from '@greatsumini/react-facebook-login';
-import { jwtDecode } from "jwt-decode";
 import axiosClient from '../../utils/axiosConfig';
 import { StoreContext } from '../../context/StoreContext.jsx'
-import axios from 'axios';
 import './Login.css';
 
 const Login = () => {

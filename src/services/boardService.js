@@ -2,11 +2,12 @@ import axiosClient from '../utils/axiosConfig';
 
 const boardService = {
     getBoards: (workspaceId, params = {}) => {
+        const queryParams = { ...params };
+        if (workspaceId) {
+            queryParams.WorkspaceId = workspaceId;
+        }
         return axiosClient.get('/Board', {
-            params: {
-                WorkspaceId: workspaceId,
-                ...params
-            }
+            params: queryParams
         });
     },
 
@@ -64,6 +65,29 @@ const boardService = {
 
     delete: (boardId) => {
         return axiosClient.delete(`/Board/${boardId}`);
+    },
+
+    updateLabels: (boardId, labelIndices) => {
+        return axiosClient.put(`/Board/${boardId}/Labels`, labelIndices);
+    },
+
+    updateVisibility: (boardId, visibility) => {
+        return axiosClient.put(`/Board/${boardId}/Visibility`, visibility, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    },
+
+    updatePinned: (boardId, isPinned) => {
+        return axiosClient.put(`/Board/${boardId}/Pinned`, isPinned, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    },
+
+    duplicate: (boardId, copyLists, copyCards) => {
+        return axiosClient.post(`/Board/${boardId}/Duplicate`, {
+            copyLists: copyLists,
+            copyCards: copyCards
+        });
     }
 };
 

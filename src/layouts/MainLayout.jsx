@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar/Navbar';
 import Sidebar from '../components/SideBar/SideBar';
@@ -8,6 +7,7 @@ const MainLayout = () => {
   return (
     <div className="app">
       <div className="main-layout">
+        <Navbar />
         <Sidebar />
         <div className="page-content">
           <Outlet />
