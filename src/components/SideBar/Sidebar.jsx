@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 const Sidebar = () => {
     const [showTemplates, setShowTemplates] = useState(false);
     const [activeWorkspace, setActiveWorkspace] = useState(1);
-    const { workSpaces, setWorkSpaces, url, accessToken, setCurrentWorkSpace, selectWorkspace } = useContext(StoreContext)
+    const { workSpaces, setWorkSpaces, url, accessToken, setCurrentWorkSpace, selectWorkspace, currentWorkSpace } = useContext(StoreContext)
     const [showAddWorkspace, setShowAddWorkSpace] = useState(false)
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [showTypePicker, setShowTypePicker] = useState(false);
@@ -108,7 +108,7 @@ const Sidebar = () => {
     return (
         <div className="sidebar">
             <div className="sidebar-options">
-                <NavLink to="/boards" className="sidebar-option">
+                <NavLink to="/main/boards" className="sidebar-option">
                     <Layout size={18} />
                     <p>Bảng</p>
                 </NavLink>
@@ -137,12 +137,19 @@ const Sidebar = () => {
                     <p>Trang chủ</p>
                 </NavLink>
 
-                <NavLink to="/members" className="sidebar-option">
-                    <Users size={18} />
-                    <p>Thành viên</p>
-                </NavLink>
+                {
+                    (() => {
+                        const membersPath = currentWorkSpace && currentWorkSpace.name ? `/workspace/${currentWorkSpace.name}/members` : '/main/boards';
+                        return (
+                            <NavLink to={membersPath} className="sidebar-option">
+                                <Users size={18} />
+                                <p>Thành viên</p>
+                            </NavLink>
+                        )
+                    })()
+                }
 
-                <NavLink to="/settings" className="sidebar-option">
+                <NavLink to="/main/settings" className="sidebar-option">
                     <Settings size={18} />
                     <p>Cài đặt</p>
                 </NavLink>
