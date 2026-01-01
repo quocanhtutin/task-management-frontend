@@ -38,6 +38,14 @@ const listService = {
             }
         );
     },
+
+    archive: (listId) => {
+        return axiosClient.put(`/List/${listId}/Archive`);
+    },
+
+    unarchive: (listId) => {
+        return axiosClient.put(`/List/${listId}/Unarchive`);
+    },
 };
 
 export default listService;
