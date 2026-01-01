@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { StoreContext } from '../../context/StoreContext';
 
 const ProtectedRoute = () => {
-  const isAuthenticated = localStorage.getItem('accessToken');
+  const { accessToken, isLoaded } = useContext(StoreContext);
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  if (!isLoaded) {
+    return <div className="loading-container">Đang tải dữ liệu...</div>; 
+  }
+
+  return accessToken ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

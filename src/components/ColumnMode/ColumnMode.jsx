@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './ColumnMode.css'
-import { Archive, PenSquareIcon } from 'lucide-react'
+import { Archive, PenSquareIcon, ArrowRightCircle } from 'lucide-react'
 
 const ColumnMode = ({
     columns,
@@ -16,7 +16,8 @@ const ColumnMode = ({
     storeCard,
     storeColumn,
     updateTitleColumn,
-    handleDragEnd
+    handleDragEnd,
+    onMoveList
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
@@ -37,10 +38,7 @@ const ColumnMode = ({
             setTitleError("Tên cột không được để trống");
             return;
         }
-
-        // gọi hàm cha (bạn tự implement trong parent)
         updateTitleColumn(col.id, columnTitleInput.trim());
-
         setEditingColId(null);
         setTitleError("");
     };
@@ -56,12 +54,11 @@ const ColumnMode = ({
         e.dataTransfer.setData("colIndex", colIndex);
     };
 
-
     const allowDrop = (e) => e.preventDefault();
 
     const onDrop = (e, toCol) => {
         const type = e.dataTransfer.getData("type");
-        if (type !== "card") return; //không phải card bỏ qua
+        if (type !== "card") return; 
         const fromCol = e.dataTransfer.getData('fromCol');
         const fromIndex = e.dataTransfer.getData('fromIndex');
 
@@ -76,7 +73,7 @@ const ColumnMode = ({
 
     const onDropBeforeCard = (e, beforeCard, atCol) => {
         e.preventDefault();
-        e.stopPropagation();  // NGĂN column.onDrop chạy
+        e.stopPropagation();
         const fromCol = e.dataTransfer.getData('fromCol');
         const fromIndex = e.dataTransfer.getData('fromIndex');
 
@@ -99,7 +96,6 @@ const ColumnMode = ({
         }
     };
 
-
     const addColumn = () => {
         const title = newColumn;
         addNewList(title)
@@ -113,7 +109,6 @@ const ColumnMode = ({
                 <div
                     key={i}
                     className="board-column"
-                    // onDrop={(e) => onDrop(e, i)}
                     onDrop={(e) => {
                         if (e.dataTransfer.getData("type") === "column")
                             onColumnDrop(e, i);
@@ -152,6 +147,14 @@ const ColumnMode = ({
                                 {col.title}
                             </h3>
                             <div className='column-tool'>
+                                <ArrowRightCircle 
+                                    className="edit-column-name-btn"
+                                    size={20}
+                                    style={{marginRight: '5px'}}
+                                    onClick={() => onMoveList && onMoveList(col.id)}
+                                    title="Di chuyển sang bảng khác"
+                                />
+
                                 <PenSquareIcon
                                     className="edit-column-name-btn"
                                     size={20}
@@ -166,7 +169,6 @@ const ColumnMode = ({
                             </div></div>
                     )}
 
-
                     <div className="card-list">
                         {col.cards.map((card, j) => (
                             <div
@@ -174,7 +176,7 @@ const ColumnMode = ({
                                 className="card-item"
                                 draggable
                                 onDragStart={(e) => {
-                                    e.stopPropagation();   // Quan trọng, chặn bubble
+                                    e.stopPropagation();
                                     onDragStart(e, i, j);
                                 }}
                                 onDrop={(e) => {
@@ -185,12 +187,10 @@ const ColumnMode = ({
                                         onDropBeforeCard(e, j, i)
                                 }}
                                 onDragOver={allowDrop}
-                            // style={card.label != [] ? { backgroundColor: card.label[0], color: "white" } : { background: "white" }}
                             >
                                 <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.id, card.id, "check", e.target.checked)} />
                                 <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
                                 {card.check && <Archive size={20} onClick={() =>
-                                    // updateCardInColumn(col.title, card.id, "stored", true)
                                     storeCard(card)}
                                 />}
 

@@ -8,7 +8,8 @@ import CardDetailPopup from '../../components/CardDetailPopup/CardDetailPopup.js
 import SharingPopup from '../../components/SharingPopup/SharingPopup.jsx'
 import MenuBoardPopup from '../../components/MenuBoardPopup/MenuBoardPopup.jsx'
 import boardService from '../../services/boardService'
-import listService from '../../services/listService';
+import listService from '../../services/listService'
+import MoveListPopup from '../../components/MoveListPopup/MoveListPopup'
 
 export const BOARD_LABEL_COLORS = [
     "#4BCE97", "#E2B203", "#FAA53D", "#F87462", "#9F8FEF", "#579DFF", 
@@ -33,6 +34,8 @@ const ManagementTable = () => {
     const [showMenuBoardPopup, setShowMenuBoardPopup] = useState(false)
     const [showInbox, setShowInbox] = useState(false);
     const [showPlanner, setShowPlanner] = useState(false);
+    const [showMoveListPopup, setShowMoveListPopup] = useState(false);
+    const [selectedListToMove, setSelectedListToMove] = useState(null);
 
     const [columns, setColumns] = useState([]);
     const [cards, setCards] = useState([])
@@ -186,7 +189,7 @@ const ManagementTable = () => {
             console.error("Lỗi xóa bảng:", error);
             alert("Xóa bảng thất bại. Vui lòng thử lại sau.");
         }
-    };
+    }
 
     const handleUpdateBackground = async (newColor) => {
         setRawColor(newColor);
@@ -197,11 +200,21 @@ const ManagementTable = () => {
         }
     }
 
+    const handleOpenMoveList = (listId) => {
+        setSelectedListToMove(listId);
+        setShowMoveListPopup(true);
+    }
+
+    const handleMoveListSuccess = (movedListId) => {
+        setColumns(prev => prev.filter(col => col.id !== movedListId));
+        alert("Đã di chuyển danh sách sang bảng khác thành công!");
+    }
+
     const updateCardInColumn = (columnId, cardId, field, value) => {
         setColumns(prev => prev.map(col => col.id === columnId ? {
             ...col, cards: col.cards.map(card => card.id === cardId ? { ...card, [field]: value } : card)
         } : col));
-    };
+    }
 
     const storeCard = (card) => {
         const now = new Date().toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" });
@@ -419,6 +432,16 @@ const ManagementTable = () => {
                 />
             }
 
+            {showMoveListPopup && (
+                <MoveListPopup
+                    onClose={() => setShowMoveListPopup(false)}
+                    listId={selectedListToMove}
+                    currentBoardId={boardId}
+                    onMoveSuccess={handleMoveListSuccess}
+                    workspaceId={boardData?.workspaceId}
+                />
+            )}
+
             <div className="board-top-bar">
                 <div className="board-info-edit">
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px', width: '100%'}}>
@@ -495,6 +518,7 @@ const ManagementTable = () => {
                     boardTitle={boardTitle}
                     boardLabelColors={BOARD_LABEL_COLORS}
                     handleDragEnd={handleMoveList}
+                    onMoveList={handleOpenMoveList}
                 />
             </div>
 
