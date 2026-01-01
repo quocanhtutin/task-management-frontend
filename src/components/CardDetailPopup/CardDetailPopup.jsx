@@ -4,7 +4,7 @@ import { ChevronDown, X, Pencil, PencilOff, Archive } from 'lucide-react';
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 import ChecklistSection from "../CheckList/ChecklistSection";
 import { DragDropContext } from "@hello-pangea/dnd";
-import { label } from "framer-motion/client";
+import cardService from "../../services/cardService";
 
 const MOCK_USERS = [
     { id: 1, name: "Nguyễn Văn A", avatarColor: "#F44336" },
@@ -33,27 +33,23 @@ export default function CardDetailPopup({
     addLabel,
     updateLabel
 }) {
+    const [loading, setLoading] = useState(false);
     const [completed, setCompleted] = useState(card.check || false);
     const [title, setTitle] = useState(card.title);
     const [editTitle, setEditTitle] = useState(false)
 
     // Column
     const active_index = columns.findIndex(col => col.id === card.columnId)
-    const [column, setColumn] = useState(columns[active_index].title)
+    const [column, setColumn] = useState(active_index !== -1 ? columns[active_index].title : "")
     const [showColumns, setShowColumns] = useState(false)
 
     // Labels
-    // const [label, setLabel] = useState(card.label || null);
     const [showLabelSelect, setShowLabelSelect] = useState(false);
-
     const [selectedLabels, setSelectedLabels] = useState(card.label || []);
-
     const [showAddLabel, setShowAddLabel] = useState(false);
     const [editingLabel, setEditingLabel] = useState(null);
-
     const [newLabelTitle, setNewLabelTitle] = useState("");
     const [newLabelColor, setNewLabelColor] = useState("");
-
 
     // Due date
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -72,16 +68,49 @@ export default function CardDetailPopup({
     // Description
     const [desc, setDesc] = useState(card.description || "");
     const [isEditingDesc, setIsEditingDesc] = useState(false);
-    const descRef = useRef(null);
 
     // Comments
     const [commentText, setCommentText] = useState("");
     const [comments, setComments] = useState(card.comments || []);
     const [editingCommentId, setEditingCommentId] = useState(null);
 
-    //task
+    // Checklists
     const [checklists, setChecklists] = useState(card.checklists || []);
 
+    useEffect(() => {
+        if (!card?.id) return;
+
+        const fetchCardDetail = async () => {
+            setLoading(true);
+            try {
+                const response = await cardService.getDetail(card.id);
+                const data = response.data.value || response.data;
+
+                setTitle(data.title || card.title);
+                setDesc(data.description || "");
+                setCompleted(data.isCompleted ?? data.check ?? false); 
+                setDeadline(data.deadline || null);
+                
+                if (data.deadline) {
+                    setDateInput(data.deadline.split("T")[0]);
+                    setTimeInput(data.deadline.split("T")[1]?.slice(0, 5) || "");
+                }
+
+                if (data.members) setMembers(data.members);
+                if (data.label) setSelectedLabels(data.label); // Giả sử API trả về mảng label IDs
+                if (data.checklists) setChecklists(data.checklists);
+                if (data.comments) setComments(data.comments);
+                if (data.reminder) setReminder(data.reminder);
+
+            } catch (error) {
+                console.error("Lỗi tải chi tiết card:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCardDetail();
+    }, [card.id]);
 
     useEffect(() => {
         function onDocClick(e) {
@@ -106,7 +135,6 @@ export default function CardDetailPopup({
         return () => document.removeEventListener("mousedown", onDocClick);
     }, []);
 
-
     const toggleMember = (user) => {
         const exists = members.find(m => m.id === user.id);
         if (exists) setMembers(members.filter(m => m.id !== user.id));
@@ -120,7 +148,6 @@ export default function CardDetailPopup({
                 : [...prev, labelId]
         );
     };
-
 
     const saveDate = () => {
         if (!dateInput) return;
@@ -152,15 +179,10 @@ export default function CardDetailPopup({
         setComments(comments.map(c => c.id === id ? { ...c, text: newText } : c));
         setEditingCommentId(null);
     }
-
-    // useEffect(() => {
-    //     updateCardInColumn(card.columnId, card.id, "label", label)
-    // }, [label])
-
+    
     useEffect(() => {
         updateCardInColumn(card.columnId, card.id, "label", selectedLabels);
     }, [selectedLabels]);
-
 
     useEffect(() => {
         updateCardInColumn(card.columnId, card.id, "deadline", deadline)
@@ -186,6 +208,7 @@ export default function CardDetailPopup({
     const handleChangeColumn = (toCol) => {
         const updated = [...columns]
         const cardIndex = updated[active_index].cards.findIndex(c => c.id === card.id)
+        if (cardIndex === -1) return;
         const [movedCard] = updated[active_index].cards.splice(cardIndex, 1);
         updated[toCol].cards.push({ ...movedCard, columnId: updated[toCol].id });
         setColumns(updated)
@@ -226,24 +249,43 @@ export default function CardDetailPopup({
 
     const saveLabel = () => {
         if (!newLabelColor) return;
-
         if (editingLabel) {
             updateLabel(editingLabel.id, newLabelColor, newLabelTitle)
         } else {
             addLabel(newLabelColor, newLabelTitle)
         }
-
         setShowAddLabel(false);
         setEditingLabel(null);
         setNewLabelTitle("");
         setNewLabelColor("");
     };
 
-
-
     return (
         <div className="cdp-overlay">
             <div className="cdp-main">
+                {loading && (
+                    <div style={{
+                        height: '3px',
+                        width: '100%',
+                        background: 'linear-gradient(90deg, #0079bf, #5aac44)',
+                        backgroundSize: '200% 100%',
+                        animation: 'loadingGradient 1.5s infinite',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        borderTopLeftRadius: '8px',
+                        borderTopRightRadius: '8px',
+                        zIndex: 10
+                    }}>
+                        <style>{`
+                            @keyframes loadingGradient {
+                                0% { background-position: 100% 0; }
+                                100% { background-position: -100% 0; }
+                            }
+                        `}</style>
+                    </div>
+                )}
+
                 <div className="cdp-top">
                     <h2>{column}</h2>
                     <ChevronDown size={14} className="down-icon" onClick={() => setShowColumns(true)} />

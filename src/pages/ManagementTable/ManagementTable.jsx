@@ -9,7 +9,8 @@ import SharingPopup from '../../components/SharingPopup/SharingPopup.jsx'
 import MenuBoardPopup from '../../components/MenuBoardPopup/MenuBoardPopup.jsx'
 import MoveListPopup from '../../components/MoveListPopup/MoveListPopup.jsx'
 import boardService from '../../services/boardService'
-import listService from '../../services/listService';
+import listService from '../../services/listService'
+import cardService from '../../services/cardService'
 
 export const BOARD_LABEL_COLORS = [
     "#4BCE97", "#E2B203", "#FAA53D", "#F87462", "#9F8FEF", "#579DFF", 
@@ -284,14 +285,37 @@ const ManagementTable = () => {
         try { await listService.updatePosition(movedColumn.id, toIndex); } catch (e) { console.error(e); }
     }
 
-    const addCard = (col, cardTitle) => {
-        if (cardTitle.trim()) {
-            const updated = [...columns];
-            updated[col].cards.push({
-                id: crypto.randomUUID(), title: cardTitle, columnId: updated[col].id,
-                label: null, members: [], deadline: null, check: false, description: null, edit: false, storedDate: null
+    const addCard = async (colIndex, cardTitle) => {
+        if (!cardTitle.trim()) return;
+
+        const listId = columns[colIndex].id;
+
+        try {
+            const response = await cardService.create({ 
+                listId: listId, 
+                title: cardTitle 
             });
-            setColumns(updated);
+
+            const newCardApi = response.data.value || response.data;
+            const updatedColumns = [...columns];
+            updatedColumns[colIndex].cards.push({
+                id: newCardApi.id,
+                title: newCardApi.title,
+                columnId: listId,
+                label: newCardApi.label || null,
+                members: newCardApi.members || [],
+                deadline: newCardApi.deadline || null,
+                check: newCardApi.isCompleted || false,
+                description: newCardApi.description || "",
+                edit: false,
+                storedDate: null
+            });
+            
+            setColumns(updatedColumns);
+
+        } catch (error) {
+            console.error("Lỗi khi tạo thẻ:", error);
+            alert("Không thể tạo thẻ mới, vui lòng thử lại!");
         }
     }
 
@@ -395,7 +419,7 @@ const ManagementTable = () => {
                 />
             }
 
-            <div className="board-top-bar">
+            {/* <div className="board-top-bar">
                 <div className="board-info-edit">
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px', width: '100%'}}>
                         <input 
@@ -434,7 +458,7 @@ const ManagementTable = () => {
                 <button className="board-menu-btn" onClick={() => setShowMenuBoardPopup(true)}>
                     ... Menu
                 </button>
-            </div>
+            </div> */}
 
             <div className={`main-content ${boardWide}`}>
                 {showInbox && <Inbox onClose={() => setShowInbox(false)} />}
