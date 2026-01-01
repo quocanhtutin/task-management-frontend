@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { StoreContext } from '../../context/StoreContext';
 
 const PublicRoute = () => {
-  const isAuthenticated = localStorage.getItem('accessToken');
+  const { accessToken, isLoaded } = useContext(StoreContext);
 
-  return isAuthenticated ? <Navigate to="/main/boards" replace /> : <Outlet />;
+  if (!isLoaded) {
+    return null;
+  }
+
+  return accessToken ? <Navigate to="/main/boards" replace /> : <Outlet />;
 };
 
 export default PublicRoute;

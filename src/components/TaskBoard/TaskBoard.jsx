@@ -26,7 +26,8 @@ const TaskBoard = ({
     updateTitleColumn,
     boardId,
     boardTitle,
-    handleDragEnd
+    handleDragEnd,
+    onMoveList
 }) => {
 
 
@@ -147,6 +148,7 @@ const TaskBoard = ({
                     storeColumn={storeColumn}
                     updateTitleColumn={updateTitleColumn}
                     handleDragEnd={handleDragEnd}
+                    onMoveList={onMoveList}
                 />
             )}
 

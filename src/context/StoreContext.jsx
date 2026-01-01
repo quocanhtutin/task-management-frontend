@@ -97,11 +97,12 @@ const StoreContextProvider = (props) => {
         accessToken,
         currentWorkSpace,
         setCurrentWorkSpace,
-        selectWorkspace
+        selectWorkspace,
+        isLoaded
     }
 
     // if (!isLoaded) {
-    //     return <div>Loading...</div>; // chờ localStorage load xong
+    //     return <div>Loading...</div>;
     // }
 
     return (

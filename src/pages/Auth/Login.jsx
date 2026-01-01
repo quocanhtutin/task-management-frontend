@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import FacebookLogin from '@greatsumini/react-facebook-login';
 import axiosClient from '../../utils/axiosConfig';
-import { StoreContext } from '../../context/StoreContext.jsx'
+import { StoreContext } from '../../context/StoreContext.jsx';
 import './Login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const { setAccessToken, setRefreshToken, setName, setEmail } = useContext(StoreContext);
+  const [emailInput, setEmailInput] = useState(''); 
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,11 +18,15 @@ const Login = () => {
     try {
       const response = await axiosClient.post('/Auth/Login', payload);
       
-      const { accessToken, refreshToken, provider } = response.data.value || response.data; 
+      const { accessToken, refreshToken, provider, name, email } = response.data.value || response.data; 
 
       if (accessToken) {
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        setAccessToken(accessToken);
+        setRefreshToken(refreshToken);
+        
+        if (name) setName(name);
+        if (email) setEmail(email);
+
         localStorage.setItem('provider', provider || payload.type);
         navigate('/main/boards'); 
       } else {
@@ -44,7 +49,7 @@ const Login = () => {
     e.preventDefault();
     const payload = {
         type: "Local",
-        email: email,
+        email: emailInput,
         password: password,
         token: ""
     };
@@ -86,8 +91,8 @@ const Login = () => {
             <label>Email</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
               required
               disabled={isLoading}
               placeholder="name@example.com"

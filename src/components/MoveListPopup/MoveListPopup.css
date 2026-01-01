@@ -1,0 +1,134 @@
+/* MoveListPopup.css */
+.move-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.move-popup-container {
+    width: 400px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.move-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.move-popup-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #172b4d;
+}
+
+.move-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b778c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.move-close-btn:hover {
+    color: #172b4d;
+}
+
+.move-popup-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.move-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #172b4d;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.move-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #dfe1e6;
+    font-size: 14px;
+    background-color: #fafbfc;
+    color: #172b4d;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.move-select:focus {
+    border-color: #0052cc;
+    background-color: #fff;
+}
+
+.move-select:disabled {
+    background-color: #f4f5f7;
+    cursor: not-allowed;
+    color: #a5adba;
+}
+
+.move-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.move-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+}
+
+.move-btn.cancel {
+    background: #f4f5f7;
+    color: #172b4d;
+}
+
+.move-btn.cancel:hover {
+    background: #e4e6ea;
+}
+
+.move-btn.primary {
+    background: #0052cc;
+    color: #fff;
+}
+
+.move-btn.primary:hover {
+    background: #0065ff;
+}
+
+.move-btn.primary:disabled {
+    background: #dfe1e6;
+    color: #a5adba;
+    cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

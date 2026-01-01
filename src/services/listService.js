@@ -29,6 +29,15 @@ const listService = {
         );
     },
     
+    move: (listId, targetBoardId) => {
+        return axiosClient.put(
+            `/List/${listId}/Move`,
+            { targetBoardId },
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+    },
 };
 
 export default listService;
