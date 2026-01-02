@@ -26,7 +26,8 @@ const ManagementTable = () => {
     const [boardData, setBoardData] = useState(null);
     const [boardTitle, setBoardTitle] = useState("");
     const [boardDes, setBoardDes] = useState("");
-
+    const [undoState, setUndoState] = useState(null);
+    
     const descTextareaRef = useRef(null);
 
     const [showCardDetailPopup, setShowCardDetailPopup] = useState(false)
@@ -184,6 +185,77 @@ const ManagementTable = () => {
         alert("Đã di chuyển danh sách sang bảng khác thành công!");
     }
 
+    const handleSoftDeleteCard = async (cardToDelete) => {
+        setShowCardDetailPopup(false);
+
+        const originalColumns = [...columns];
+        const colIndex = columns.findIndex(c => c.id === cardToDelete.columnId);
+        if (colIndex === -1) return;
+
+        const newColumns = [...columns];
+        newColumns[colIndex].cards = newColumns[colIndex].cards.filter(c => c.id !== cardToDelete.id);
+        setColumns(newColumns);
+
+        try {
+            await cardService.delete(cardToDelete.id);
+        } catch (error) {
+            console.error("Lỗi xóa card:", error);
+            setColumns(originalColumns);
+            alert("Có lỗi xảy ra khi xóa thẻ!");
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
+            setUndoState(null);
+        }, 15000);
+
+        setUndoState({
+            card: cardToDelete,
+            columnId: cardToDelete.columnId,
+            timeoutId: timeoutId
+        });
+    };
+
+    const handleUndoDelete = async () => {
+        if (!undoState) return;
+
+        clearTimeout(undoState.timeoutId);
+
+        const { card } = undoState;
+
+        try {
+            await cardService.restore(card.id);
+            
+            setColumns(prev => {
+                const newCols = prev.map(col => ({
+                    ...col,
+                    cards: [...col.cards] 
+                }));
+
+                const colIdx = newCols.findIndex(c => c.id === card.columnId);
+                
+                if (colIdx !== -1) {
+                    const isExist = newCols[colIdx].cards.some(c => c.id === card.id);
+                    
+                    if (!isExist) {
+                        newCols[colIdx].cards.push(card);
+                    }
+                }
+                return newCols;
+            });
+
+            setUndoState(null);
+        } catch (error) {
+            console.error("Lỗi khôi phục thẻ:", error);
+            alert("Không thể khôi phục thẻ!");
+        }
+    };
+
+    const handleConfirmDelete = () => {
+        if (undoState?.timeoutId) clearTimeout(undoState.timeoutId);
+        setUndoState(null); 
+    };
+
     const storeCard = (card) => {
         const now = new Date().toLocaleString("vi-VN");
         const updated = [...columns]
@@ -319,14 +391,14 @@ const ManagementTable = () => {
     const handleUpdateVisibility = async (newV) => {
         setVisibility(newV);
         try { await boardService.updateVisibility(boardId, newV); } catch (e) { console.error(e); }
-    };
+    }
 
     const handleTogglePinned = async () => {
         const newStatus = !isStarred;
         setIsStarred(newStatus);
         try { await boardService.updatePinned(boardId, newStatus); }
         catch (e) { setIsStarred(!newStatus); }
-    };
+    }
 
     const handleDuplicateBoard = async (copyLists, copyCards) => {
         try {
@@ -338,6 +410,21 @@ const ManagementTable = () => {
                 window.location.reload();
             }
         } catch (error) { alert("Sao chép thất bại!"); }
+    }
+
+    const handleDeleteCardPermanent = async (cardId) => {
+        if (!window.confirm("Bạn có chắc chắn muốn xóa vĩnh viễn thẻ này không? Hành động này không thể hoàn tác.")) {
+            return;
+        }
+
+        try {
+            await cardService.delete(cardId);
+            setStoredCards(prev => prev.filter(card => card.id !== cardId));
+
+        } catch (error) {
+            console.error("Lỗi xóa thẻ:", error);
+            alert("Xóa thẻ thất bại, vui lòng thử lại!");
+        }
     }
 
     const boardWide = (!showInbox && !showPlanner) ? "full-board" : (!showInbox || !showPlanner) ? "wide-board" : "normal-board"
@@ -369,6 +456,8 @@ const ManagementTable = () => {
                     setColumns={setColumns}
                     storeCard={storeCard}
                     boardLabelColors={BOARD_LABEL_COLORS}
+                    onSoftDelete={handleSoftDeleteCard}
+                    activeLabelIndices={activeLabelIndices}
                 />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
 
@@ -397,6 +486,7 @@ const ManagementTable = () => {
                     onTogglePinned={handleTogglePinned}
                     onDuplicateBoard={handleDuplicateBoard}
                     onDeleteBoard={handleDeleteBoard}
+                    onDeleteCard={handleDeleteCardPermanent}
                 />
             }
 
@@ -461,6 +551,7 @@ const ManagementTable = () => {
                     isStarred={isStarred}
                     setIsStarred={setIsStarred}
                     storeCard={storeCard}
+                    onSoftDelete={handleSoftDeleteCard}
                     storeColumn={storeColumn}
                     updateTitleColumn={updateTitleColumn}
                     boardId={boardId}
@@ -470,6 +561,30 @@ const ManagementTable = () => {
                     onMoveList={handleOpenMoveList}
                 />
             </div>
+
+            {undoState && (
+                <div className="undo-toast-overlay">
+                    <div className="undo-toast-content">
+                        <span>Thẻ <strong>{undoState.card.title}</strong> đã bị xóa.</span>
+                        <div className="undo-actions">
+                            <span style={{marginRight: '10px', fontSize: '14px'}}>Bạn có chắc chắn muốn xóa thẻ không?</span>
+                            <button 
+                                className="btn-undo-confirm" 
+                                onClick={handleConfirmDelete}
+                            >
+                                Chắc chắn
+                            </button>
+                            <button 
+                                className="btn-undo-cancel" 
+                                onClick={handleUndoDelete}
+                            >
+                                Khôi phục
+                            </button>
+                        </div>
+                        <div className="undo-progress-bar"></div>
+                    </div>
+                </div>
+            )}
 
             <div className="toggle-floating-panel">
                 {!showInbox && <div className="toggle-icon" onClick={() => setShowInbox(true)}>Inbox</div>}

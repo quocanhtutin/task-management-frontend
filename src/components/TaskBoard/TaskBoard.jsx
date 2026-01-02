@@ -22,6 +22,7 @@ const TaskBoard = ({
     cards,
     setCards,
     storeCard,
+    onSoftDelete,
     storeColumn,
     updateTitleColumn,
     boardId,
@@ -227,6 +228,7 @@ const TaskBoard = ({
                     updateTitleColumn={updateTitleColumn}
                     handleDragEnd={handleDragEnd}
                     onMoveList={onMoveList}
+                    onSoftDelete={onSoftDelete}
                 />
             )}
 

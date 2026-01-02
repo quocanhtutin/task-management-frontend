@@ -49,7 +49,8 @@ const MenuBoardPopup = ({
     isStarred,
     onTogglePinned,
     onDuplicateBoard,
-    onDeleteBoard
+    onDeleteBoard,
+    onDeleteCard,
 }) => {
     const [tab, setTab] = useState("menu");
     const [backgroundType, setBackgroundType] = useState("gradient");
@@ -62,22 +63,22 @@ const MenuBoardPopup = ({
         "#1976D2", "#e5fc51ff", "#ee3dd9ff", "#241f61ff",
     ];
     const imageOptions = [
-        "https://images.unsplash.com/photo-1697464082987-1422c5c56c8f?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
         "https://images.unsplash.com/photo-1707343843437-caacff5cfa74?q=80&w=1000&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1707343848552-893e05dba6ac?q=80&w=1000&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop"
     ];
 
     const [isEditingDesc, setIsEditingDesc] = useState(false);
     const [desc, setDesc] = useState(boardDes);
-    const [storedCategory, setStoredCategory] = useState("card");
     const [showVisibility, setShowVisibility] = useState(false);
     const [copyLists, setCopyLists] = useState(true);
     const [copyCards, setCopyCards] = useState(true);
 
     useEffect(() => {
-        if (tab === "achieve" && storedCategory === "list" && boardId) {
+        if (tab === "achieve" && boardId) {
             const fetchArchivedLists = async () => {
                 try {
                     const response = await listService.getLists(boardId);
@@ -101,7 +102,7 @@ const MenuBoardPopup = ({
 
             fetchArchivedLists();
         }
-    }, [tab, storedCategory, boardId]);
+    }, [tab, boardId]);
 
     return (
         <div className="menu-overlay" onClick={onClose}>
@@ -141,21 +142,8 @@ const MenuBoardPopup = ({
                             <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
 
-                        <div className="store-cat">
-                            <button onClick={() => setStoredCategory("card")} className={storedCategory === "card" ? "active-tab" : "tab"}>Thẻ nhiệm vụ</button>
-                            <button onClick={() => setStoredCategory("list")} className={storedCategory === "list" ? "active-tab" : "tab"}>Danh sách</button>
-                        </div>
-
                         <div className="store">
-                            {storedCategory === "card" && storedCards.map((card, i) =>
-                                <div key={i} className="stored-card-item" style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}>
-                                    <input type="checkbox" checked={card.check} readOnly />
-                                    <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true), onClose() }}>{card.title}</p>
-                                    <ArchiveX className="activate-btn" size={20} onClick={() => activateCard(i)} title="Gửi lại vào bảng" />
-                                    <Trash2 className="delete-btn" size={20} title="Xóa" />
-                                </div>
-                            )}
-                            {storedCategory === "list" && storedColumns.map((col, i) =>
+                            {storedColumns.map((col, i) => (
                                 <div key={i} className="stored-column-item">
                                     <p style={{fontWeight: 500}}>{col.title}</p>
                                     <div className="stored-actions">
@@ -168,13 +156,12 @@ const MenuBoardPopup = ({
                                         />
                                     </div>
                                 </div>
-                            )}
+                            ))}
                             
-                            {storedCategory === "list" && storedColumns.length === 0 && (
-                                <div style={{textAlign: 'center', color: '#5e6c84', marginTop: '20px'}}>Không có danh sách nào được lưu trữ.</div>
-                            )}
-                             {storedCategory === "card" && storedCards.length === 0 && (
-                                <div style={{textAlign: 'center', color: '#5e6c84', marginTop: '20px'}}>Không có thẻ nào được lưu trữ.</div>
+                            {storedColumns.length === 0 && (
+                                <div style={{textAlign: 'center', color: '#5e6c84', marginTop: '20px'}}>
+                                    Không có danh sách nào được lưu trữ.
+                                </div>
                             )}
                         </div>
                     </div>

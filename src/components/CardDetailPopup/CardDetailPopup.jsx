@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./CardDetailPopup.css";
-import { ChevronDown, X, Pencil, PencilOff, Archive } from 'lucide-react';
+import { ChevronDown, X, Pencil, PencilOff, Trash2 } from 'lucide-react'; 
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 import ChecklistSection from "../CheckList/ChecklistSection";
 import { DragDropContext } from "@hello-pangea/dnd";
@@ -13,25 +13,28 @@ const MOCK_USERS = [
     { id: 4, name: "Phạm D", avatarColor: "#4CAF50" },
 ];
 
-const LABEL_COLORS = [
-    "#BAF3DB", "#F8E6A0", "#FFE2A8", "#FFD5D2", "#EBD9FF",
-    "#4BCE97", "#E2B203", "#FF9F1A", "#FF7452", "#C77DFF",
-    "#1F845A", "#946F00", "#C25100", "#C9372C", "#8F46C1",
-    "#D6E4FF", "#C6EDFB", "#D3F1A7", "#FDD0EC", "#DFE1E6",
-    "#6B9EFF", "#6CC3E0", "#94C748", "#E774BB", "#8C8F97",
-    "#1D6CE0", "#227D9B", "#5B7F24", "#A64D79", "#6B6E76"
-]
+function CommentEditor({ initial, onSave, onCancel }) {
+    const [val, setVal] = useState(initial);
+    return (
+        <div>
+            <AutoResizeTextarea value={val} onChange={(e) => setVal(e.target.value)} ></AutoResizeTextarea>
+            <div className="desc-actions">
+                <button onClick={onCancel} className="btn">Hủy</button>
+                <button onClick={() => onSave(val)} className="btn primary">Lưu</button>
+            </div>
+        </div>
+    );
+}
 
 export default function CardDetailPopup({
     card = {},
     onClose,
+    onSoftDelete,
     updateCardInColumn,
     columns,
     setColumns,
-    labels,
-    setLabels,
-    addLabel,
-    updateLabel
+    boardLabelColors = [],
+    activeLabelIndices = [],
 }) {
     const [loading, setLoading] = useState(false);
     const [completed, setCompleted] = useState(card.check || false);
@@ -45,18 +48,15 @@ export default function CardDetailPopup({
 
     // Labels
     const [showLabelSelect, setShowLabelSelect] = useState(false);
-    const [selectedLabels, setSelectedLabels] = useState(card.label || []);
-    const [showAddLabel, setShowAddLabel] = useState(false);
-    const [editingLabel, setEditingLabel] = useState(null);
-    const [newLabelTitle, setNewLabelTitle] = useState("");
-    const [newLabelColor, setNewLabelColor] = useState("");
+    const [selectedLabels, setSelectedLabels] = useState(Array.isArray(card.label) ? card.label : []);
 
-    // Due date
+    // Due date & Start date
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [startDate, setStartDate] = useState(null);
     const [deadline, setDeadline] = useState(card.deadline || null);
     const [dateInput, setDateInput] = useState(() => (card.deadline ? card.deadline.split("T")[0] : ""));
     const [timeInput, setTimeInput] = useState(() => (card.deadline ? card.deadline.split("T")[1].slice(0, 5) : ""));
-    const [reminder, setReminder] = useState(card.reminder || "none");
+    const [reminder, setReminder] = useState("none");
 
     // Members
     const [showMemberSearch, setShowMemberSearch] = useState(false);
@@ -88,19 +88,35 @@ export default function CardDetailPopup({
 
                 setTitle(data.title || card.title);
                 setDesc(data.description || "");
-                setCompleted(data.isCompleted ?? data.check ?? false); 
-                setDeadline(data.deadline || null);
+                setCompleted(data.isCompleted ?? data.check ?? false);
                 
-                if (data.deadline) {
-                    setDateInput(data.deadline.split("T")[0]);
-                    setTimeInput(data.deadline.split("T")[1]?.slice(0, 5) || "");
+                if (Array.isArray(data.label)) {
+                    setSelectedLabels(data.label);
+                } else {
+                    setSelectedLabels([]);
+                }
+
+                setStartDate(data.startDate || null); // Lưu startDate để gửi lại khi update
+                setDeadline(data.dueDate || data.deadline || null);
+                
+                if (data.dueDate) {
+                    const d = new Date(data.dueDate);
+                    setDateInput(d.toISOString().split("T")[0]);
+                    const hh = String(d.getHours()).padStart(2, '0');
+                    const mm = String(d.getMinutes()).padStart(2, '0');
+                    setTimeInput(`${hh}:${mm}`);
+                }
+
+                if (data.reminderEnabled === false) {
+                    setReminder("none");
+                } else {
+                    if (data.reminderBeforeMinutes === 0) setReminder("at");
+                    else setReminder(String(data.reminderBeforeMinutes));
                 }
 
                 if (data.members) setMembers(data.members);
-                if (data.label) setSelectedLabels(data.label); // Giả sử API trả về mảng label IDs
                 if (data.checklists) setChecklists(data.checklists);
                 if (data.comments) setComments(data.comments);
-                if (data.reminder) setReminder(data.reminder);
 
             } catch (error) {
                 console.error("Lỗi tải chi tiết card:", error);
@@ -114,58 +130,115 @@ export default function CardDetailPopup({
 
     useEffect(() => {
         function onDocClick(e) {
-            if (
-                !e.target.closest(".label-select") &&
-                !e.target.closest(".label-btn") &&
-                !e.target.closest(".add-label-popup")
-            ) {
-                setShowLabelSelect(false);
-                setShowAddLabel(false);
-                setEditingLabel(null);
-            }
-
-            if (!e.target.closest(".member-search") && !e.target.closest(".member-btn"))
-                setShowMemberSearch(false);
-
-            if (!e.target.closest(".date-popup") && !e.target.closest(".date-btn"))
-                setShowDatePicker(false);
+            if (!e.target.closest(".label-select") && !e.target.closest(".label-btn")) setShowLabelSelect(false);
+            if (!e.target.closest(".member-search") && !e.target.closest(".member-btn")) setShowMemberSearch(false);
+            if (!e.target.closest(".date-popup") && !e.target.closest(".date-btn")) setShowDatePicker(false);
         }
-
         document.addEventListener("mousedown", onDocClick);
         return () => document.removeEventListener("mousedown", onDocClick);
     }, []);
+
+    const toggleLabel = async (labelIndex) => {
+        let newLabels;
+        const currentLabels = Array.isArray(selectedLabels) ? selectedLabels : [];
+        
+        if (currentLabels.includes(labelIndex)) {
+            newLabels = currentLabels.filter(id => id !== labelIndex);
+        } else {
+            newLabels = [...currentLabels, labelIndex];
+        }
+
+        const oldLabels = [...currentLabels];
+        
+        setSelectedLabels(newLabels);
+        updateCardInColumn(card.columnId, card.id, "label", newLabels);
+
+        try {
+            await cardService.updateLabels(card.id, newLabels);
+        } catch (error) {
+            console.error("Lỗi API Label:", error);
+            setSelectedLabels(oldLabels);
+            updateCardInColumn(card.columnId, card.id, "label", oldLabels);
+            alert("Không thể cập nhật nhãn!");
+        }
+    };
+
+    const saveDescription = async () => {
+        if (desc === (card.description || "")) {
+            setIsEditingDesc(false);
+            return;
+        }
+        const oldDesc = card.description;
+
+        setIsEditingDesc(false);
+        updateCardInColumn(card.columnId, card.id, "description", desc);
+
+        try {
+            await cardService.updateDescription(card.id, desc);
+        } catch (error) {
+            console.error("Lỗi API Mô tả:", error);
+            setDesc(oldDesc || "");
+            updateCardInColumn(card.columnId, card.id, "description", oldDesc);
+            alert("Lỗi lưu mô tả!");
+            setIsEditingDesc(true);
+        }
+    }
+
+    const saveDate = async () => {
+        if (!dateInput) return;
+        const dateTimeString = `${dateInput}T${timeInput || "00:00"}`;
+        const newDueDate = new Date(dateTimeString).toISOString();
+
+        let isReminderEnabled = true;
+        let reminderMinutes = 0;
+
+        if (reminder === "none") {
+            isReminderEnabled = false;
+        } else if (reminder === "at") {
+            reminderMinutes = 0;
+        } else {
+            reminderMinutes = parseInt(reminder, 10);
+        }
+
+        const payload = {
+            startDate: startDate,
+            dueDate: newDueDate,
+            reminderEnabled: isReminderEnabled,
+            reminderBeforeMinutes: reminderMinutes
+        };
+
+        setDeadline(newDueDate);
+        setShowDatePicker(false);
+
+        try {
+            await cardService.updateDates(card.id, payload);
+        } catch (error) {
+            console.error("Lỗi cập nhật ngày:", error);
+            alert("Cập nhật ngày thất bại!");
+        }
+    }
+
+    const saveTitle = async () => {
+        if (!title.trim() || title === card.title) {
+            setTitle(card.title);
+            setEditTitle(false);
+            return;
+        }
+        try {
+            await cardService.updateTitle(card.id, title);
+            updateCardInColumn(card.columnId, card.id, "title", title);
+            setEditTitle(false);
+        } catch (error) {
+            console.error(error);
+            alert("Lỗi đổi tên!");
+            setTitle(card.title);
+        }
+    }
 
     const toggleMember = (user) => {
         const exists = members.find(m => m.id === user.id);
         if (exists) setMembers(members.filter(m => m.id !== user.id));
         else setMembers([...members, user]);
-    }
-
-    const toggleLabel = (labelId) => {
-        setSelectedLabels(prev =>
-            prev.includes(labelId)
-                ? prev.filter(id => id !== labelId)
-                : [...prev, labelId]
-        );
-    };
-
-    const saveDate = () => {
-        if (!dateInput) return;
-        const iso = `${dateInput}T${timeInput || "00:00"}`;
-        setDeadline(iso);
-        setShowDatePicker(false);
-    }
-
-    const saveDescription = () => {
-        setIsEditingDesc(false);
-        updateCardInColumn(card.columnId, card.id, "description", desc)
-    }
-
-    const saveTitle = () => {
-        setEditTitle(false);
-        if (title) {
-            updateCardInColumn(card.columnId, card.id, "title", title)
-        }
     }
 
     const addComment = () => {
@@ -179,31 +252,11 @@ export default function CardDetailPopup({
         setComments(comments.map(c => c.id === id ? { ...c, text: newText } : c));
         setEditingCommentId(null);
     }
-    
-    useEffect(() => {
-        updateCardInColumn(card.columnId, card.id, "label", selectedLabels);
-    }, [selectedLabels]);
 
-    useEffect(() => {
-        updateCardInColumn(card.columnId, card.id, "deadline", deadline)
-    }, [deadline])
-
-    useEffect(() => {
-        updateCardInColumn(card.columnId, card.id, "members", members)
-    }, [members])
-
-    useEffect(() => {
-        updateCardInColumn(card.columnId, card.id, "check", completed)
-    }, [completed])
-
-    useEffect(() => {
-        updateCardInColumn(card.columnId, card.id, "reminder", reminder)
-    }, [reminder])
-
-    useEffect(() => {
-        updateCardInColumn(card.columnId, card.id, "checklists", checklists);
-    }, [checklists]);
-
+    useEffect(() => { updateCardInColumn(card.columnId, card.id, "deadline", deadline) }, [deadline])
+    useEffect(() => { updateCardInColumn(card.columnId, card.id, "members", members) }, [members])
+    useEffect(() => { updateCardInColumn(card.columnId, card.id, "check", completed) }, [completed])
+    useEffect(() => { updateCardInColumn(card.columnId, card.id, "checklists", checklists) }, [checklists]);
 
     const handleChangeColumn = (toCol) => {
         const updated = [...columns]
@@ -218,27 +271,18 @@ export default function CardDetailPopup({
     const handleDragEnd = (result) => {
         const { source, destination } = result;
         if (!destination) return;
-
         setChecklists(prev => {
             const sourceIdx = prev.findIndex(c => c.id === source.droppableId);
             const destIdx = prev.findIndex(c => c.id === destination.droppableId);
-
-            const sourceCl = prev[sourceIdx];
-            const destCl = prev[destIdx];
-
-            const sourceItems = [...sourceCl.items];
+            const sourceItems = [...prev[sourceIdx].items];
             const [moved] = sourceItems.splice(source.index, 1);
 
             if (sourceIdx === destIdx) {
                 sourceItems.splice(destination.index, 0, moved);
-                return prev.map((c, i) =>
-                    i === sourceIdx ? { ...c, items: sourceItems } : c
-                );
+                return prev.map((c, i) => i === sourceIdx ? { ...c, items: sourceItems } : c);
             }
-
-            const destItems = [...destCl.items];
+            const destItems = [...prev[destIdx].items];
             destItems.splice(destination.index, 0, moved);
-
             return prev.map((c, i) => {
                 if (i === sourceIdx) return { ...c, items: sourceItems };
                 if (i === destIdx) return { ...c, items: destItems };
@@ -247,42 +291,19 @@ export default function CardDetailPopup({
         });
     };
 
-    const saveLabel = () => {
-        if (!newLabelColor) return;
-        if (editingLabel) {
-            updateLabel(editingLabel.id, newLabelColor, newLabelTitle)
-        } else {
-            addLabel(newLabelColor, newLabelTitle)
-        }
-        setShowAddLabel(false);
-        setEditingLabel(null);
-        setNewLabelTitle("");
-        setNewLabelColor("");
-    };
-
     return (
         <div className="cdp-overlay">
             <div className="cdp-main">
                 {loading && (
                     <div style={{
-                        height: '3px',
-                        width: '100%',
+                        height: '3px', width: '100%',
                         background: 'linear-gradient(90deg, #0079bf, #5aac44)',
                         backgroundSize: '200% 100%',
                         animation: 'loadingGradient 1.5s infinite',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        borderTopLeftRadius: '8px',
-                        borderTopRightRadius: '8px',
-                        zIndex: 10
+                        position: 'absolute', top: 0, left: 0,
+                        borderTopLeftRadius: '8px', borderTopRightRadius: '8px', zIndex: 10
                     }}>
-                        <style>{`
-                            @keyframes loadingGradient {
-                                0% { background-position: 100% 0; }
-                                100% { background-position: -100% 0; }
-                            }
-                        `}</style>
+                        <style>{`@keyframes loadingGradient { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }`}</style>
                     </div>
                 )}
 
@@ -298,6 +319,7 @@ export default function CardDetailPopup({
                     )}
                     {card.storedDate && <h2>Thẻ được lưu trữ vào {card.storedDate}</h2>}
                 </div>
+
                 <div className="cdp-under">
                     {/* Left column */}
                     <div className="cdp-left">
@@ -306,131 +328,62 @@ export default function CardDetailPopup({
                                 <input type="checkbox" checked={completed} onChange={(e) => setCompleted(e.target.checked)} />
                             </label>
                             {!editTitle ?
-                                <h1 className="cdp-title">{title}</h1>
-                                :
-                                <textarea className="cdp-title" value={title} onChange={(e) => setTitle(e.target.value)} />}
+                                <h1 className="cdp-title">{title}</h1> :
+                                <textarea className="cdp-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                            }
                             {!editTitle ?
-                                <Pencil className="edit-title" onClick={() => setEditTitle(true)} />
-                                :
+                                <Pencil className="edit-title" onClick={() => setEditTitle(true)} /> :
                                 <PencilOff className="edit-title" onClick={() => { setEditTitle(false); saveTitle() }} />
                             }
-                            {completed && <Archive className="store-card" size={22} onClick={() => updateCardInColumn(card.columnId, card.id, "stored", true)} />}
-
+                            
+                            <div 
+                                className="store-card delete-hover" 
+                                title="Xóa thẻ"
+                                style={{ cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center', marginLeft: '10px' }} 
+                                onClick={() => onSoftDelete(card)}
+                            >
+                                <Trash2 size={22} />
+                            </div>
                         </div>
 
-                        {/* Actions */}
                         <div className="cdp-actions">
                             {/* Label */}
                             <div className="action-row">
                                 <button className="action-btn label-btn" onClick={() => setShowLabelSelect(!showLabelSelect)}>
                                     Nhãn
                                 </button>
-                                {selectedLabels &&
+                                
+                                {selectedLabels && Array.isArray(selectedLabels) && selectedLabels.length > 0 && (
                                     <div className="preview-labels">
-                                        {selectedLabels.map((labelId, i) => {
-                                            const label = labels.find(l => l.id === labelId);
-                                            if (!label) return null;
-
+                                        {selectedLabels.map((labelIdx) => {
+                                            const color = boardLabelColors[labelIdx];
+                                            if (!color) return null;
                                             return (
-                                                <span
-                                                    key={label.id}
-                                                    className="label-preview-item"
-                                                    style={{ backgroundColor: label.color }}
-                                                >
-                                                    {label.title}
-                                                </span>
+                                                <span key={labelIdx} className="label-preview-item" style={{ backgroundColor: color }}></span>
                                             );
-                                        }
-                                        )}
+                                        })}
                                     </div>
-                                }
-                                {showLabelSelect && !showAddLabel && (
+                                )}
+
+                                {showLabelSelect && (
                                     <div className="label-select">
                                         <div className="label-list-cdp">
-                                            {labels.map(label => {
-                                                const checked = selectedLabels.includes(label.id);
+                                            <h4 style={{margin: '0 0 8px 0', fontSize: '14px', color: '#5e6c84'}}>Nhãn dán</h4>
+                                            
+                                            {boardLabelColors.map((colorHex, index) => {
+                                                if (!activeLabelIndices.includes(index)) return null;
 
+                                                const isChecked = Array.isArray(selectedLabels) && selectedLabels.includes(index);
                                                 return (
-                                                    <div className="card-label-item" key={label.id}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={checked}
-                                                            onChange={() => toggleLabel(label.id)}
-                                                        />
-
-                                                        <div
-                                                            className="label-color"
-                                                            style={{ background: label.color }}
-                                                            onClick={() => toggleLabel(label.id)}
-                                                        >
-                                                            {label.title}
-                                                        </div>
-
-                                                        <Pencil
-                                                            size={14}
-                                                            className="edit-icon"
-                                                            onClick={() => {
-                                                                setEditingLabel(label);
-                                                                setNewLabelTitle(label.title);
-                                                                setNewLabelColor(label.color);
-                                                                setShowAddLabel(true);
-                                                            }}
-                                                        />
+                                                    <div className="card-label-item" key={index} onClick={() => toggleLabel(index)}>
+                                                        <input type="checkbox" checked={isChecked} readOnly style={{cursor: 'pointer'}} />
+                                                        <div className="label-color" style={{ background: colorHex, cursor: 'pointer' }}></div>
                                                     </div>
                                                 );
                                             })}
-
-                                            <button
-                                                className="add-card white"
-                                                onClick={() => {
-                                                    setEditingLabel(null);
-                                                    setNewLabelTitle("");
-                                                    setNewLabelColor("");
-                                                    setShowAddLabel(true);
-                                                }}
-                                            >
-                                                Tạo nhãn mới
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                )}
-                                {showAddLabel && (
-                                    <div className="label-select">
-                                        <input
-                                            className="new-label-title"
-                                            placeholder="Tên nhãn"
-                                            value={newLabelTitle}
-                                            onChange={(e) => setNewLabelTitle(e.target.value)}
-                                        />
-
-                                        <div className="new-label-grid">
-                                            {LABEL_COLORS.map((color, i) => (
-                                                <div
-                                                    key={i}
-                                                    className={`new-label-item ${newLabelColor === color ? "active" : ""
-                                                        }`}
-                                                    style={{ backgroundColor: color }}
-                                                    onClick={() => setNewLabelColor(color)}
-                                                />
-                                            ))}
-                                        </div>
-
-                                        <div className="add-label-btns">
-                                            <button className="add-card blue" onClick={saveLabel}>
-                                                Lưu
-                                            </button>
-
-                                            <button
-                                                className="add-card white"
-                                                onClick={() => {
-                                                    setShowAddLabel(false);
-                                                    setEditingLabel(null);
-                                                    setShowLabelSelect(true)
-                                                }}
-                                            >
-                                                Hủy
-                                            </button>
+                                            {activeLabelIndices.length === 0 && (
+                                                <div style={{color: '#ef4444', fontSize: '13px', padding: '10px 0'}}>Chưa có nhãn nào được kích hoạt.</div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -439,23 +392,67 @@ export default function CardDetailPopup({
                             {/* Due date */}
                             <div className="action-row">
                                 <button className="action-btn date-btn" onClick={() => setShowDatePicker(!showDatePicker)}>Ngày</button>
-
                                 {showDatePicker && (
                                     <div className="date-popup">
-                                        <label>Chọn ngày</label>
+                                        <label>Chọn ngày hết hạn</label>
                                         <input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
                                         <div className="time-row">
-                                            <input type="number" min="0" max="23" placeholder="HH" value={timeInput ? timeInput.split(":")[0] : ""} onChange={(e) => {
-                                                const hh = (e.target.value || "").padStart(2, '0');
-                                                const mm = timeInput ? timeInput.split(":")[1] : "00";
-                                                setTimeInput(hh + ":" + mm);
-                                            }} />
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max="23" 
+                                                placeholder="HH" 
+                                                value={timeInput ? timeInput.split(":")[0] : ""} 
+                                                
+                                                onChange={(e) => {
+                                                    let val = e.target.value;
+                                                    if (val.length > 2) val = val.slice(0, 2);
+                                                    if (parseInt(val) > 23) val = "23";
+                                                    if (parseInt(val) < 0) val = "0";
+
+                                                    const mm = timeInput ? timeInput.split(":")[1] : "00";
+                                                    
+                                                    setTimeInput(`${val}:${mm}`);
+                                                }}
+
+                                                onBlur={(e) => {
+                                                    let val = e.target.value;
+                                                    if (!val) val = "00";
+                                                    else val = val.padStart(2, '0');
+
+                                                    const mm = timeInput ? timeInput.split(":")[1] : "00";
+                                                    setTimeInput(`${val}:${mm}`);
+                                                }}
+                                            />
+                                            
                                             <span>:</span>
-                                            <input type="number" min="0" max="59" placeholder="MM" value={timeInput ? timeInput.split(":")[1] : ""} onChange={(e) => {
-                                                const mm = (e.target.value || "").padStart(2, '0');
-                                                const hh = timeInput ? timeInput.split(":")[0] : "00";
-                                                setTimeInput(hh + ":" + mm);
-                                            }} />
+
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max="59" 
+                                                placeholder="MM" 
+                                                value={timeInput ? timeInput.split(":")[1] : ""} 
+                                                
+                                                onChange={(e) => {
+                                                    let val = e.target.value;
+                                                    if (val.length > 2) val = val.slice(0, 2);
+                                                    if (parseInt(val) > 59) val = "59";
+                                                    if (parseInt(val) < 0) val = "0";
+
+                                                    const hh = timeInput ? timeInput.split(":")[0] : "00";
+                                                    setTimeInput(`${hh}:${val}`);
+                                                }}
+
+                                                onBlur={(e) => {
+                                                    let val = e.target.value;
+                                                    if (!val) val = "00";
+                                                    else val = val.padStart(2, '0');
+
+                                                    const hh = timeInput ? timeInput.split(":")[0] : "00";
+                                                    setTimeInput(`${hh}:${val}`);
+                                                }}
+                                            />
                                         </div>
 
                                         <label>Thiết lập lời nhắc</label>
@@ -475,29 +472,18 @@ export default function CardDetailPopup({
                                         </div>
                                     </div>
                                 )}
-
                                 {deadline && <div className="due-preview">Hạn: {new Date(deadline).toLocaleString()}</div>}
                             </div>
 
                             {/* Members */}
                             <div className="action-row">
                                 <div className="members-row">
-                                    <div
-                                        className="members-stack"
-                                        onMouseEnter={() => {
-                                            hoverTimer.current = setTimeout(() => {
-                                                setShowAssignedMembers(true);
-                                            }, 1000);
-                                        }}
-                                        onMouseLeave={() => {
-                                            clearTimeout(hoverTimer.current);
-                                            setShowAssignedMembers(false);
-                                        }}
+                                    <div className="members-stack"
+                                        onMouseEnter={() => { hoverTimer.current = setTimeout(() => { setShowAssignedMembers(true); }, 1000); }}
+                                        onMouseLeave={() => { clearTimeout(hoverTimer.current); setShowAssignedMembers(false); }}
                                     >
                                         {members.slice(0, 3).map((m, idx) => (
-                                            <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>
-                                                {m.name[0]}
-                                            </div>
+                                            <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>{m.name[0]}</div>
                                         ))}
                                         {showAssignedMembers &&
                                             <div className="member-assigned">
@@ -512,8 +498,6 @@ export default function CardDetailPopup({
                                             </div>}
                                     </div>
                                     <button className="avatar add member-btn" onClick={() => setShowMemberSearch(true)}>+</button>
-
-
                                     {showMemberSearch && (
                                         <div className="member-search">
                                             <input placeholder="Tìm thành viên..." value={memberQuery} onChange={(e) => setMemberQuery(e.target.value)} />
@@ -540,7 +524,6 @@ export default function CardDetailPopup({
                                 onChange={(e) => setDesc(e.target.value)}
                                 onFocus={() => setIsEditingDesc(true)}
                             />
-
                             {isEditingDesc && (
                                 <div className="desc-actions">
                                     <button onClick={() => { setDesc(card.description || ""); setIsEditingDesc(false); }} className="btn">Hủy</button>
@@ -549,19 +532,13 @@ export default function CardDetailPopup({
                             )}
                         </div>
                         <DragDropContext onDragEnd={handleDragEnd}>
-                            <ChecklistSection
-                                checklists={checklists}
-                                setChecklists={setChecklists}
-                            />
+                            <ChecklistSection checklists={checklists} setChecklists={setChecklists} />
                         </DragDropContext>
-
-
                     </div>
 
                     {/* Right column */}
                     <div className="cdp-right">
                         <div className="comments-header">Nhận xét và hoạt động</div>
-
                         <div className="comment-input">
                             <textarea placeholder="Viết bình luận..." value={commentText} onChange={(e) => setCommentText(e.target.value)} rows={3}></textarea>
                             <div className="comment-actions">
@@ -569,7 +546,6 @@ export default function CardDetailPopup({
                                 <button className="btn primary" onClick={addComment} disabled={!commentText.trim()}>Lưu</button>
                             </div>
                         </div>
-
                         <div className="comments-list">
                             {comments.map(c => (
                                 <div className="comment-card" key={c.id}>
@@ -577,7 +553,6 @@ export default function CardDetailPopup({
                                         <div className="avatar small">{c.author[0]}</div>
                                         <div className="meta-text"><div className="name">{c.author}</div><div className="time">{new Date(c.time).toLocaleString()}</div></div>
                                     </div>
-
                                     <div className="comment-body">
                                         {editingCommentId === c.id ? (
                                             <CommentEditor initial={c.text} onSave={(t) => saveEditComment(c.id, t)} onCancel={() => setEditingCommentId(null)} />
@@ -599,19 +574,6 @@ export default function CardDetailPopup({
                     </div>
                 </div>
                 <X size={14} className="cdp-close" onClick={onClose} />
-            </div>
-        </div>
-    );
-}
-
-function CommentEditor({ initial, onSave, onCancel }) {
-    const [val, setVal] = useState(initial);
-    return (
-        <div>
-            <AutoResizeTextarea value={val} onChange={(e) => setVal(e.target.value)} ></AutoResizeTextarea>
-            <div className="desc-actions">
-                <button onClick={onCancel} className="btn">Hủy</button>
-                <button onClick={() => onSave(val)} className="btn primary">Lưu</button>
             </div>
         </div>
     );
