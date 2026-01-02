@@ -54,6 +54,18 @@ const cardService = {
     move: (cardId, data) => {
         return axiosClient.put(`/Card/${cardId}/Move`, data);
     },
+
+    getAssignees: (cardId) => {
+        return axiosClient.get(`/Cards/${cardId}/Assignees`);
+    },
+
+    addAssignee: (cardId, userId) => {
+        return axiosClient.post(`/Cards/${cardId}/Assignees`, { userId });
+    },
+
+    removeAssignee: (cardId, userId) => {
+        return axiosClient.delete(`/Cards/${cardId}/Assignees/${userId}`);
+    },
 };
 
 export default cardService;

@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useParams } from 'react-router-dom';
 import "./CardDetailPopup.css";
 import { ChevronDown, X, Pencil, PencilOff, Trash2 } from 'lucide-react'; 
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 import ChecklistSection from "../CheckList/ChecklistSection";
 import { DragDropContext } from "@hello-pangea/dnd";
 import cardService from "../../services/cardService";
+import boardMemberService from "../../services/boardMemberService";
 
 const MOCK_USERS = [
     { id: 1, name: "Nguyễn Văn A", avatarColor: "#F44336" },
@@ -40,6 +42,7 @@ export default function CardDetailPopup({
     const [completed, setCompleted] = useState(card.check || false);
     const [title, setTitle] = useState(card.title);
     const [editTitle, setEditTitle] = useState(false)
+    const { boardId } = useParams();
 
     // Column
     const active_index = columns.findIndex(col => col.id === card.columnId)
@@ -64,6 +67,7 @@ export default function CardDetailPopup({
     const [members, setMembers] = useState(card.members || []);
     const [showAssignedMembers, setShowAssignedMembers] = useState(false)
     const hoverTimer = useRef(null);
+    const [boardMembers, setBoardMembers] = useState([]);
 
     // Description
     const [desc, setDesc] = useState(card.description || "");
@@ -78,13 +82,39 @@ export default function CardDetailPopup({
     const [checklists, setChecklists] = useState(card.checklists || []);
 
     useEffect(() => {
+        if (!boardId) return;
+        const fetchBoardMembers = async () => {
+            try {
+                const response = await boardMemberService.getAllMembers(boardId);
+                const data = response.data.value || response.data || [];
+                
+                const formattedMembers = data.map(m => ({
+                    id: m.userId || m.id,
+                    name: m.name || m.user?.name || "No Name",
+                    avatarColor: m.avatarColor || "#2196F3",
+                    email: m.email || m.user?.email
+                }));
+                setBoardMembers(formattedMembers);
+            } catch (error) {
+                console.error("Lỗi tải thành viên board:", error);
+            }
+        };
+        fetchBoardMembers();
+    }, [boardId]);
+
+    useEffect(() => {
         if (!card?.id) return;
 
         const fetchCardDetail = async () => {
             setLoading(true);
             try {
-                const response = await cardService.getDetail(card.id);
-                const data = response.data.value || response.data;
+                const [detailResponse, assigneesResponse] = await Promise.all([
+                    cardService.getDetail(card.id),
+                    cardService.getAssignees(card.id)
+                ]);
+
+                const data = detailResponse.data.value || detailResponse.data;
+                const assigneesData = assigneesResponse.data.value || assigneesResponse.data;
 
                 setTitle(data.title || card.title);
                 setDesc(data.description || "");
@@ -96,12 +126,16 @@ export default function CardDetailPopup({
                     setSelectedLabels([]);
                 }
 
-                setStartDate(data.startDate || null); // Lưu startDate để gửi lại khi update
+                setStartDate(data.startDate || null);
                 setDeadline(data.dueDate || data.deadline || null);
                 
                 if (data.dueDate) {
                     const d = new Date(data.dueDate);
-                    setDateInput(d.toISOString().split("T")[0]);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    setDateInput(`${year}-${month}-${day}`);
+                    
                     const hh = String(d.getHours()).padStart(2, '0');
                     const mm = String(d.getMinutes()).padStart(2, '0');
                     setTimeInput(`${hh}:${mm}`);
@@ -117,9 +151,16 @@ export default function CardDetailPopup({
                 if (data.members) setMembers(data.members);
                 if (data.checklists) setChecklists(data.checklists);
                 if (data.comments) setComments(data.comments);
+                const mappedMembers = assigneesData.map(u => ({
+                    id: u.userId,
+                    name: u.userName,
+                    avatarColor: "#2196F3"
+                }));
+
+                setMembers(mappedMembers);
 
             } catch (error) {
-                console.error("Lỗi tải chi tiết card:", error);
+                console.error("Lỗi tải chi tiết card hoặc thành viên:", error);
             } finally {
                 setLoading(false);
             }
@@ -235,10 +276,31 @@ export default function CardDetailPopup({
         }
     }
 
-    const toggleMember = (user) => {
-        const exists = members.find(m => m.id === user.id);
-        if (exists) setMembers(members.filter(m => m.id !== user.id));
-        else setMembers([...members, user]);
+    const toggleMember = async (user) => {
+        const isAssigned = members.find(m => m.id === user.id);
+        
+        if (isAssigned) {
+            setMembers(members.filter(m => m.id !== user.id));
+        } else {
+            setMembers([...members, user]);
+        }
+
+        try {
+            if (isAssigned) {
+                await cardService.removeAssignee(card.id, user.id);
+            } else {
+                await cardService.addAssignee(card.id, user.id);
+            }
+        } catch (error) {
+            console.error("Lỗi cập nhật thành viên:", error);
+            alert("Có lỗi xảy ra, vui lòng thử lại!");
+            
+            if (isAssigned) {
+                setMembers([...members, user]); 
+            } else {
+                setMembers(members.filter(m => m.id !== user.id));
+            }
+        }
     }
 
     const addComment = () => {
@@ -502,13 +564,32 @@ export default function CardDetailPopup({
                                         <div className="member-search">
                                             <input placeholder="Tìm thành viên..." value={memberQuery} onChange={(e) => setMemberQuery(e.target.value)} />
                                             <div className="member-results">
-                                                {MOCK_USERS.filter(u => u.name.toLowerCase().includes(memberQuery.toLowerCase())).map(u => (
-                                                    <div key={u.id} className={`member-item ${members.find(m => m.id === u.id) ? 'selected' : ''}`} onClick={() => toggleMember(u)}>
-                                                        <div className="avatar small" style={{ background: u.avatarColor }}>{u.name[0]}</div>
-                                                        <div className="member-name">{u.name}</div>
-                                                        {members.find(m => m.id === u.id) && <button className="remove-member member-btn">x</button>}
+                                                {boardMembers
+                                                    .filter(u => u.name.toLowerCase().includes(memberQuery.toLowerCase()))
+                                                    .map(u => {
+                                                        const isSelected = members.find(m => m.id === u.id);
+                                                        return (
+                                                            <div 
+                                                                key={u.id} 
+                                                                className={`member-item ${isSelected ? 'selected' : ''}`} 
+                                                                onClick={() => toggleMember(u)}
+                                                            >
+                                                                <div className="avatar small" style={{ background: u.avatarColor }}>
+                                                                    {u.name[0]?.toUpperCase()}
+                                                                </div>
+                                                                <div className="member-name">
+                                                                    {u.name}
+                                                                    <div style={{fontSize: '11px', color: '#888'}}>{u.email}</div>
+                                                                </div>
+                                                                {isSelected && <button className="remove-member member-btn">x</button>}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                {boardMembers.length === 0 && (
+                                                    <div style={{padding: '10px', textAlign: 'center', color: '#888'}}>
+                                                        Không có thành viên nào trong Board.
                                                     </div>
-                                                ))}
+                                                )}
                                             </div>
                                         </div>
                                     )}

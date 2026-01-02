@@ -6,6 +6,7 @@ import './MainLayout.css';
 const MainLayout = () => {
   return (
     <div className="app">
+      <Navbar />
       <div className="main-layout">
         <Sidebar />
         <div className="page-content">
