@@ -1,25 +1,26 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import "./CardDetailPopup.css";
-import { ChevronDown, X, Pencil, PencilOff, Trash2 } from 'lucide-react'; 
+import { ChevronDown, X, Pencil, PencilOff, Trash2, Paperclip, Download } from 'lucide-react'; 
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 import ChecklistSection from "../CheckList/ChecklistSection";
 import { DragDropContext } from "@hello-pangea/dnd";
 import cardService from "../../services/cardService";
 import boardMemberService from "../../services/boardMemberService";
-
-const MOCK_USERS = [
-    { id: 1, name: "Nguyễn Văn A", avatarColor: "#F44336" },
-    { id: 2, name: "Trần Thị B", avatarColor: "#9C27B0" },
-    { id: 3, name: "Lê C", avatarColor: "#03A9F4" },
-    { id: 4, name: "Phạm D", avatarColor: "#4CAF50" },
-];
+import taskService from "../../services/taskService";
+import subTaskService from "../../services/subTaskService";
+import commentService from "../../services/commentService"; 
+import attachmentService from "../../services/attachmentService"; 
 
 function CommentEditor({ initial, onSave, onCancel }) {
     const [val, setVal] = useState(initial);
     return (
         <div>
-            <AutoResizeTextarea value={val} onChange={(e) => setVal(e.target.value)} ></AutoResizeTextarea>
+            <AutoResizeTextarea 
+                value={val} 
+                onChange={(e) => setVal(e.target.value)} 
+                onFocus={() => {}} 
+            />
             <div className="desc-actions">
                 <button onClick={onCancel} className="btn">Hủy</button>
                 <button onClick={() => onSave(val)} className="btn primary">Lưu</button>
@@ -75,8 +76,12 @@ export default function CardDetailPopup({
 
     // Comments
     const [commentText, setCommentText] = useState("");
-    const [comments, setComments] = useState(card.comments || []);
+    const [comments, setComments] = useState([]); 
     const [editingCommentId, setEditingCommentId] = useState(null);
+
+    // Attachments
+    const [attachments, setAttachments] = useState([]);
+    const fileInputRef = useRef(null);
 
     // Checklists
     const [checklists, setChecklists] = useState(card.checklists || []);
@@ -108,10 +113,24 @@ export default function CardDetailPopup({
         const fetchCardDetail = async () => {
             setLoading(true);
             try {
-                const [detailResponse, assigneesResponse] = await Promise.all([
+                const [detailResponse, assigneesResponse, tasksResponse, commentsResponse, attachmentsResponse] = await Promise.all([
                     cardService.getDetail(card.id),
-                    cardService.getAssignees(card.id)
+                    cardService.getAssignees(card.id),
+                    taskService.getTasks(card.id),
+                    commentService.getComments(card.id), 
+                    attachmentService.getAttachments(card.id)
                 ]);
+
+                const tasksData = tasksResponse.data.value || tasksResponse.data || [];
+                const formattedChecklists = tasksData.map(task => ({
+                    ...task,
+                    items: (task.subTasks || []).map(sub => ({
+                        ...sub,
+                        done: sub.status === 2, 
+                        status: sub.status 
+                    }))
+                }));
+                setChecklists(formattedChecklists);
 
                 const data = detailResponse.data.value || detailResponse.data;
                 const assigneesData = assigneesResponse.data.value || assigneesResponse.data;
@@ -148,19 +167,32 @@ export default function CardDetailPopup({
                     else setReminder(String(data.reminderBeforeMinutes));
                 }
 
-                if (data.members) setMembers(data.members);
-                if (data.checklists) setChecklists(data.checklists);
-                if (data.comments) setComments(data.comments);
                 const mappedMembers = assigneesData.map(u => ({
                     id: u.userId,
                     name: u.userName,
                     avatarColor: "#2196F3"
                 }));
-
                 setMembers(mappedMembers);
 
+                // Xử lý comments (có Avatar)
+                const commentsData = commentsResponse.data.value || commentsResponse.data || [];
+                const formattedComments = commentsData.map(c => ({
+                    id: c.id,
+                    text: c.content,
+                    author: c.userName || c.user?.name || "Người dùng",
+                    avatar: c.userAvatar, // Lấy avatar từ GET API
+                    time: c.createdAt || c.createdTime || new Date().toISOString(),
+                    userId: c.userId
+                }));
+                formattedComments.sort((a, b) => new Date(b.time) - new Date(a.time));
+                setComments(formattedComments);
+
+                // Xử lý Attachments
+                const attachData = attachmentsResponse.data.value || attachmentsResponse.data || [];
+                setAttachments(attachData);
+
             } catch (error) {
-                console.error("Lỗi tải chi tiết card hoặc thành viên:", error);
+                console.error("Lỗi tải chi tiết card:", error);
             } finally {
                 setLoading(false);
             }
@@ -182,18 +214,14 @@ export default function CardDetailPopup({
     const toggleLabel = async (labelIndex) => {
         let newLabels;
         const currentLabels = Array.isArray(selectedLabels) ? selectedLabels : [];
-        
         if (currentLabels.includes(labelIndex)) {
             newLabels = currentLabels.filter(id => id !== labelIndex);
         } else {
             newLabels = [...currentLabels, labelIndex];
         }
-
         const oldLabels = [...currentLabels];
-        
         setSelectedLabels(newLabels);
         updateCardInColumn(card.columnId, card.id, "label", newLabels);
-
         try {
             await cardService.updateLabels(card.id, newLabels);
         } catch (error) {
@@ -210,10 +238,8 @@ export default function CardDetailPopup({
             return;
         }
         const oldDesc = card.description;
-
         setIsEditingDesc(false);
         updateCardInColumn(card.columnId, card.id, "description", desc);
-
         try {
             await cardService.updateDescription(card.id, desc);
         } catch (error) {
@@ -229,10 +255,8 @@ export default function CardDetailPopup({
         if (!dateInput) return;
         const dateTimeString = `${dateInput}T${timeInput || "00:00"}`;
         const newDueDate = new Date(dateTimeString).toISOString();
-
         let isReminderEnabled = true;
         let reminderMinutes = 0;
-
         if (reminder === "none") {
             isReminderEnabled = false;
         } else if (reminder === "at") {
@@ -240,17 +264,14 @@ export default function CardDetailPopup({
         } else {
             reminderMinutes = parseInt(reminder, 10);
         }
-
         const payload = {
             startDate: startDate,
             dueDate: newDueDate,
             reminderEnabled: isReminderEnabled,
             reminderBeforeMinutes: reminderMinutes
         };
-
         setDeadline(newDueDate);
         setShowDatePicker(false);
-
         try {
             await cardService.updateDates(card.id, payload);
         } catch (error) {
@@ -278,13 +299,11 @@ export default function CardDetailPopup({
 
     const toggleMember = async (user) => {
         const isAssigned = members.find(m => m.id === user.id);
-        
         if (isAssigned) {
             setMembers(members.filter(m => m.id !== user.id));
         } else {
             setMembers([...members, user]);
         }
-
         try {
             if (isAssigned) {
                 await cardService.removeAssignee(card.id, user.id);
@@ -294,7 +313,6 @@ export default function CardDetailPopup({
         } catch (error) {
             console.error("Lỗi cập nhật thành viên:", error);
             alert("Có lỗi xảy ra, vui lòng thử lại!");
-            
             if (isAssigned) {
                 setMembers([...members, user]); 
             } else {
@@ -303,16 +321,109 @@ export default function CardDetailPopup({
         }
     }
 
-    const addComment = () => {
+    // --- ATTACHMENT LOGIC ---
+    const handleUploadClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        e.target.value = null;
+        try {
+            const response = await attachmentService.upload(card.id, file);
+            const newAttachment = response.data.value || response.data;
+            setAttachments([...attachments, newAttachment]);
+        } catch (error) {
+            console.error("Lỗi upload file:", error);
+            alert("Tải tệp lên thất bại!");
+        }
+    };
+
+    const handleDeleteAttachment = async (attachmentId) => {
+        if (!window.confirm("Bạn có chắc muốn xóa tệp đính kèm này?")) return;
+        const oldAttachments = [...attachments];
+        setAttachments(attachments.filter(a => a.id !== attachmentId));
+        try {
+            await attachmentService.delete(attachmentId);
+        } catch (error) {
+            console.error("Lỗi xóa file:", error);
+            alert("Không thể xóa tệp!");
+            setAttachments(oldAttachments);
+        }
+    };
+
+    // --- COMMENT LOGIC ---
+    const addComment = async () => {
         if (!commentText.trim()) return;
-        const newC = { id: Date.now(), text: commentText, author: "Bạn", time: new Date().toISOString() };
-        setComments([newC, ...comments]);
+
+        const contentToDisplay = commentText;
+        const tempId = "temp-" + Date.now(); 
+
+        // Optimistic UI update
+        const newCommentOptimistic = { 
+            id: tempId, 
+            text: contentToDisplay, 
+            author: "Bạn",
+            avatar: null, // Mới tạo chưa có avatar
+            time: new Date().toISOString()
+        };
+
+        setComments([newCommentOptimistic, ...comments]);
         setCommentText("");
+
+        try {
+            const response = await commentService.create(card.id, contentToDisplay);
+            
+            // Dữ liệu API trả về: { userName, userAvatar, id, createdAt, ... }
+            const apiData = response.data.value; 
+            
+            setComments(prevComments => 
+                prevComments.map(c => 
+                    c.id === tempId ? { 
+                        ...c, 
+                        id: apiData.id, 
+                        time: apiData.createdAt,
+                        // --- CẬP NHẬT THÊM 2 DÒNG NÀY ---
+                        author: apiData.userName,   // Cập nhật tên thật từ server
+                        avatar: apiData.userAvatar  // Cập nhật link avatar từ server
+                    } : c
+                )
+            );
+        } catch (error) {
+            console.error("Lỗi thêm comment:", error);
+            alert("Không thể gửi bình luận!");
+            setComments(prev => prev.filter(c => c.id !== tempId));
+        }
     }
 
-    const saveEditComment = (id, newText) => {
-        setComments(comments.map(c => c.id === id ? { ...c, text: newText } : c));
+    const saveEditComment = async (id, newText) => {
+        const oldComments = [...comments];
+        const updatedComments = comments.map(c => c.id === id ? { ...c, text: newText } : c);
+        setComments(updatedComments);
         setEditingCommentId(null);
+        try {
+            await commentService.update(id, newText);
+        } catch (error) {
+            console.error("Lỗi sửa comment:", error);
+            alert("Lỗi cập nhật bình luận!");
+            setComments(oldComments);
+        }
+    }
+
+    const handleDeleteComment = async (commentId) => {
+        if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) return;
+        const oldComments = [...comments];
+        setComments(comments.filter(x => x.id !== commentId));
+        try {
+            await commentService.delete(commentId);
+        } catch (error) {
+            console.error("Lỗi xóa comment:", error);
+            alert("Không thể xóa bình luận!");
+            setComments(oldComments);
+        }
     }
 
     useEffect(() => { updateCardInColumn(card.columnId, card.id, "deadline", deadline) }, [deadline])
@@ -330,27 +441,43 @@ export default function CardDetailPopup({
         setShowColumns(false)
     }
 
-    const handleDragEnd = (result) => {
-        const { source, destination } = result;
+    const handleDragEnd = async (result) => {
+        const { source, destination, type } = result;
         if (!destination) return;
-        setChecklists(prev => {
-            const sourceIdx = prev.findIndex(c => c.id === source.droppableId);
-            const destIdx = prev.findIndex(c => c.id === destination.droppableId);
-            const sourceItems = [...prev[sourceIdx].items];
-            const [moved] = sourceItems.splice(source.index, 1);
 
-            if (sourceIdx === destIdx) {
-                sourceItems.splice(destination.index, 0, moved);
-                return prev.map((c, i) => i === sourceIdx ? { ...c, items: sourceItems } : c);
+        if (type === "CHECKLIST_GROUP") {
+            if (source.index === destination.index) return;
+            const newChecklists = [...checklists];
+            const [movedChecklist] = newChecklists.splice(source.index, 1);
+            newChecklists.splice(destination.index, 0, movedChecklist);
+            setChecklists(newChecklists);
+            try {
+                await taskService.updatePosition(movedChecklist.id, destination.index);
+            } catch (error) {
+                console.error("Lỗi di chuyển Task Group:", error);
             }
-            const destItems = [...prev[destIdx].items];
-            destItems.splice(destination.index, 0, moved);
-            return prev.map((c, i) => {
-                if (i === sourceIdx) return { ...c, items: sourceItems };
-                if (i === destIdx) return { ...c, items: destItems };
-                return c;
+            return;
+        }
+
+        if (type === "ITEM" || !type) {
+            if (source.droppableId !== destination.droppableId) return;
+            if (source.index === destination.index) return;
+            setChecklists(prev => {
+                const listIndex = prev.findIndex(c => c.id === source.droppableId);
+                if (listIndex === -1) return prev;
+                const newList = { ...prev[listIndex] };
+                const newItems = [...newList.items];
+                const [movedItem] = newItems.splice(source.index, 1);
+                newItems.splice(destination.index, 0, movedItem);
+                newList.items = newItems;
+                return prev.map((c, i) => i === listIndex ? newList : c);
             });
-        });
+            try {
+                await subTaskService.updatePosition(result.draggableId, destination.index);
+            } catch (error) {
+                console.error("Lỗi di chuyển SubTask:", error);
+            }
+        }
     };
 
     return (
@@ -383,7 +510,6 @@ export default function CardDetailPopup({
                 </div>
 
                 <div className="cdp-under">
-                    {/* Left column */}
                     <div className="cdp-left">
                         <div className="cdp-header">
                             <label className="cdp-checkbox">
@@ -409,7 +535,6 @@ export default function CardDetailPopup({
                         </div>
 
                         <div className="cdp-actions">
-                            {/* Label */}
                             <div className="action-row">
                                 <button className="action-btn label-btn" onClick={() => setShowLabelSelect(!showLabelSelect)}>
                                     Nhãn
@@ -451,7 +576,6 @@ export default function CardDetailPopup({
                                 )}
                             </div>
 
-                            {/* Due date */}
                             <div className="action-row">
                                 <button className="action-btn date-btn" onClick={() => setShowDatePicker(!showDatePicker)}>Ngày</button>
                                 {showDatePicker && (
@@ -459,64 +583,10 @@ export default function CardDetailPopup({
                                         <label>Chọn ngày hết hạn</label>
                                         <input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} />
                                         <div className="time-row">
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                max="23" 
-                                                placeholder="HH" 
-                                                value={timeInput ? timeInput.split(":")[0] : ""} 
-                                                
-                                                onChange={(e) => {
-                                                    let val = e.target.value;
-                                                    if (val.length > 2) val = val.slice(0, 2);
-                                                    if (parseInt(val) > 23) val = "23";
-                                                    if (parseInt(val) < 0) val = "0";
-
-                                                    const mm = timeInput ? timeInput.split(":")[1] : "00";
-                                                    
-                                                    setTimeInput(`${val}:${mm}`);
-                                                }}
-
-                                                onBlur={(e) => {
-                                                    let val = e.target.value;
-                                                    if (!val) val = "00";
-                                                    else val = val.padStart(2, '0');
-
-                                                    const mm = timeInput ? timeInput.split(":")[1] : "00";
-                                                    setTimeInput(`${val}:${mm}`);
-                                                }}
-                                            />
-                                            
+                                            <input type="number" min="0" max="23" placeholder="HH" value={timeInput ? timeInput.split(":")[0] : ""} onChange={(e) => { let val = e.target.value; if (val.length > 2) val = val.slice(0, 2); if (parseInt(val) > 23) val = "23"; if (parseInt(val) < 0) val = "0"; const mm = timeInput ? timeInput.split(":")[1] : "00"; setTimeInput(`${val}:${mm}`); }} onBlur={(e) => { let val = e.target.value; if (!val) val = "00"; else val = val.padStart(2, '0'); const mm = timeInput ? timeInput.split(":")[1] : "00"; setTimeInput(`${val}:${mm}`); }} />
                                             <span>:</span>
-
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                max="59" 
-                                                placeholder="MM" 
-                                                value={timeInput ? timeInput.split(":")[1] : ""} 
-                                                
-                                                onChange={(e) => {
-                                                    let val = e.target.value;
-                                                    if (val.length > 2) val = val.slice(0, 2);
-                                                    if (parseInt(val) > 59) val = "59";
-                                                    if (parseInt(val) < 0) val = "0";
-
-                                                    const hh = timeInput ? timeInput.split(":")[0] : "00";
-                                                    setTimeInput(`${hh}:${val}`);
-                                                }}
-
-                                                onBlur={(e) => {
-                                                    let val = e.target.value;
-                                                    if (!val) val = "00";
-                                                    else val = val.padStart(2, '0');
-
-                                                    const hh = timeInput ? timeInput.split(":")[0] : "00";
-                                                    setTimeInput(`${hh}:${val}`);
-                                                }}
-                                            />
+                                            <input type="number" min="0" max="59" placeholder="MM" value={timeInput ? timeInput.split(":")[1] : ""} onChange={(e) => { let val = e.target.value; if (val.length > 2) val = val.slice(0, 2); if (parseInt(val) > 59) val = "59"; if (parseInt(val) < 0) val = "0"; const hh = timeInput ? timeInput.split(":")[0] : "00"; setTimeInput(`${hh}:${val}`); }} onBlur={(e) => { let val = e.target.value; if (!val) val = "00"; else val = val.padStart(2, '0'); const hh = timeInput ? timeInput.split(":")[0] : "00"; setTimeInput(`${hh}:${val}`); }} />
                                         </div>
-
                                         <label>Thiết lập lời nhắc</label>
                                         <select value={reminder} onChange={(e) => setReminder(e.target.value)}>
                                             <option value="none">Không có</option>
@@ -527,17 +597,15 @@ export default function CardDetailPopup({
                                             <option value="60">1 giờ trước</option>
                                             <option value="120">2 giờ trước</option>
                                         </select>
-
                                         <div className="date-actions">
                                             <button onClick={() => setShowDatePicker(false)} className="btn small">Hủy</button>
                                             <button onClick={saveDate} className="btn small primary">Lưu</button>
                                         </div>
                                     </div>
                                 )}
-                                {deadline && <div className="due-preview">Hạn: {new Date(deadline).toLocaleString()}</div>}
+                                {deadline && <div className="due-preview">Hạn: {new Date(deadline).toLocaleString('vi-VN')}</div>}
                             </div>
 
-                            {/* Members */}
                             <div className="action-row">
                                 <div className="members-row">
                                     <div className="members-stack"
@@ -596,8 +664,91 @@ export default function CardDetailPopup({
                                 </div>
                             </div>
 
+                            {/* [FIXED] Nút Đính kèm nhỏ gọn */}
+                            <div className="action-row" style={{ flex: '0 0 auto' }}>
+                                <button 
+                                    className="action-btn attachment-btn" 
+                                    onClick={handleUploadClick} 
+                                    title="Đính kèm tệp"
+                                    style={{
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center', 
+                                        padding: '6px 10px',
+                                        height: '32px',
+                                        minWidth: '32px'
+                                    }}
+                                >
+                                    <Paperclip size={16} /> 
+                                </button>
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    style={{display: 'none'}} 
+                                    onChange={handleFileChange} 
+                                />
+                            </div>
+
                         </div>
-                        {/* Description */}
+
+                        {attachments.length > 0 && (
+                            <div className="section">
+                                <div className="label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                    <Paperclip size={16} /> Tệp đính kèm ({attachments.length})
+                                </div>
+                                <div className="attachments-list" style={{marginTop: '10px'}}>
+                                    {attachments.map(att => (
+                                        <div key={att.id} className="attachment-item" style={{
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            padding: '8px', 
+                                            border: '1px solid #dfe1e6', 
+                                            borderRadius: '4px', 
+                                            marginBottom: '8px',
+                                            background: '#fff'
+                                        }}>
+                                            <div style={{
+                                                width: '40px', 
+                                                height: '30px', 
+                                                background: '#dfe1e6', 
+                                                borderRadius: '3px', 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center', 
+                                                marginRight: '10px', 
+                                                fontSize: '10px', 
+                                                color: '#5e6c84', 
+                                                fontWeight: 'bold', 
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                {att.fileName ? att.fileName.split('.').pop() : 'FILE'}
+                                            </div>
+
+                                            <div style={{flex: 1, overflow: 'hidden'}}>
+                                                <div style={{fontWeight: 600, fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                                                    {att.fileName}
+                                                </div>
+                                                <div style={{fontSize: '12px', color: '#5e6c84'}}>
+                                                    Đã thêm {new Date(att.uploadDate || Date.now()).toLocaleDateString('vi-VN')}
+                                                    <span style={{margin: '0 6px'}}>•</span>
+                                                    <span 
+                                                        style={{cursor: 'pointer', textDecoration: 'underline'}} 
+                                                        onClick={() => handleDeleteAttachment(att.id)}
+                                                    >
+                                                        Xóa
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <a href={att.fileUrl} target="_blank" rel="noreferrer" className="btn-icon" style={{color: '#5e6c84', padding: '6px'}} title="Tải xuống">
+                                                <Download size={16} />
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="section">
                             <div className="label">Mô tả</div>
                             <AutoResizeTextarea
@@ -612,12 +763,16 @@ export default function CardDetailPopup({
                                 </div>
                             )}
                         </div>
+                        
                         <DragDropContext onDragEnd={handleDragEnd}>
-                            <ChecklistSection checklists={checklists} setChecklists={setChecklists} />
+                            <ChecklistSection 
+                                checklists={checklists} 
+                                setChecklists={setChecklists}
+                                cardId={card.id}
+                            />
                         </DragDropContext>
                     </div>
 
-                    {/* Right column */}
                     <div className="cdp-right">
                         <div className="comments-header">Nhận xét và hoạt động</div>
                         <div className="comment-input">
@@ -631,8 +786,20 @@ export default function CardDetailPopup({
                             {comments.map(c => (
                                 <div className="comment-card" key={c.id}>
                                     <div className="comment-meta">
-                                        <div className="avatar small">{c.author[0]}</div>
-                                        <div className="meta-text"><div className="name">{c.author}</div><div className="time">{new Date(c.time).toLocaleString()}</div></div>
+                                        {/* [FIXED] Hiển thị Avatar */}
+                                        {c.avatar ? (
+                                            <img 
+                                                src={c.avatar} 
+                                                alt={c.author} 
+                                                className="avatar small" 
+                                                style={{ objectFit: 'cover', border: '1px solid #dfe1e6' }} 
+                                            />
+                                        ) : (
+                                            <div className="avatar small">
+                                                {c.author ? c.author[0].toUpperCase() : "?"}
+                                            </div>
+                                        )}
+                                        <div className="meta-text"><div className="name">{c.author}</div><div className="time">{new Date(c.time).toLocaleString('vi-VN')}</div></div>
                                     </div>
                                     <div className="comment-body">
                                         {editingCommentId === c.id ? (
@@ -643,12 +810,11 @@ export default function CardDetailPopup({
                                     </div>
                                     {editingCommentId !== c.id &&
                                         <div className="comment-footer">
-                                            <div className="comment-actions-row">
-                                                <button className="icon-btn">👍</button>
-                                                <button className="icon-btn" onClick={() => setEditingCommentId(c.id)}>Chỉnh sửa</button>
-                                                <button className="icon-btn" onClick={() => setComments(comments.filter(x => x.id !== c.id))}>Xóa</button>
-                                            </div>
-                                        </div>}
+                                            <button className="comment-action-btn" onClick={() => setEditingCommentId(c.id)}>Chỉnh sửa</button>
+                                            <span className="action-separator">•</span>
+                                            <button className="comment-action-btn delete" onClick={() => handleDeleteComment(c.id)}>Xóa</button>
+                                        </div>
+                                    }
                                 </div>
                             ))}
                         </div>
