@@ -27,6 +27,7 @@ const TaskBoard = ({
     updateTitleColumn,
     boardId,
     boardTitle,
+    boardLabelColors,
     handleDragEnd,
     onMoveList
 }) => {
@@ -229,6 +230,7 @@ const TaskBoard = ({
                     handleDragEnd={handleDragEnd}
                     onMoveList={onMoveList}
                     onSoftDelete={onSoftDelete}
+                    boardLabelColors={boardLabelColors}
                 />
             )}
 

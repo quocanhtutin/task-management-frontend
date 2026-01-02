@@ -19,7 +19,8 @@ const ColumnMode = ({
     updateTitleColumn,
     handleDragEnd,
     onMoveList,
-    onSoftDelete
+    onSoftDelete,
+    boardLabelColors = []
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
@@ -226,7 +227,26 @@ const ColumnMode = ({
                                 onDragOver={allowDrop}
                             >
                                 <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.id, card.id, "check", e.target.checked)} />
-                                <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
+                                <div className="card-content-wrapper" onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
+                                    
+                                    {card.label && Array.isArray(card.label) && card.label.length > 0 && (
+                                        <div className="card-tags">
+                                            {card.label.map((labelIndex, idx) => {
+                                                const color = boardLabelColors[labelIndex];
+                                                if (!color) return null;
+                                                return (
+                                                    <span 
+                                                        key={idx} 
+                                                        className="card-tag-bar" 
+                                                        style={{ backgroundColor: color }}
+                                                    ></span>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    <p className="card-title-text">{card.title}</p>
+                                </div>
                                 
                                 {card.check && (
                                     <div 
