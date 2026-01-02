@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import './ColumnMode.css'
-import { Archive, PenSquareIcon, ArrowRightCircle } from 'lucide-react'
+import { Archive, PenSquareIcon, ArrowRightCircle, Trash2 } from 'lucide-react'
+import cardService from '../../services/cardService';
 
 const ColumnMode = ({
     columns,
@@ -17,7 +18,8 @@ const ColumnMode = ({
     storeColumn,
     updateTitleColumn,
     handleDragEnd,
-    onMoveList
+    onMoveList,
+    onSoftDelete
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
@@ -56,33 +58,68 @@ const ColumnMode = ({
 
     const allowDrop = (e) => e.preventDefault();
 
-    const onDrop = (e, toCol) => {
+    const onDrop = async (e, toColIndex) => {
         const type = e.dataTransfer.getData("type");
-        if (type !== "card") return; 
-        const fromCol = e.dataTransfer.getData('fromCol');
-        const fromIndex = e.dataTransfer.getData('fromIndex');
+        if (type !== "card") return;
+        
+        const fromColIndex = parseInt(e.dataTransfer.getData('fromCol'), 10);
+        const fromCardIndex = parseInt(e.dataTransfer.getData('fromIndex'), 10);
 
-        if (fromCol === '' || fromIndex === '') return;
+        if (isNaN(fromColIndex) || isNaN(fromCardIndex)) return;
 
-        const updated = [...columns];
-        const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[toCol].cards.push({ ...movedCard, columnId: updated[toCol].id });
-
+        const updated = columns.map(c => ({...c, cards: [...c.cards]}));
+        
+        const [movedCard] = updated[fromColIndex].cards.splice(fromCardIndex, 1);
+        const cardWithNewCol = { ...movedCard, columnId: updated[toColIndex].id };
+        
+        updated[toColIndex].cards.push(cardWithNewCol);
         setColumns(updated);
+
+        try {
+            const cardId = movedCard.id;
+            const toListId = updated[toColIndex].id;
+            const newPosition = updated[toColIndex].cards.length - 1; 
+
+            await cardService.move(cardId, {
+                cardId: cardId,
+                toListId: toListId,
+                newPosition: newPosition
+            });
+        } catch (error) {
+            console.error("Lỗi di chuyển thẻ:", error);
+        }
     };
 
-    const onDropBeforeCard = (e, beforeCard, atCol) => {
+    const onDropBeforeCard = async (e, targetCardIndex, toColIndex) => {
         e.preventDefault();
         e.stopPropagation();
-        const fromCol = e.dataTransfer.getData('fromCol');
-        const fromIndex = e.dataTransfer.getData('fromIndex');
+        
+        const fromColIndex = parseInt(e.dataTransfer.getData('fromCol'), 10);
+        const fromCardIndex = parseInt(e.dataTransfer.getData('fromIndex'), 10);
 
-        if (fromCol === '' || fromIndex === '') return;
+        if (isNaN(fromColIndex) || isNaN(fromCardIndex)) return;
 
-        const updated = [...columns];
-        const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[atCol].cards.splice(beforeCard, 0, { ...movedCard, columnId: updated[atCol].id });
+        const updated = columns.map(c => ({...c, cards: [...c.cards]}));
+        
+        const [movedCard] = updated[fromColIndex].cards.splice(fromCardIndex, 1);
+        const cardWithNewCol = { ...movedCard, columnId: updated[toColIndex].id };
+        
+        updated[toColIndex].cards.splice(targetCardIndex, 0, cardWithNewCol);
         setColumns(updated);
+
+        try {
+            const cardId = movedCard.id;
+            const toListId = updated[toColIndex].id;
+            const newPosition = targetCardIndex;
+
+            await cardService.move(cardId, {
+                cardId: cardId,
+                toListId: toListId,
+                newPosition: newPosition
+            });
+        } catch (error) {
+            console.error("Lỗi di chuyển thẻ:", error);
+        }
     };
 
     const onColumnDrop = (e, targetColIndex) => {
@@ -190,9 +227,19 @@ const ColumnMode = ({
                             >
                                 <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.id, card.id, "check", e.target.checked)} />
                                 <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
-                                {card.check && <Archive size={20} onClick={() =>
-                                    storeCard(card)}
-                                />}
+                                
+                                {card.check && (
+                                    <div 
+                                        title="Xóa thẻ"
+                                        onClick={(e) => { 
+                                            e.stopPropagation();
+                                            onSoftDelete(card); 
+                                        }}
+                                        style={{ cursor: 'pointer', color: '#ef4444' }} 
+                                    >
+                                        <Trash2 size={20} />
+                                    </div>
+                                )}
 
                             </div>
                         ))}
