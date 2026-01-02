@@ -7,7 +7,6 @@ const MainLayout = () => {
   return (
     <div className="app">
       <div className="main-layout">
-        <Navbar />
         <Sidebar />
         <div className="page-content">
           <Outlet />

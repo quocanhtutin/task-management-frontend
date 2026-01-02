@@ -154,7 +154,7 @@ const Sidebar = () => {
                     <p>Cài đặt</p>
                 </NavLink>
             </div>
-            <div className="workspace">
+            {/* <div className="workspace">
                 <div className="workspace-header">
                     <h2>Không gian làm việc</h2>
                     <CirclePlus size={22} onClick={() => setShowAddWorkSpace(!showAddWorkspace)} />
@@ -214,7 +214,7 @@ const Sidebar = () => {
                     </div>
 
                     {/* TYPE */}
-                    <div className="form-group">
+            {/* <div className="form-group">
                         <label>Loại workspace</label>
                         <div
                             className="type-input"
@@ -242,15 +242,15 @@ const Sidebar = () => {
                                 ))}
                             </div>
                         )}
-                    </div>
+                    </div> */}
 
-                    {/* SUBMIT */}
-                    <button className="add-workspace-btn" onClick={handleAddWorkspace}>
+            {/* SUBMIT */}
+            {/* <button className="add-workspace-btn" onClick={handleAddWorkspace}>
                         Thêm không gian
                     </button>
-                </div>
+                </div> */}
 
-                <div className="workspace-list">
+            {/* <div className="workspace-list">
                     {workSpaces.map(ws => (
                         <div key={ws.id}>
                             <div
@@ -279,9 +279,9 @@ const Sidebar = () => {
                             </div>
                         </div>
                     ))}
-                </div>
-            </div>
-        </div>
+                </div> */}
+            {/* </div > */}
+        </div >
     );
 };
 

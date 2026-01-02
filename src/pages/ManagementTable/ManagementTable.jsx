@@ -13,10 +13,10 @@ import listService from '../../services/listService'
 import cardService from '../../services/cardService'
 
 export const BOARD_LABEL_COLORS = [
-    "#4BCE97", "#E2B203", "#FAA53D", "#F87462", "#9F8FEF", "#579DFF", 
-    "#60C6D2", "#94C748", "#E774BB", "#8590A2", "#B3DF3B", "#F5CD47", 
-    "#FEA362", "#F87168", "#76BB86", "#6CC3E0", "#E1B309", "#172B4D", 
-    "#0052CC", "#C1C7D0" 
+    "#4BCE97", "#E2B203", "#FAA53D", "#F87462", "#9F8FEF", "#579DFF",
+    "#60C6D2", "#94C748", "#E774BB", "#8590A2", "#B3DF3B", "#F5CD47",
+    "#FEA362", "#F87168", "#76BB86", "#6CC3E0", "#E1B309", "#172B4D",
+    "#0052CC", "#C1C7D0"
 ];
 
 const ManagementTable = () => {
@@ -24,9 +24,9 @@ const ManagementTable = () => {
     const navigate = useNavigate();
 
     const [boardData, setBoardData] = useState(null);
-    const [boardTitle, setBoardTitle] = useState(""); 
+    const [boardTitle, setBoardTitle] = useState("");
     const [boardDes, setBoardDes] = useState("");
-    
+
     const descTextareaRef = useRef(null);
 
     const [showCardDetailPopup, setShowCardDetailPopup] = useState(false)
@@ -44,30 +44,10 @@ const ManagementTable = () => {
     const [storedColumns, setStoredColumns] = useState([])
 
     const [rawColor, setRawColor] = useState("#0079bf")
-    
+
     const [isStarred, setIsStarred] = useState(false)
     const [activeLabelIndices, setActiveLabelIndices] = useState([]);
     const [visibility, setVisibility] = useState(0);
-
-    const getBackgroundStyle = (bgString) => {
-        const style = {
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-        };
-
-        if (!bgString) return { ...style, backgroundColor: "#0079bf" };
-
-        if (bgString.startsWith('http')) {
-            return { ...style, backgroundImage: `url(${bgString})` };
-        }
-        
-        if (bgString.includes(',')) {
-            return { ...style, backgroundImage: `linear-gradient(135deg, ${bgString})` };
-        }
-
-        return { backgroundColor: bgString };
-    };
 
     useEffect(() => {
         if (!boardId) return;
@@ -85,9 +65,9 @@ const ManagementTable = () => {
                 setBoardTitle(apiBoard.title || "Chưa có tiêu đề");
                 setBoardDes(apiBoard.description || "");
                 setRawColor(apiBoard.background || "#0079bf");
-                
+
                 setIsStarred(apiBoard.pinned || false);
-                setActiveLabelIndices(apiBoard.label || []); 
+                setActiveLabelIndices(apiBoard.label || []);
                 if (apiBoard.visibility !== undefined) {
                     setVisibility(apiBoard.visibility);
                 }
@@ -99,7 +79,7 @@ const ManagementTable = () => {
                             id: c.id,
                             title: c.title,
                             columnId: list.id,
-                            label: c.label || null, 
+                            label: c.label || null,
                             members: c.members || [],
                             deadline: c.deadline || null,
                             check: c.isCompleted || false,
@@ -120,7 +100,7 @@ const ManagementTable = () => {
 
                 const activeLists = apiLists.filter(l => !l.isArchived).map(mapListToColumn);
                 const archivedLists = apiLists.filter(l => l.isArchived).map(mapListToColumn);
-                
+
                 setColumns(activeLists);
                 setStoredColumns(archivedLists);
 
@@ -147,7 +127,7 @@ const ManagementTable = () => {
 
     const handleTitleUpdate = async () => {
         if (!boardTitle.trim()) { setBoardTitle(boardData?.title || ""); return; }
-        if (boardData && boardTitle === boardData.title) return; 
+        if (boardData && boardTitle === boardData.title) return;
 
         try {
             await boardService.updateTitle(boardId, boardTitle);
@@ -165,8 +145,9 @@ const ManagementTable = () => {
 
     const handleUpdateBoardDes = async (newDes) => {
         setBoardDes(newDes);
-        try { await boardService.updateDescription(boardId, newDes);
-             setBoardData(prev => ({ ...prev, description: newDes }));
+        try {
+            await boardService.updateDescription(boardId, newDes);
+            setBoardData(prev => ({ ...prev, description: newDes }));
         } catch (e) { console.error(e) }
     }
 
@@ -291,9 +272,9 @@ const ManagementTable = () => {
         const listId = columns[colIndex].id;
 
         try {
-            const response = await cardService.create({ 
-                listId: listId, 
-                title: cardTitle 
+            const response = await cardService.create({
+                listId: listId,
+                title: cardTitle
             });
 
             const newCardApi = response.data.value || response.data;
@@ -310,7 +291,7 @@ const ManagementTable = () => {
                 edit: false,
                 storedDate: null
             });
-            
+
             setColumns(updatedColumns);
 
         } catch (error) {
@@ -323,13 +304,13 @@ const ManagementTable = () => {
         if (!newTitle.trim()) return;
         const originalColumns = [...columns];
         setColumns(cols => cols.map(c => c.id === colId ? { ...c, title: newTitle } : c));
-        try { await listService.updateTitle(colId, newTitle); } 
+        try { await listService.updateTitle(colId, newTitle); }
         catch (error) { setColumns(originalColumns); alert("Lỗi đổi tên danh sách!"); }
     }
 
     const handleToggleLabel = async (colorIndex) => {
-        let newIndices = activeLabelIndices.includes(colorIndex) 
-            ? activeLabelIndices.filter(i => i !== colorIndex) 
+        let newIndices = activeLabelIndices.includes(colorIndex)
+            ? activeLabelIndices.filter(i => i !== colorIndex)
             : [...activeLabelIndices, colorIndex];
         setActiveLabelIndices(newIndices);
         try { await boardService.updateLabels(boardId, newIndices); } catch (e) { console.error(e); }
@@ -343,7 +324,7 @@ const ManagementTable = () => {
     const handleTogglePinned = async () => {
         const newStatus = !isStarred;
         setIsStarred(newStatus);
-        try { await boardService.updatePinned(boardId, newStatus); } 
+        try { await boardService.updatePinned(boardId, newStatus); }
         catch (e) { setIsStarred(!newStatus); }
     };
 
@@ -354,7 +335,7 @@ const ManagementTable = () => {
             if (newBoard && newBoard.id) {
                 setShowMenuBoardPopup(false);
                 navigate(`/board/${newBoard.id}`);
-                window.location.reload(); 
+                window.location.reload();
             }
         } catch (error) { alert("Sao chép thất bại!"); }
     }
@@ -367,7 +348,7 @@ const ManagementTable = () => {
 
     return (
         <div className="man-table-container">
-            <div className="board-background-layer" style={getBackgroundStyle(rawColor)} />
+            {/* <div className="board-background-layer" style={getBackgroundStyle(rawColor)} /> */}
 
             {showMoveListPopup && (
                 <MoveListPopup
@@ -390,13 +371,13 @@ const ManagementTable = () => {
                     boardLabelColors={BOARD_LABEL_COLORS}
                 />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
-            
+
             {showMenuBoardPopup &&
                 <MenuBoardPopup
                     boardId={boardId}
                     onClose={() => setShowMenuBoardPopup(false)}
                     setShowSharePopup={setShowSharePopup}
-                    setRawColor={handleUpdateBackground} 
+                    setRawColor={handleUpdateBackground}
                     rawColor={rawColor}
                     boardDes={boardDes}
                     setBoardDes={handleUpdateBoardDes}
@@ -414,7 +395,7 @@ const ManagementTable = () => {
                     onUpdateVisibility={handleUpdateVisibility}
                     isStarred={isStarred}
                     onTogglePinned={handleTogglePinned}
-                    onDuplicateBoard={handleDuplicateBoard} 
+                    onDuplicateBoard={handleDuplicateBoard}
                     onDeleteBoard={handleDeleteBoard}
                 />
             }

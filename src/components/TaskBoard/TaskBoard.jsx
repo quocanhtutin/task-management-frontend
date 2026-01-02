@@ -79,20 +79,98 @@ const TaskBoard = ({
         return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     }
 
-    useEffect(() => {
-        if (rawColor.includes(",")) {
-            const baseColor = rawColor.split(",")[0];
-            setHeaderColor(darkenColor(baseColor, 30));
+    const getBackgroundStyle = (bgString) => {
+        const style = {
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+        };
 
-            setColor(`linear-gradient(135deg, ${rawColor})`);
-        } else {
-            setHeaderColor(darkenColor(rawColor, 30));
-            setColor(rawColor);
+        if (!bgString) return { ...style, backgroundColor: "#0079bf" };
+
+        if (bgString.startsWith('http')) {
+            return { ...style, backgroundImage: `url(${bgString})` };
         }
+
+        if (bgString.includes(',')) {
+            return { ...style, backgroundImage: `linear-gradient(135deg, ${bgString})` };
+        }
+
+        return { backgroundColor: bgString };
+    };
+
+    const getDominantColorFromImage = (imageUrl) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image()
+            img.crossOrigin = "Anonymous"
+            img.src = imageUrl
+
+            img.onload = () => {
+                const canvas = document.createElement("canvas")
+                const ctx = canvas.getContext("2d")
+
+                const w = 40
+                const h = 40
+                canvas.width = w
+                canvas.height = h
+
+                ctx.drawImage(img, 0, 0, w, h)
+
+                const data = ctx.getImageData(0, 0, w, h).data
+
+                let r = 0, g = 0, b = 0, count = 0
+                for (let i = 0; i < data.length; i += 4) {
+                    r += data[i]
+                    g += data[i + 1]
+                    b += data[i + 2]
+                    count++
+                }
+
+                r = Math.round(r / count)
+                g = Math.round(g / count)
+                b = Math.round(b / count)
+
+                resolve(`rgb(${r}, ${g}, ${b})`)
+            }
+
+            img.onerror = reject
+        })
+    }
+
+    const rgbToHex = (rgb) => {
+        const result = rgb.match(/\d+/g)
+        if (!result) return "#000000"
+
+        const toHex = (n) => Number(n).toString(16).padStart(2, "0")
+        return `#${toHex(result[0])}${toHex(result[1])}${toHex(result[2])}`
+    }
+
+
+    useEffect(() => {
+        if (!rawColor) return;
+
+        if (rawColor.includes(",")) {
+            const baseColor = rawColor.split(",")[0]
+            setHeaderColor(darkenColor(baseColor, 30))
+            setColor(`linear-gradient(135deg, ${rawColor})`)
+            return
+        }
+
+        if (rawColor.startsWith("http")) {
+            getDominantColorFromImage(rawColor)
+                .then(color => {
+                    setHeaderColor(darkenColor(rgbToHex(color), 35))
+                })
+                .catch(() => setHeaderColor("#172b4d"))
+            return
+        }
+
+        setHeaderColor(darkenColor(rawColor, 30))
+        setColor(rawColor)
     }, [rawColor])
 
     return (
-        <div className="trello-board" style={{ background: color }}>
+        <div className="trello-board" style={getBackgroundStyle(rawColor)}>
             <div className='board-header' style={{ background: headerColor }}>
                 <div className='board-header-left'>
                     <h2>{board_title}</h2>

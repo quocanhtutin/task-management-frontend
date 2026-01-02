@@ -24,6 +24,9 @@
   align-items: center;
   gap: 15px;
 }
+.board-header-right button{
+  border: none;
+}
 .board-avatar {
   width: 36px;
   height: 36px;
@@ -76,6 +79,7 @@
   padding:5px 15px;
   font-size: 16px;
   width:100%;
+  list-style: none;
 }
 
 .view-menu li:hover{
@@ -93,6 +97,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  color: white;
+  background: none;
 }
 .menu-board:hover{
   background: rgba(255,255,255,0.3);
