@@ -18,7 +18,7 @@ const TaskBoard = ({
     setShowMenuBoardPopup,
     rawColor,
     isStarred,
-    setIsStarred,
+    onTogglePinned,
     cards,
     setCards,
     storeCard,
@@ -29,7 +29,9 @@ const TaskBoard = ({
     boardTitle,
     boardLabelColors,
     handleDragEnd,
-    onMoveList
+    onMoveList,
+    ownerName,
+    ownerAvatar,
 }) => {
 
 
@@ -191,12 +193,34 @@ const TaskBoard = ({
                     </div>
                 </div>
                 <div className='board-header-right'>
-                    <div className="board-avatar">
-                        QA
+                    <div 
+                        className="board-avatar" 
+                        title={`Chủ sở hữu: ${ownerName}`}
+                        style={{
+                            overflow: 'hidden', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            cursor: 'default'
+                        }}
+                    >
+                        {ownerAvatar ? (
+                            <img 
+                                src={ownerAvatar} 
+                                alt={ownerName} 
+                                style={{
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover'
+                                }} 
+                            />
+                        ) : (
+                            <span>{ownerName ? ownerName[0].toUpperCase() : "?"}</span>
+                        )}
                     </div>
                     <button
                         className="star-btn"
-                        onClick={() => setIsStarred(prev => !prev)}
+                        onClick={onTogglePinned}
                     >
                         {isStarred ? "★" : "☆"}
                     </button>

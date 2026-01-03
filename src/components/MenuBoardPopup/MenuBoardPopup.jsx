@@ -32,6 +32,8 @@ const MenuBoardPopup = ({
     setShowSharePopup,
     setRawColor,
     rawColor,
+    boardTitle,
+    onUpdateTitle,
     boardDes,
     setBoardDes,
     storedCards,
@@ -51,6 +53,8 @@ const MenuBoardPopup = ({
     onDuplicateBoard,
     onDeleteBoard,
     onDeleteCard,
+    ownerName,
+    ownerAvatar,
 }) => {
     const [tab, setTab] = useState("menu");
     const [backgroundType, setBackgroundType] = useState("gradient");
@@ -71,11 +75,26 @@ const MenuBoardPopup = ({
         "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop"
     ];
 
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [tempTitle, setTempTitle] = useState(boardTitle);
     const [isEditingDesc, setIsEditingDesc] = useState(false);
     const [desc, setDesc] = useState(boardDes);
     const [showVisibility, setShowVisibility] = useState(false);
     const [copyLists, setCopyLists] = useState(true);
     const [copyCards, setCopyCards] = useState(true);
+
+    useEffect(() => {
+        setTempTitle(boardTitle);
+    }, [boardTitle]);
+
+    const handleSaveTitle = () => {
+        if (tempTitle.trim() !== "" && tempTitle !== boardTitle) {
+            onUpdateTitle(tempTitle);
+        } else {
+            setTempTitle(boardTitle || "");
+        }
+        setIsEditingTitle(false);
+    };
 
     useEffect(() => {
         if (tab === "achieve" && boardId) {
@@ -179,13 +198,81 @@ const MenuBoardPopup = ({
                                 <h2>Quản trị viên của bảng</h2>
                             </div>
                             <div className="member-item">
-                                <div className="member-avatar">QA</div>
+                                <div className="member-avatar" style={{ overflow: 'hidden' }}>
+                                    {ownerAvatar ? (
+                                        <img 
+                                            src={ownerAvatar} 
+                                            alt={ownerName} 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                        />
+                                    ) : (
+                                        ownerName ? ownerName[0].toUpperCase() : "?"
+                                    )}
+                                </div>
                                 <div className="member-info">
-                                    <p className="member-name">Quốc Anh Nguyễn (bạn)</p>
-                                    <p className="member-username">@qucanhnguyen26</p>
+                                    <p className="member-name">{ownerName}</p>
                                 </div>
                             </div>
                         </div>
+
+                        <div className="board-info" style={{marginBottom: '0'}}>
+                            <h2>Tiêu đề bảng</h2>
+                            
+                            {!isEditingTitle ? (
+                                <div 
+                                    className="board-title-display"
+                                    onClick={() => setIsEditingTitle(true)}
+                                    style={{
+                                        padding: '8px 12px',
+                                        backgroundColor: '#fafbfc',
+                                        border: '1px solid #dfe1e6',
+                                        borderRadius: '3px',
+                                        cursor: 'pointer',
+                                        fontWeight: '600',
+                                        fontSize: '16px',
+                                        marginBottom: '10px'
+                                    }}
+                                >
+                                    {boardTitle}
+                                </div>
+                            ) : (
+                                <div>
+                                    <input 
+                                        value={tempTitle}
+                                        onChange={(e) => setTempTitle(e.target.value)}
+                                        autoFocus
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px 12px',
+                                            borderRadius: '3px',
+                                            border: '2px solid #0079bf',
+                                            fontSize: '16px',
+                                            fontWeight: '600',
+                                            marginBottom: '8px',
+                                            outline: 'none'
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') handleSaveTitle();
+                                        }}
+                                    />
+                                    <div className="desc-actions">
+                                        <button 
+                                            onClick={() => { setTempTitle(boardTitle); setIsEditingTitle(false); }} 
+                                            className="btn"
+                                        >
+                                            Hủy
+                                        </button>
+                                        <button 
+                                            onClick={handleSaveTitle} 
+                                            className="btn primary"
+                                        >
+                                            Lưu
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
                         <div className="board-info">
                             <h2>Mô tả</h2>
                             <AutoResizeTextarea value={desc} onChange={(e) => setDesc(e.target.value)} onFocus={() => setIsEditingDesc(true)} />
