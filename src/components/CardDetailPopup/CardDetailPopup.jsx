@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import "./CardDetailPopup.css";
-import { ChevronDown, X, Pencil, PencilOff, Trash2, Paperclip, Download } from 'lucide-react'; 
+import { ChevronDown, X, Pencil, PencilOff, Trash2, Paperclip, Download } from 'lucide-react';
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
 import ChecklistSection from "../CheckList/ChecklistSection";
 import { DragDropContext } from "@hello-pangea/dnd";
@@ -9,17 +9,17 @@ import cardService from "../../services/cardService";
 import boardMemberService from "../../services/boardMemberService";
 import taskService from "../../services/taskService";
 import subTaskService from "../../services/subTaskService";
-import commentService from "../../services/commentService"; 
-import attachmentService from "../../services/attachmentService"; 
+import commentService from "../../services/commentService";
+import attachmentService from "../../services/attachmentService";
 
 function CommentEditor({ initial, onSave, onCancel }) {
     const [val, setVal] = useState(initial);
     return (
         <div>
-            <AutoResizeTextarea 
-                value={val} 
-                onChange={(e) => setVal(e.target.value)} 
-                onFocus={() => {}} 
+            <AutoResizeTextarea
+                value={val}
+                onChange={(e) => setVal(e.target.value)}
+                onFocus={() => { }}
             />
             <div className="desc-actions">
                 <button onClick={onCancel} className="btn">Hủy</button>
@@ -76,7 +76,7 @@ export default function CardDetailPopup({
 
     // Comments
     const [commentText, setCommentText] = useState("");
-    const [comments, setComments] = useState([]); 
+    const [comments, setComments] = useState([]);
     const [editingCommentId, setEditingCommentId] = useState(null);
 
     // Attachments
@@ -92,7 +92,7 @@ export default function CardDetailPopup({
             try {
                 const response = await boardMemberService.getAllMembers(boardId);
                 const data = response.data.value || response.data || [];
-                
+
                 const formattedMembers = data.map(m => ({
                     id: m.userId || m.id,
                     name: m.name || m.user?.name || "No Name",
@@ -118,7 +118,7 @@ export default function CardDetailPopup({
                     cardService.getDetail(card.id),
                     cardService.getAssignees(card.id),
                     taskService.getTasks(card.id),
-                    commentService.getComments(card.id), 
+                    commentService.getComments(card.id),
                     attachmentService.getAttachments(card.id)
                 ]);
 
@@ -127,8 +127,8 @@ export default function CardDetailPopup({
                     ...task,
                     items: (task.subTasks || []).map(sub => ({
                         ...sub,
-                        done: sub.status === 2, 
-                        status: sub.status 
+                        done: sub.status === 2,
+                        status: sub.status
                     }))
                 }));
                 setChecklists(formattedChecklists);
@@ -139,7 +139,7 @@ export default function CardDetailPopup({
                 setTitle(data.title || card.title);
                 setDesc(data.description || "");
                 setCompleted(data.isCompleted ?? data.check ?? false);
-                
+
                 if (Array.isArray(data.label)) {
                     setSelectedLabels(data.label);
                 } else {
@@ -148,14 +148,14 @@ export default function CardDetailPopup({
 
                 setStartDate(data.startDate || null);
                 setDeadline(data.dueDate || data.deadline || null);
-                
+
                 if (data.dueDate) {
                     const d = new Date(data.dueDate);
                     const year = d.getFullYear();
                     const month = String(d.getMonth() + 1).padStart(2, '0');
                     const day = String(d.getDate()).padStart(2, '0');
                     setDateInput(`${year}-${month}-${day}`);
-                    
+
                     const hh = String(d.getHours()).padStart(2, '0');
                     const mm = String(d.getMinutes()).padStart(2, '0');
                     setTimeInput(`${hh}:${mm}`);
@@ -315,14 +315,13 @@ export default function CardDetailPopup({
             console.error("Lỗi cập nhật thành viên:", error);
             alert("Có lỗi xảy ra, vui lòng thử lại!");
             if (isAssigned) {
-                setMembers([...members, user]); 
+                setMembers([...members, user]);
             } else {
                 setMembers(members.filter(m => m.id !== user.id));
             }
         }
     }
 
-    // --- ATTACHMENT LOGIC ---
     const handleUploadClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
@@ -361,12 +360,12 @@ export default function CardDetailPopup({
         if (!commentText.trim()) return;
 
         const contentToDisplay = commentText;
-        const tempId = "temp-" + Date.now(); 
+        const tempId = "temp-" + Date.now();
 
         // Optimistic UI update
-        const newCommentOptimistic = { 
-            id: tempId, 
-            text: contentToDisplay, 
+        const newCommentOptimistic = {
+            id: tempId,
+            text: contentToDisplay,
             author: "Bạn",
             avatar: null, // Mới tạo chưa có avatar
             time: new Date().toISOString()
@@ -377,17 +376,16 @@ export default function CardDetailPopup({
 
         try {
             const response = await commentService.create(card.id, contentToDisplay);
-            
+
             // Dữ liệu API trả về: { userName, userAvatar, id, createdAt, ... }
-            const apiData = response.data.value; 
-            
-            setComments(prevComments => 
-                prevComments.map(c => 
-                    c.id === tempId ? { 
-                        ...c, 
-                        id: apiData.id, 
+            const apiData = response.data.value;
+
+            setComments(prevComments =>
+                prevComments.map(c =>
+                    c.id === tempId ? {
+                        ...c,
+                        id: apiData.id,
                         time: apiData.createdAt,
-                        // --- CẬP NHẬT THÊM 2 DÒNG NÀY ---
                         author: apiData.userName,   // Cập nhật tên thật từ server
                         avatar: apiData.userAvatar  // Cập nhật link avatar từ server
                     } : c
@@ -524,11 +522,11 @@ export default function CardDetailPopup({
                                 <Pencil className="edit-title" onClick={() => setEditTitle(true)} /> :
                                 <PencilOff className="edit-title" onClick={() => { setEditTitle(false); saveTitle() }} />
                             }
-                            
-                            <div 
-                                className="store-card delete-hover" 
+
+                            <div
+                                className="store-card delete-hover"
                                 title="Xóa thẻ"
-                                style={{ cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center', marginLeft: '10px' }} 
+                                style={{ cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center', marginLeft: '10px' }}
                                 onClick={() => onSoftDelete(card)}
                             >
                                 <Trash2 size={22} />
@@ -540,7 +538,7 @@ export default function CardDetailPopup({
                                 <button className="action-btn label-btn" onClick={() => setShowLabelSelect(!showLabelSelect)}>
                                     Nhãn
                                 </button>
-                                
+
                                 {selectedLabels && Array.isArray(selectedLabels) && selectedLabels.length > 0 && (
                                     <div className="preview-labels">
                                         {selectedLabels.map((labelIdx) => {
@@ -556,21 +554,21 @@ export default function CardDetailPopup({
                                 {showLabelSelect && (
                                     <div className="label-select">
                                         <div className="label-list-cdp">
-                                            <h4 style={{margin: '0 0 8px 0', fontSize: '14px', color: '#5e6c84'}}>Nhãn dán</h4>
-                                            
+                                            <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#5e6c84' }}>Nhãn dán</h4>
+
                                             {boardLabelColors.map((colorHex, index) => {
                                                 if (!activeLabelIndices.includes(index)) return null;
 
                                                 const isChecked = Array.isArray(selectedLabels) && selectedLabels.includes(index);
                                                 return (
                                                     <div className="card-label-item" key={index} onClick={() => toggleLabel(index)}>
-                                                        <input type="checkbox" checked={isChecked} readOnly style={{cursor: 'pointer'}} />
+                                                        <input type="checkbox" checked={isChecked} readOnly style={{ cursor: 'pointer' }} />
                                                         <div className="label-color" style={{ background: colorHex, cursor: 'pointer' }}></div>
                                                     </div>
                                                 );
                                             })}
                                             {activeLabelIndices.length === 0 && (
-                                                <div style={{color: '#ef4444', fontSize: '13px', padding: '10px 0'}}>Chưa có nhãn nào được kích hoạt.</div>
+                                                <div style={{ color: '#ef4444', fontSize: '13px', padding: '10px 0' }}>Chưa có nhãn nào được kích hoạt.</div>
                                             )}
                                         </div>
                                     </div>
@@ -616,10 +614,10 @@ export default function CardDetailPopup({
                                         {members.slice(0, 3).map((m, idx) => (
                                             <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>
                                                 {m.avatarUrl ? (
-                                                    <img 
-                                                        src={m.avatarUrl} 
-                                                        alt={m.name} 
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                    <img
+                                                        src={m.avatarUrl}
+                                                        alt={m.name}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                     />
                                                 ) : (
                                                     m.name[0]
@@ -633,10 +631,10 @@ export default function CardDetailPopup({
                                                         <div key={u.id} className={`member-item`}>
                                                             <div className="avatar small" style={{ background: u.avatarColor }}>
                                                                 {m.avatarUrl ? (
-                                                                    <img 
-                                                                        src={m.avatarUrl} 
-                                                                        alt={m.name} 
-                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                                    <img
+                                                                        src={m.avatarUrl}
+                                                                        alt={m.name}
+                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                                     />
                                                                 ) : (
                                                                     m.name[0]
@@ -659,9 +657,9 @@ export default function CardDetailPopup({
                                                     .map(u => {
                                                         const isSelected = members.find(m => m.id === u.id);
                                                         return (
-                                                            <div 
-                                                                key={u.id} 
-                                                                className={`member-item ${isSelected ? 'selected' : ''}`} 
+                                                            <div
+                                                                key={u.id}
+                                                                className={`member-item ${isSelected ? 'selected' : ''}`}
                                                                 onClick={() => toggleMember(u)}
                                                             >
                                                                 <div className="avatar small" style={{ background: u.avatarColor }}>
@@ -669,14 +667,14 @@ export default function CardDetailPopup({
                                                                 </div>
                                                                 <div className="member-name">
                                                                     {u.name}
-                                                                    <div style={{fontSize: '11px', color: '#888'}}>{u.email}</div>
+                                                                    <div style={{ fontSize: '11px', color: '#888' }}>{u.email}</div>
                                                                 </div>
                                                                 {isSelected && <button className="remove-member member-btn">x</button>}
                                                             </div>
                                                         );
                                                     })}
                                                 {boardMembers.length === 0 && (
-                                                    <div style={{padding: '10px', textAlign: 'center', color: '#888'}}>
+                                                    <div style={{ padding: '10px', textAlign: 'center', color: '#888' }}>
                                                         Không có thành viên nào trong Board.
                                                     </div>
                                                 )}
@@ -688,26 +686,26 @@ export default function CardDetailPopup({
 
                             {/* [FIXED] Nút Đính kèm nhỏ gọn */}
                             <div className="action-row" style={{ flex: '0 0 auto' }}>
-                                <button 
-                                    className="action-btn attachment-btn" 
-                                    onClick={handleUploadClick} 
+                                <button
+                                    className="action-btn attachment-btn"
+                                    onClick={handleUploadClick}
                                     title="Đính kèm tệp"
                                     style={{
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center', 
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                         padding: '6px 10px',
                                         height: '32px',
                                         minWidth: '32px'
                                     }}
                                 >
-                                    <Paperclip size={16} /> 
+                                    <Paperclip size={16} />
                                 </button>
-                                <input 
-                                    type="file" 
-                                    ref={fileInputRef} 
-                                    style={{display: 'none'}} 
-                                    onChange={handleFileChange} 
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    style={{ display: 'none' }}
+                                    onChange={handleFileChange}
                                 />
                             </div>
 
@@ -715,46 +713,46 @@ export default function CardDetailPopup({
 
                         {attachments.length > 0 && (
                             <div className="section">
-                                <div className="label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                <div className="label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Paperclip size={16} /> Tệp đính kèm ({attachments.length})
                                 </div>
-                                <div className="attachments-list" style={{marginTop: '10px'}}>
+                                <div className="attachments-list" style={{ marginTop: '10px' }}>
                                     {attachments.map(att => (
                                         <div key={att.id} className="attachment-item" style={{
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            padding: '8px', 
-                                            border: '1px solid #dfe1e6', 
-                                            borderRadius: '4px', 
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '8px',
+                                            border: '1px solid #dfe1e6',
+                                            borderRadius: '4px',
                                             marginBottom: '8px',
                                             background: '#fff'
                                         }}>
                                             <div style={{
-                                                width: '40px', 
-                                                height: '30px', 
-                                                background: '#dfe1e6', 
-                                                borderRadius: '3px', 
-                                                display: 'flex', 
-                                                alignItems: 'center', 
-                                                justifyContent: 'center', 
-                                                marginRight: '10px', 
-                                                fontSize: '10px', 
-                                                color: '#5e6c84', 
-                                                fontWeight: 'bold', 
+                                                width: '40px',
+                                                height: '30px',
+                                                background: '#dfe1e6',
+                                                borderRadius: '3px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                marginRight: '10px',
+                                                fontSize: '10px',
+                                                color: '#5e6c84',
+                                                fontWeight: 'bold',
                                                 textTransform: 'uppercase'
                                             }}>
                                                 {att.fileName ? att.fileName.split('.').pop() : 'FILE'}
                                             </div>
 
-                                            <div style={{flex: 1, overflow: 'hidden'}}>
-                                                <div style={{fontWeight: 600, fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                                            <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                <div style={{ fontWeight: 600, fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {att.fileName}
                                                 </div>
-                                                <div style={{fontSize: '12px', color: '#5e6c84'}}>
+                                                <div style={{ fontSize: '12px', color: '#5e6c84' }}>
                                                     Đã thêm {new Date(att.uploadDate || Date.now()).toLocaleDateString('vi-VN')}
-                                                    <span style={{margin: '0 6px'}}>•</span>
-                                                    <span 
-                                                        style={{cursor: 'pointer', textDecoration: 'underline'}} 
+                                                    <span style={{ margin: '0 6px' }}>•</span>
+                                                    <span
+                                                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
                                                         onClick={() => handleDeleteAttachment(att.id)}
                                                     >
                                                         Xóa
@@ -762,7 +760,7 @@ export default function CardDetailPopup({
                                                 </div>
                                             </div>
 
-                                            <a href={att.fileUrl} target="_blank" rel="noreferrer" className="btn-icon" style={{color: '#5e6c84', padding: '6px'}} title="Tải xuống">
+                                            <a href={att.fileUrl} target="_blank" rel="noreferrer" className="btn-icon" style={{ color: '#5e6c84', padding: '6px' }} title="Tải xuống">
                                                 <Download size={16} />
                                             </a>
                                         </div>
@@ -785,10 +783,10 @@ export default function CardDetailPopup({
                                 </div>
                             )}
                         </div>
-                        
+
                         <DragDropContext onDragEnd={handleDragEnd}>
-                            <ChecklistSection 
-                                checklists={checklists} 
+                            <ChecklistSection
+                                checklists={checklists}
                                 setChecklists={setChecklists}
                                 cardId={card.id}
                             />
@@ -810,11 +808,11 @@ export default function CardDetailPopup({
                                     <div className="comment-meta">
                                         {/* [FIXED] Hiển thị Avatar */}
                                         {c.avatar ? (
-                                            <img 
-                                                src={c.avatar} 
-                                                alt={c.author} 
-                                                className="avatar small" 
-                                                style={{ objectFit: 'cover', border: '1px solid #dfe1e6' }} 
+                                            <img
+                                                src={c.avatar}
+                                                alt={c.author}
+                                                className="avatar small"
+                                                style={{ objectFit: 'cover', border: '1px solid #dfe1e6' }}
                                             />
                                         ) : (
                                             <div className="avatar small">

@@ -2,16 +2,31 @@
   display: flex;
   gap: 12px;
   padding: 16px;
-  overflow-x: auto;
-  height: 100%;
-  overflow-y: auto;
+
+  height: 100%;          /* ăn theo wrapper */
+  overflow-y: auto;      /* scroll dọc */
+  overflow-x: visible;   /* KHÔNG scroll ngang */
+
+  box-sizing: border-box;
 }
 
-.board-scroll::-webkit-scrollbar {
-  height: 8px;
+.board-wrapper {
+  height: 85%;
+  width: 100%;
+
+  overflow-x: auto;   
+  overflow-y: hidden;
+
+  position: relative;
 }
-.board-scroll::-webkit-scrollbar-thumb {
-  background: #bbb;
+
+
+.board-scroll::-webkit-scrollbar, .board-wrapper::-webkit-scrollbar {
+  height: 8px;
+  width:8px;
+}
+.board-scroll::-webkit-scrollbar-thumb, .board-wrapper::-webkit-scrollbar-thumb {
+  background: #bbbbbb70;
   border-radius: 4px;
 }
 
@@ -23,7 +38,7 @@
   flex-shrink: 0;
   height: fit-content;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  margin-bottom: 135px;
+  /* margin-bottom: 135px; */
 }
 .column-header{
   display: flex;
