@@ -1,68 +1,69 @@
-import React, { useState } from 'react'
-import './Navbar.css'
+import React, { useState } from 'react';
+import './Navbar.css';
 import { Bell, Home, Plus, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../../utils/axiosConfig';
 
 const Navbar = () => {
-    const [showMenu, setShowMenu] = useState(false);
-    const navigate = useNavigate()
+  const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
 
-    const handleLogout = async () => {
-        try {
-            const refreshToken = localStorage.getItem('refreshToken');
-            const provider = localStorage.getItem('provider');
-      
-            await axiosClient.post('/Auth/Logout', {
-                provider: provider,
-                refreshToken: refreshToken
-        });
+  const handleLogout = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      const provider = localStorage.getItem('provider');
 
-        } catch (error) {
-            console.error("Lỗi logout trên server:", error);
-        } finally {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('provider');
+      await axiosClient.post('/Auth/Logout', {
+        provider: provider,
+        refreshToken: refreshToken
+      });
+    } catch (error) {
+      console.error("Lỗi logout trên server:", error);
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('provider');
+      localStorage.removeItem('returnUrl');
 
-            navigate('/login');
-        }
-    };
-
-    const handleNavigate = (path) => {
-        navigate(path);
-        setShowMenu(false);
+      navigate('/login');
     }
+  };
 
-    return (
-        <div className="navbar">
-            <div className="navbar-left">
-                <button className="icon-btn" onClick={() => navigate('/main/boards')}><Home /></button>
-                <input type="text" placeholder="Tìm kiếm" className="search-input" />
+  const handleNavigate = (path) => {
+    navigate(path);
+    setShowMenu(false);
+  };
+
+  return (
+    <div className="navbar">
+      <div className="navbar-left">
+        <button className="icon-btn" onClick={() => navigate('/main/boards')}><Home /></button>
+        <input type="text" placeholder="Tìm kiếm" className="search-input" />
+      </div>
+      <div className="navbar-right">
+        <button className="icon-btn"><Plus /></button>
+        <button className="icon-btn"><Bell /></button>
+        <div className="menu-wrapper">
+          <button className="icon-btn" onClick={() => setShowMenu(!showMenu)}><User /></button>
+          {showMenu && (
+            <div className="navbar-dropdown-menu">
+              <ul>
+                <li onClick={() => handleNavigate('/main/settings')}>Tài khoản</li>
+                <li>Cài đặt</li>
+                <li>Chủ đề</li>
+                <li>Trợ giúp</li>
+                <li>
+                  <button onClick={handleLogout} className="logout-btn">
+                    Đăng xuất
+                  </button>
+                </li>
+              </ul>
             </div>
-            <div className="navbar-right">
-                <button className="icon-btn"><Plus /></button>
-                <button className="icon-btn"><Bell /></button>
-                <div className="menu-wrapper">
-                    <button className="icon-btn" onClick={() => setShowMenu(!showMenu)}><User /></button>
-                    {showMenu && (
-                        <div className="navbar-dropdown-menu">
-                            <ul>
-                                <li onClick={() => handleNavigate('/main/settings')}>Tài khoản</li>
-                                <li>Cài đặt</li>
-                                <li>Chủ đề</li>
-                                <li>Trợ giúp</li>
-                                <li><button onClick={handleLogout} className="logout-btn">
-                                    Đăng xuất
-                                </button></li>
-                            </ul>
-                        </div>
-                    )}
-                </div>
-            </div>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
+};
 
-}
-
-export default Navbar
+export default Navbar;
