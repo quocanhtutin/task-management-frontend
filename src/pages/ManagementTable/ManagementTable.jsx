@@ -23,6 +23,8 @@ const ManagementTable = () => {
     const { boardId } = useParams();
     const navigate = useNavigate();
 
+    const [ownerName, setOwnerName] = useState("");
+    const [ownerAvatar, setOwnerAvatar] = useState("");
     const [boardData, setBoardData] = useState(null);
     const [boardTitle, setBoardTitle] = useState("");
     const [boardDes, setBoardDes] = useState("");
@@ -62,6 +64,8 @@ const ManagementTable = () => {
                 const apiLists = data.lists || [];
                 const apiCards = data.cards || [];
 
+                setOwnerName(data.ownerName || "Admin");
+                setOwnerAvatar(data.ownerAvatarUrl || "");
                 setBoardData(apiBoard);
                 setBoardTitle(apiBoard.title || "Chưa có tiêu đề");
                 setBoardDes(apiBoard.description || "");
@@ -126,14 +130,15 @@ const ManagementTable = () => {
         }
     }, [boardDes]);
 
-    const handleTitleUpdate = async () => {
-        if (!boardTitle.trim()) { setBoardTitle(boardData?.title || ""); return; }
-        if (boardData && boardTitle === boardData.title) return;
-
+    const handleUpdateTitleRaw = async (newTitle) => {
+        if (!newTitle.trim()) return;
+        setBoardTitle(newTitle);
         try {
-            await boardService.updateTitle(boardId, boardTitle);
-            setBoardData(prev => ({ ...prev, title: boardTitle }));
-        } catch (error) { console.error("Lỗi cập nhật tiêu đề:", error); }
+            await boardService.updateTitle(boardId, newTitle);
+            setBoardData(prev => ({ ...prev, title: newTitle }));
+        } catch (error) {
+            console.error("Lỗi cập nhật tiêu đề:", error);
+        }
     }
 
     const handleDescriptionUpdate = async () => {
@@ -487,6 +492,10 @@ const ManagementTable = () => {
                     onDuplicateBoard={handleDuplicateBoard}
                     onDeleteBoard={handleDeleteBoard}
                     onDeleteCard={handleDeleteCardPermanent}
+                    boardTitle={boardTitle}
+                    onUpdateTitle={handleUpdateTitleRaw}
+                    ownerName={ownerName}
+                    ownerAvatar={ownerAvatar}
                 />
             }
 
@@ -549,7 +558,7 @@ const ManagementTable = () => {
                     setShowMenuBoardPopup={setShowMenuBoardPopup}
                     rawColor={rawColor}
                     isStarred={isStarred}
-                    setIsStarred={setIsStarred}
+                    onTogglePinned={handleTogglePinned}
                     storeCard={storeCard}
                     onSoftDelete={handleSoftDeleteCard}
                     storeColumn={storeColumn}
@@ -559,6 +568,8 @@ const ManagementTable = () => {
                     boardLabelColors={BOARD_LABEL_COLORS}
                     handleDragEnd={handleMoveList}
                     onMoveList={handleOpenMoveList}
+                    ownerName={ownerName}
+                    ownerAvatar={ownerAvatar}
                 />
             </div>
 

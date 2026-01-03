@@ -97,7 +97,8 @@ export default function CardDetailPopup({
                     id: m.userId || m.id,
                     name: m.name || m.user?.name || "No Name",
                     avatarColor: m.avatarColor || "#2196F3",
-                    email: m.email || m.user?.email
+                    email: m.email || m.user?.email,
+                    avatarUrl: m.avatarUrl
                 }));
                 setBoardMembers(formattedMembers);
             } catch (error) {
@@ -613,14 +614,35 @@ export default function CardDetailPopup({
                                         onMouseLeave={() => { clearTimeout(hoverTimer.current); setShowAssignedMembers(false); }}
                                     >
                                         {members.slice(0, 3).map((m, idx) => (
-                                            <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>{m.name[0]}</div>
+                                            <div key={m.id} className={`avatar overlap idx-${idx}`} style={{ background: m.avatarColor }}>
+                                                {m.avatarUrl ? (
+                                                    <img 
+                                                        src={m.avatarUrl} 
+                                                        alt={m.name} 
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                    />
+                                                ) : (
+                                                    m.name[0]
+                                                )}
+                                            </div>
                                         ))}
                                         {showAssignedMembers &&
                                             <div className="member-assigned">
                                                 <div className="member-results">
                                                     {members.map(u => (
                                                         <div key={u.id} className={`member-item`}>
-                                                            <div className="avatar small" style={{ background: u.avatarColor }}>{u.name[0]}</div>
+                                                            <div className="avatar small" style={{ background: u.avatarColor }}>
+                                                                {m.avatarUrl ? (
+                                                                    <img 
+                                                                        src={m.avatarUrl} 
+                                                                        alt={m.name} 
+                                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                                    />
+                                                                ) : (
+                                                                    m.name[0]
+                                                                )}
+
+                                                            </div>
                                                             <div className="member-name">{u.name}</div>
                                                         </div>
                                                     ))}
