@@ -51,6 +51,16 @@ const cardService = {
         return axiosClient.put(`/Card/${cardId}/Dates`, data);
     },
 
+    updateStatus: (cardId, status) => {
+        return axiosClient.put(
+            `/Card/${cardId}/Status`,
+            JSON.stringify(status),
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+    },
+
     move: (cardId, data) => {
         return axiosClient.put(`/Card/${cardId}/Move`, data);
     },
