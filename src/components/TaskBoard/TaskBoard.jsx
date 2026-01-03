@@ -14,6 +14,7 @@ const TaskBoard = ({
     setColumns,
     addNewList,
     addCard,
+    onToggleStatus,
     setShowSharePopup,
     setShowMenuBoardPopup,
     rawColor,
@@ -255,6 +256,7 @@ const TaskBoard = ({
                     onMoveList={onMoveList}
                     onSoftDelete={onSoftDelete}
                     boardLabelColors={boardLabelColors}
+                    onToggleStatus={onToggleStatus}
                 />
             )}
 
@@ -271,6 +273,7 @@ const TaskBoard = ({
                     addCard={(col) => { addCard(col, input); setInput("") }}
                     input={input}
                     setInput={setInput}
+                    onToggleStatus={onToggleStatus}
                 />
             )}
 

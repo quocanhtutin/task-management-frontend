@@ -86,8 +86,8 @@ const ManagementTable = () => {
                             columnId: list.id,
                             label: c.label || null,
                             members: c.members || [],
-                            deadline: c.deadline || null,
-                            check: c.isCompleted || false,
+                            deadline: c.dueDate || c.deadline || null,
+                            check: c.status === 2,
                             description: c.description,
                             edit: false,
                             storedDate: c.storedDate || null
@@ -259,6 +259,38 @@ const ManagementTable = () => {
     const handleConfirmDelete = () => {
         if (undoState?.timeoutId) clearTimeout(undoState.timeoutId);
         setUndoState(null); 
+    };
+
+    const handleUpdateCardStatus = async (cardId, currentCheckState) => {
+        const newCheckState = !currentCheckState;
+        const statusInt = newCheckState ? 2 : 1;
+
+        let foundColumnId = null;
+        for (const col of columns) {
+            if (col.cards.find(c => c.id === cardId)) {
+                foundColumnId = col.id;
+                break;
+            }
+        }
+        
+        if (!foundColumnId) return;
+
+        updateCardInColumn(foundColumnId, cardId, "check", newCheckState);
+        
+        if (showCardDetailPopup && cardDetail.id === cardId) {
+            setCardDetail(prev => ({ ...prev, check: newCheckState }));
+        }
+
+        try {
+            await cardService.updateStatus(cardId, statusInt);
+        } catch (error) {
+            console.error("Lỗi cập nhật trạng thái:", error);
+            alert("Không thể cập nhật trạng thái thẻ!");
+            updateCardInColumn(foundColumnId, cardId, "check", currentCheckState);
+             if (showCardDetailPopup && cardDetail.id === cardId) {
+                setCardDetail(prev => ({ ...prev, check: currentCheckState }));
+            }
+        }
     };
 
     const storeCard = (card) => {
@@ -463,6 +495,7 @@ const ManagementTable = () => {
                     boardLabelColors={BOARD_LABEL_COLORS}
                     onSoftDelete={handleSoftDeleteCard}
                     activeLabelIndices={activeLabelIndices}
+                    onToggleStatus={handleUpdateCardStatus}
                 />}
             {showSharePopup && <SharingPopup onClose={() => setShowSharePopup(false)} />}
 
@@ -570,6 +603,7 @@ const ManagementTable = () => {
                     onMoveList={handleOpenMoveList}
                     ownerName={ownerName}
                     ownerAvatar={ownerAvatar}
+                    onToggleStatus={handleUpdateCardStatus}
                 />
             </div>
 

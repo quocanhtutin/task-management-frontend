@@ -10,6 +10,7 @@ const ColumnMode = ({
     setInput,
     displayAddCard,
     addCard,
+    onToggleStatus,
     setCardDetail,
     setShowCardDetailPopup,
     updateCardInColumn,
@@ -227,7 +228,13 @@ const ColumnMode = ({
                                     }}
                                     onDragOver={allowDrop}
                                 >
-                                    <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.id, card.id, "check", e.target.checked)} />
+                                    <input
+                                        type="checkbox"
+                                        checked={card.check}
+                                        onChange={(e) => {
+                                            onToggleStatus(card.id, card.check);
+                                        }}
+                                    />
                                     <div className="card-content-wrapper" onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
 
                                         {card.label && Array.isArray(card.label) && card.label.length > 0 && (

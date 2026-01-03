@@ -13,7 +13,8 @@ const TableMode = ({
     addNewList,
     addCard,
     input,
-    setInput
+    setInput,
+    onToggleStatus,
 }) => {
     const [popupInfo, setPopupInfo] = useState(null);
     const [cardColumn, setCardColumn] = useState("")
@@ -50,7 +51,11 @@ const TableMode = ({
                     {columns.map((col, i) => col.cards.map((card, cardIndex) => (
                         <tr key={cardIndex} className="table-row">
                             <td className="row-check">
-                                <input type='checkbox' checked={card.check} onChange={(e) => updateCardInColumn(card.columnId, card.id, "check", e.target.checked)} />
+                                <input 
+                                    type='checkbox' 
+                                    checked={card.check} 
+                                    onChange={(e) => onToggleStatus(card.id, card.check)} 
+                                />                            
                             </td>
                             <td className='card-detail' >
                                 <div className='card-title' onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>

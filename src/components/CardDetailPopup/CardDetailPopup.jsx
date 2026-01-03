@@ -38,6 +38,7 @@ export default function CardDetailPopup({
     setColumns,
     boardLabelColors = [],
     activeLabelIndices = [],
+    onToggleStatus,
 }) {
     const [loading, setLoading] = useState(false);
     const [completed, setCompleted] = useState(card.check || false);
@@ -427,8 +428,19 @@ export default function CardDetailPopup({
 
     useEffect(() => { updateCardInColumn(card.columnId, card.id, "deadline", deadline) }, [deadline])
     useEffect(() => { updateCardInColumn(card.columnId, card.id, "members", members) }, [members])
-    useEffect(() => { updateCardInColumn(card.columnId, card.id, "check", completed) }, [completed])
+    //useEffect(() => { updateCardInColumn(card.columnId, card.id, "check", completed) }, [completed])
     useEffect(() => { updateCardInColumn(card.columnId, card.id, "checklists", checklists) }, [checklists]);
+
+    useEffect(() => {
+        setCompleted(card.check || false);
+    }, [card.check]);
+
+    const handleCheckboxChange = (e) => {
+        const newStatus = e.target.checked;
+        setCompleted(newStatus);
+        onToggleStatus(card.id, !newStatus);
+        onToggleStatus(card.id, completed); 
+    };
 
     const handleChangeColumn = (toCol) => {
         const updated = [...columns]
@@ -512,7 +524,11 @@ export default function CardDetailPopup({
                     <div className="cdp-left">
                         <div className="cdp-header">
                             <label className="cdp-checkbox">
-                                <input type="checkbox" checked={completed} onChange={(e) => setCompleted(e.target.checked)} />
+                                <input 
+                                    type="checkbox" 
+                                    checked={completed} 
+                                    onChange={handleCheckboxChange} 
+                                />
                             </label>
                             {!editTitle ?
                                 <h1 className="cdp-title">{title}</h1> :
