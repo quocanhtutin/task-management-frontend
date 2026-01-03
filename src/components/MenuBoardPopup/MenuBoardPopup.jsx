@@ -16,7 +16,7 @@ const VISIBILITY_OPTIONS = [
     },
     {
         value: 2,
-        title: "Không gian làm việc",
+        title: "Được bảo vệ",
         desc: "Tất cả thành viên Workspace có thể xem."
     },
     {

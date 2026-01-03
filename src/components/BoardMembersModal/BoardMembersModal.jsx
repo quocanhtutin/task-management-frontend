@@ -10,8 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import './BoardMembersModal.css';
 
 const ROLES = {
-    0: 'Member',
-    1: 'Admin',
+    0: 'Viewer',
+    1: 'Editor',
     2: 'Owner'
 };
 
@@ -218,8 +218,8 @@ export default function BoardMembersModal({ boardId, boardName, onClose }) {
                 if (typeof role === 'string') {
                     const rl = role.toLowerCase();
                     if (rl.includes('owner')) role = 2;
-                    else if (rl.includes('admin')) role = 1;
-                    else if (rl.includes('member')) role = 0;
+                    else if (rl.includes('editor') || rl.includes('admin')) role = 1;
+                    else if (rl.includes('viewer') || rl.includes('member')) role = 0;
                     else {
                         const parsed = parseInt(role, 10);
                         role = isNaN(parsed) ? 0 : parsed;
