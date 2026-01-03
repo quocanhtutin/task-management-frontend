@@ -8,7 +8,11 @@ import { StoreContext } from '../../context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 import './BoardMembersModal.css';
 
-const ROLES = { 0: 'Member', 1: 'Admin', 2: 'Owner' };
+const ROLES = {
+    0: 'Viewer',
+    1: 'Editor',
+    2: 'Owner'
+};
 
 export default function BoardMembersModal({ boardId, boardName, onClose }) {
     const [members, setMembers] = useState([]);
@@ -96,7 +100,30 @@ export default function BoardMembersModal({ boardId, boardName, onClose }) {
     const fetchMembers = async () => {
         try {
             const res = await boardMemberService.getAllMembers(boardId);
-            setMembers(res.data.value || res.data || []);
+            const data = res.data.value || res.data || [];
+            console.log('Fetched board members (raw):', data);
+            const normalized = data.map(m => {
+                const user = m.user || {};
+                const email = m.email || user.email || m.userEmail || m.emailAddress || '';
+                const name = m.name || user.name || m.fullName || '';
+                const id = m.userId ?? m.id ?? user.id ?? user.userId ?? '';
+                let role = m.role ?? m.roleId ?? m.roleValue ?? m.userRole ?? 0;
+                if (typeof role === 'string') {
+                    const rl = role.toLowerCase();
+                    if (rl.includes('owner')) role = 2;
+                    else if (rl.includes('editor') || rl.includes('admin')) role = 1;
+                    else if (rl.includes('viewer') || rl.includes('member')) role = 0;
+                    else {
+                        const parsed = parseInt(role, 10);
+                        role = isNaN(parsed) ? 0 : parsed;
+                    }
+                } else {
+                    role = Number(role) || 0;
+                }
+                return { ...m, userId: id, email, name, role };
+            });
+            console.log('Fetched board members (normalized):', normalized);
+            setMembers(normalized);
         } catch (error) {
             console.error(error);
         } finally {

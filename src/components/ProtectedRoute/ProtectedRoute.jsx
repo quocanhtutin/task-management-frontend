@@ -1,12 +1,3 @@
-<<<<<<< Updated upstream
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-
-const ProtectedRoute = () => {
-  const isAuthenticated = localStorage.getItem('accessToken');
-
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
-=======
 import React, { useContext } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { StoreContext } from '../../context/StoreContext';
@@ -27,7 +18,5 @@ const ProtectedRoute = () => {
   }
 
   return <Outlet />;
->>>>>>> Stashed changes
 };
-
 export default ProtectedRoute;

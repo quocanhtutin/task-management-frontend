@@ -6,6 +6,7 @@ import {
     Check, Copy, UserCogIcon 
 } from "lucide-react";
 import AutoResizeTextarea from "../AutoResizeTextarea/AutoResizeTextarea";
+import listService from "../../services/listService";
 
 const VISIBILITY_OPTIONS = [
     {
@@ -15,7 +16,7 @@ const VISIBILITY_OPTIONS = [
     },
     {
         value: 2,
-        title: "Không gian làm việc",
+        title: "Được bảo vệ",
         desc: "Tất cả thành viên Workspace có thể xem."
     },
     {
@@ -26,10 +27,13 @@ const VISIBILITY_OPTIONS = [
 ];
 
 const MenuBoardPopup = ({
+    boardId,
     onClose,
     setShowSharePopup,
     setRawColor,
     rawColor,
+    boardTitle,
+    onUpdateTitle,
     boardDes,
     setBoardDes,
     storedCards,
@@ -37,6 +41,7 @@ const MenuBoardPopup = ({
     setCardDetail,
     activateCard,
     storedColumns,
+    setStoredColumns,
     activateColumn,
     labelColors,
     activeLabelIndices,
@@ -46,7 +51,10 @@ const MenuBoardPopup = ({
     isStarred,
     onTogglePinned,
     onDuplicateBoard,
-    onDeleteBoard
+    onDeleteBoard,
+    onDeleteCard,
+    ownerName,
+    ownerAvatar,
 }) => {
     const [tab, setTab] = useState("menu");
     const [backgroundType, setBackgroundType] = useState("gradient");
@@ -59,28 +67,61 @@ const MenuBoardPopup = ({
         "#1976D2", "#e5fc51ff", "#ee3dd9ff", "#241f61ff",
     ];
     const imageOptions = [
-        "https://images.unsplash.com/photo-1697464082987-1422c5c56c8f?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
         "https://images.unsplash.com/photo-1707343843437-caacff5cfa74?q=80&w=1000&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1707343848552-893e05dba6ac?q=80&w=1000&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1000&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=1000&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop"
     ];
 
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [tempTitle, setTempTitle] = useState(boardTitle);
     const [isEditingDesc, setIsEditingDesc] = useState(false);
     const [desc, setDesc] = useState(boardDes);
-    const [storedCategory, setStoredCategory] = useState("card");
     const [showVisibility, setShowVisibility] = useState(false);
     const [copyLists, setCopyLists] = useState(true);
     const [copyCards, setCopyCards] = useState(true);
 
     useEffect(() => {
-        function onDocClick(e) {
-            if (!e.target.closest(".show-visibility"))
-                setShowVisibility(false);
+        setTempTitle(boardTitle);
+    }, [boardTitle]);
+
+    const handleSaveTitle = () => {
+        if (tempTitle.trim() !== "" && tempTitle !== boardTitle) {
+            onUpdateTitle(tempTitle);
+        } else {
+            setTempTitle(boardTitle || "");
         }
-        document.addEventListener("mousedown", onDocClick);
-        return () => document.removeEventListener("mousedown", onDocClick);
-    }, []);
+        setIsEditingTitle(false);
+    };
+
+    useEffect(() => {
+        if (tab === "achieve" && boardId) {
+            const fetchArchivedLists = async () => {
+                try {
+                    const response = await listService.getLists(boardId);
+                    const allLists = response.data.value || response.data;
+                    
+                    const archivedOnly = allLists.filter(l => l.isArchived);
+
+                    const formattedLists = archivedOnly.map(l => ({
+                        id: l.id,
+                        title: l.title,
+                        cards: [],
+                        addCard: false,
+                        isArchived: true
+                    }));
+
+                    setStoredColumns(formattedLists);
+                } catch (error) {
+                    console.error("Lỗi tải danh sách lưu trữ:", error);
+                }
+            };
+
+            fetchArchivedLists();
+        }
+    }, [tab, boardId]);
 
     return (
         <div className="menu-overlay" onClick={onClose}>
@@ -120,25 +161,25 @@ const MenuBoardPopup = ({
                             <ArrowLeft className="close-btn" size={28} onClick={() => setTab("menu")} />
                         </div>
 
-                        <div className="store-cat">
-                            <button onClick={() => setStoredCategory("card")} className={storedCategory === "card" ? "active-tab" : "tab"}>Thẻ nhiệm vụ</button>
-                            <button onClick={() => setStoredCategory("list")} className={storedCategory === "list" ? "active-tab" : "tab"}>Danh sách</button>
-                        </div>
-
                         <div className="store">
-                            {storedCategory === "card" && storedCards.map((card, i) =>
-                                <div key={i} className="stored-card-item" style={card.label ? { backgroundColor: card.label, color: "white" } : { background: "white" }}>
-                                    <input type="checkbox" checked={card.check} />
-                                    <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true), onClose() }}>{card.title}</p>
-                                    <ArchiveX className="activate-btn" size={20} onClick={() => activateCard(i)} />
-                                    <Trash2 className="delete-btn" size={20} />
-                                </div>
-                            )}
-                            {storedCategory === "list" && storedColumns.map((col, i) =>
+                            {storedColumns.map((col, i) => (
                                 <div key={i} className="stored-column-item">
-                                    <p >{col.title}</p>
-                                    <ArchiveX className="activate-btn" size={20} onClick={() => activateColumn(i)} />
-                                    <Trash2 className="delete-btn" size={20} />
+                                    <p style={{fontWeight: 500}}>{col.title}</p>
+                                    <div className="stored-actions">
+                                        <ArchiveX 
+                                            className="activate-btn" 
+                                            size={20} 
+                                            onClick={() => activateColumn(i)} 
+                                            title="Khôi phục danh sách này"
+                                            style={{cursor: 'pointer', marginRight: '8px'}}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            {storedColumns.length === 0 && (
+                                <div style={{textAlign: 'center', color: '#5e6c84', marginTop: '20px'}}>
+                                    Không có danh sách nào được lưu trữ.
                                 </div>
                             )}
                         </div>
@@ -157,13 +198,81 @@ const MenuBoardPopup = ({
                                 <h2>Quản trị viên của bảng</h2>
                             </div>
                             <div className="member-item">
-                                <div className="member-avatar">QA</div>
+                                <div className="member-avatar" style={{ overflow: 'hidden' }}>
+                                    {ownerAvatar ? (
+                                        <img 
+                                            src={ownerAvatar} 
+                                            alt={ownerName} 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                        />
+                                    ) : (
+                                        ownerName ? ownerName[0].toUpperCase() : "?"
+                                    )}
+                                </div>
                                 <div className="member-info">
-                                    <p className="member-name">Quốc Anh Nguyễn (bạn)</p>
-                                    <p className="member-username">@qucanhnguyen26</p>
+                                    <p className="member-name">{ownerName}</p>
                                 </div>
                             </div>
                         </div>
+
+                        <div className="board-info" style={{marginBottom: '0'}}>
+                            <h2>Tiêu đề bảng</h2>
+                            
+                            {!isEditingTitle ? (
+                                <div 
+                                    className="board-title-display"
+                                    onClick={() => setIsEditingTitle(true)}
+                                    style={{
+                                        padding: '8px 12px',
+                                        backgroundColor: '#fafbfc',
+                                        border: '1px solid #dfe1e6',
+                                        borderRadius: '3px',
+                                        cursor: 'pointer',
+                                        fontWeight: '600',
+                                        fontSize: '16px',
+                                        marginBottom: '10px'
+                                    }}
+                                >
+                                    {boardTitle}
+                                </div>
+                            ) : (
+                                <div>
+                                    <input 
+                                        value={tempTitle}
+                                        onChange={(e) => setTempTitle(e.target.value)}
+                                        autoFocus
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px 12px',
+                                            borderRadius: '3px',
+                                            border: '2px solid #0079bf',
+                                            fontSize: '16px',
+                                            fontWeight: '600',
+                                            marginBottom: '8px',
+                                            outline: 'none'
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') handleSaveTitle();
+                                        }}
+                                    />
+                                    <div className="desc-actions">
+                                        <button 
+                                            onClick={() => { setTempTitle(boardTitle); setIsEditingTitle(false); }} 
+                                            className="btn"
+                                        >
+                                            Hủy
+                                        </button>
+                                        <button 
+                                            onClick={handleSaveTitle} 
+                                            className="btn primary"
+                                        >
+                                            Lưu
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
                         <div className="board-info">
                             <h2>Mô tả</h2>
                             <AutoResizeTextarea value={desc} onChange={(e) => setDesc(e.target.value)} onFocus={() => setIsEditingDesc(true)} />

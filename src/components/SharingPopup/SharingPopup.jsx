@@ -1,22 +1,47 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useParams } from "react-router-dom";
 import "./SharingPopup.css";
 import { X, Link as LinkIcon } from "lucide-react";
 import boardMemberService from "../../services/boardMemberService";
 import axiosClient from "../../utils/axiosConfig";
 import { StoreContext } from "../../context/StoreContext.jsx";
-import { useParams } from "react-router-dom";
 
 const SharingPopup = ({ onClose }) => {
+  const { boardId } = useParams();
   const [tab, setTab] = useState("members");
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState(0);
   const [creatingLink, setCreatingLink] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
-  const [members, setMembers] = useState([]);
-  const [loadingMembers, setLoadingMembers] = useState(true);
+  
   const store = useContext(StoreContext) || {};
-  const { boardId: paramBoardId } = useParams();
-  const boardId = paramBoardId || "";
+
+  useEffect(() => {
+    if (!boardId) return;
+    
+    const fetchMembers = async () => {
+      setLoading(true);
+      try {
+        const response = await boardMemberService.getAllMembers(boardId);
+        const data = response.data.value || response.data || [];
+        setMembers(data);
+      } catch (error) {
+        console.error("Lỗi tải thành viên:", error);
+        setMembers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, [boardId]);
+
+  const getRoleName = (roleId) => {
+    return roleId === 1 ? "Quản trị viên" : "Thành viên";
+  };
 
   const _getLocal = (k) => {
     const v = localStorage.getItem(k);
@@ -25,30 +50,7 @@ const SharingPopup = ({ onClose }) => {
     if (!s || s.toLowerCase() === "null" || s.toLowerCase() === "undefined") return "";
     return s;
   };
-
-  useEffect(() => {
-    if (!boardId) {
-      setMembers([]);
-      setLoadingMembers(false);
-      return;
-    }
-    setLoadingMembers(true);
-    boardMemberService.getAllMembers(boardId)
-      .then(res => {
-        const data = res.data?.value || res.data || [];
-        const normalized = data.map(m => {
-          const user = m.user || {};
-          const email = (m.email || user.email || "").toString();
-          const name = (m.name || user.name || "Người dùng").toString();
-          const userId = m.userId ?? m.id ?? user.id ?? "";
-          let role = m.role ?? 0;
-          return { userId, name, email, role };
-        });
-        setMembers(normalized);
-      })
-      .catch(() => setMembers([]))
-      .finally(() => setLoadingMembers(false));
-  }, [boardId]);
+  const currentEmail = store.email || _getLocal("email") || "";
 
   const handleCreateLink = async () => {
     if (!boardId) {
@@ -100,14 +102,13 @@ const SharingPopup = ({ onClose }) => {
     }
   };
 
-  const currentEmail = store.email || _getLocal("email") || "";
-
   return (
     <div className="share-overlay" onClick={onClose}>
       <div className="share-popup" onClick={(e) => e.stopPropagation()}>
-        <div className="share-header">
+        
+        <div className="share-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
           <h3>Chia sẻ bảng</h3>
-          <button className="share-close-btn" onClick={onClose}>
+          <button className="share-close-btn" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={20} />
           </button>
         </div>
@@ -115,8 +116,8 @@ const SharingPopup = ({ onClose }) => {
         <div className="share-invite">
           <input 
             placeholder="Địa chỉ email hoặc tên" 
-            value={inviteEmail} 
-            onChange={(e) => setInviteEmail(e.target.value)} 
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
           />
           <select value={inviteRole} onChange={(e) => setInviteRole(Number(e.target.value))}>
             <option value={0}>Thành viên</option>
@@ -125,7 +126,7 @@ const SharingPopup = ({ onClose }) => {
           <button className="share-submit-btn" onClick={handleShareByEmail}>Chia sẻ</button>
         </div>
 
-        <div className="share-link-section">
+        <div className="share-link-section" style={{ marginTop: '15px', padding: '10px', background: '#f9f9f9', borderRadius: '5px' }}>
           <div className="share-link-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <LinkIcon size={20} />
@@ -159,38 +160,75 @@ const SharingPopup = ({ onClose }) => {
           )}
         </div>
 
-        <div className="share-tabs">
-          <button className={`tab-list ${tab === "members" ? "tab-active" : ""}`} onClick={() => setTab("members")}>Thành viên</button>
-          <button className={`tab-list ${tab === "requests" ? "tab-active" : ""}`} onClick={() => setTab("requests")}>Yêu cầu</button>
+        <div className="share-tabs" style={{ marginTop: '20px', borderBottom: '1px solid #ddd' }}>
+          <button className={`tab-list ${tab === "members" ? "tab-active" : ""}`} onClick={() => setTab("members")}>
+            Thành viên ({members.length})
+          </button>
+          <button className={`tab-list ${tab === "requests" ? "tab-active" : ""}`} onClick={() => setTab("requests")}>
+            Yêu cầu tham gia
+          </button>
         </div>
 
-        {tab === "members" ? (
-          <div className="member-list">
-            {loadingMembers ? (
-              <div style={{ padding: 12 }}>Đang tải...</div>
-            ) : (
-              members.map(m => {
-                const isCurrent = currentEmail && m.email && currentEmail.toLowerCase() === m.email.toLowerCase();
-                return (
-                  <div className="member-item" key={m.userId || m.email}>
-                    <div className="member-avatar">{(m.name[0] || 'U').toUpperCase()}</div>
-                    <div className="member-info">
-                      <p className="member-name">{m.name}{isCurrent ? ' (bạn)' : ''}</p>
-                      <p className="member-username">{m.email}</p>
-                    </div>
-                    <select className="member-role" defaultValue={m.role} disabled>
-                      <option value={2}>Chủ sở hữu</option>
-                      <option value={1}>Quản trị viên</option>
-                      <option value={0}>Thành viên</option>
-                    </select>
+        {/* Section: List (Lấy từ nhánh merge - để hỗ trợ Avatar và Date) */}
+        <div className="share-body" style={{ marginTop: '15px', maxHeight: '300px', overflowY: 'auto' }}>
+          {tab === "members" ? (
+            <div className="member-list">
+              {loading && <div style={{textAlign: 'center', padding: '10px'}}>Đang tải...</div>}
+              
+              {!loading && members.map((member) => (
+                <div className="member-item" key={member.userId || member.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                  {/* Avatar section từ merge */}
+                  <div className="member-avatar" style={{ overflow: 'hidden', background: '#e0e0e0', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
+                    {member.avatarUrl ? (
+                      <img 
+                        src={member.avatarUrl} 
+                        alt={member.name} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {e.target.style.display = 'none'}}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                        {member.name ? member.name.charAt(0).toUpperCase() : "?"}
+                      </span>
+                    )}
                   </div>
-                );
-              })
-            )}
-          </div>
-        ) : (
-          <div className="member-requests">Không có yêu cầu nào</div>
-        )}
+                  
+                  {/* Info section từ merge */}
+                  <div className="member-info" style={{ flex: 1 }}>
+                    <p className="member-name" style={{ margin: 0, fontWeight: 500 }}>
+                      {member.name} 
+                      {currentEmail && member.email === currentEmail ? " (bạn)" : ""}
+                    </p>
+                    <p className="member-username" style={{ margin: 0, fontSize: '12px', color: '#888' }}>
+                      {/* Hiển thị ngày tham gia nếu có, fallback về email */}
+                      {member.joinedAt 
+                        ? `Tham gia: ${new Date(member.joinedAt).toLocaleDateString('vi-VN')}` 
+                        : member.email}
+                    </p>
+                  </div>
+
+                  {/* Role section */}
+                  <select 
+                    className="member-role" 
+                    defaultValue={getRoleName(member.role)}
+                  >
+                    <option>Quản trị viên</option>
+                    <option>Thành viên</option>
+                  </select>
+                </div>
+              ))}
+              
+              {!loading && members.length === 0 && (
+                <div style={{textAlign: 'center', padding: '20px', color: '#888'}}>Chưa có thành viên nào.</div>
+              )}
+            </div>
+          ) : (
+            <div className="member-requests">
+              Không có yêu cầu nào
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 32px;
   padding: 24px;
+  color: #334155;
 }
 
 .templates-section,
@@ -60,9 +61,6 @@
   color:black;
   font-size: 16px;
 }
-
-
-
 .workspace-icon {
   width: 48px;
   height: 48px;
@@ -86,4 +84,31 @@
   color: #64748b;
   margin:0;
   padding: 0;
+}
+.ws-actions{
+  display: flex;
+  gap: 10px;
+}
+.ws-actions svg{
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+.ws-actions svg:hover{
+  opacity: 1;
+}
+.btn-create-ws{
+  border: none;
+  color: black;
+  transition: opacity 0.2s ease;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.5;
+}
+.btn-create-ws:hover{
+  opacity: 1;
+}
+.bp-header{
+  display:flex;
+  justify-content: space-between;
 }

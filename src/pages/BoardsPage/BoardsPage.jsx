@@ -19,7 +19,7 @@ export default function BoardsPage() {
     const [starredBoards, setStarredBoards] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-    
+
     const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
     const [selectedWorkspace, setSelectedWorkspace] = useState(null);
     const [showMembersModal, setShowMembersModal] = useState(false);
@@ -39,10 +39,10 @@ export default function BoardsPage() {
                 setWorkspaces(workspacesData);
 
                 if (Array.isArray(workspacesData) && workspacesData.length > 0) {
-                    const pinnedPromises = workspacesData.map(ws => 
+                    const pinnedPromises = workspacesData.map(ws =>
                         boardService.getBoards(ws.id || ws.Id, { pinned: true })
                     );
-                    
+
                     const responses = await Promise.all(pinnedPromises);
                     const allPinnedBoards = responses.flatMap(res => {
                         const bData = res.data.value || res.data || [];
@@ -50,7 +50,7 @@ export default function BoardsPage() {
                     });
 
                     const uniquePinned = allPinnedBoards.filter(b => b.pinned);
-                    
+
                     setStarredBoards(uniquePinned);
                 } else {
                     setStarredBoards([]);
@@ -69,9 +69,9 @@ export default function BoardsPage() {
     const openCreateModal = () => { setSelectedWorkspace(null); setShowCreateWorkspace(true); };
     const openEditModal = (ws) => { setSelectedWorkspace(ws); setShowCreateWorkspace(true); };
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    
+
     const handleFormSubmit = async (formData) => {
-         try {
+        try {
             if (selectedWorkspace) {
                 const wsId = selectedWorkspace.id || selectedWorkspace.Id;
                 if (!wsId) return;
@@ -82,7 +82,7 @@ export default function BoardsPage() {
                 if (newDesc !== oldDesc) tasks.push(() => workspaceService.updateDescription(wsId, newDesc));
                 if (Number(formData.type) !== Number(selectedWorkspace.type)) tasks.push(() => workspaceService.updateType(wsId, formData.type));
                 if (formData.background !== selectedWorkspace.background) tasks.push(() => workspaceService.updateBackground(wsId, formData.background));
-                
+
                 if (tasks.length === 0) { setShowCreateWorkspace(false); return; }
                 for (const task of tasks) { await task(); await delay(500); }
                 alert("Cập nhật thành công!");
@@ -97,9 +97,9 @@ export default function BoardsPage() {
 
     const handleDeleteWorkspace = async (id) => {
         if (window.confirm("Xóa Workspace này?")) {
-            try { 
-                await workspaceService.delete(id); 
-                setRefreshTrigger(prev => prev + 1); 
+            try {
+                await workspaceService.delete(id);
+                setRefreshTrigger(prev => prev + 1);
             } catch (error) { alert("Xóa thất bại."); }
         }
     };
@@ -124,12 +124,12 @@ export default function BoardsPage() {
             };
 
             await boardService.create(payload);
-            
+
             setShowCreateBoardPopup(false);
             setActiveWorkspaceIdForBoard(null);
-            
+
             setRefreshTrigger(prev => prev + 1);
-            
+
         } catch (error) {
             console.error("Lỗi tạo board:", error);
             alert("Không thể tạo bảng mới.");
@@ -139,8 +139,8 @@ export default function BoardsPage() {
     const getBoardStyle = (bg) => {
         if (!bg) return { background: '#0079bf' };
         if (bg.startsWith('http')) {
-            return { 
-                backgroundImage: `url(${bg})`, 
+            return {
+                backgroundImage: `url(${bg})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
             };
@@ -155,25 +155,26 @@ export default function BoardsPage() {
 
     return (
         <div className="boards-page">
-            <div style={{marginBottom: '20px', textAlign: 'right'}}>
-                 <button className="btn-create-ws" onClick={openCreateModal}>+ Tạo Workspace Mới</button>
+            <div className="bp-header">
+                <h2>Các không gian làm việc của bạn</h2>
+                <p className="btn-create-ws" onClick={openCreateModal}>+ Tạo Workspace Mới</p>
             </div>
 
             {starredBoards.length > 0 && (
                 <div className="starred-boards-section" style={{ marginBottom: '40px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', color: '#172b4d' }}>
-                        <Star size={24} fill="#e6c60d" color="#e6c60d" /> 
+                        <Star size={24} fill="#e6c60d" color="#e6c60d" />
                         <h3 style={{ margin: 0, fontWeight: '700', fontSize: '18px' }}>Các bảng đã gắn sao</h3>
                     </div>
-                    
-                    <div className="board-list-grid" style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-                        gap: '16px' 
+
+                    <div className="board-list-grid" style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                        gap: '16px'
                     }}>
                         {starredBoards.map(board => (
-                            <div 
-                                key={board.id} 
+                            <div
+                                key={board.id}
                                 className="board-card-item"
                                 onClick={() => navigate(`/board/${board.id}`)}
                                 style={{
@@ -194,16 +195,16 @@ export default function BoardsPage() {
                                 onMouseEnter={e => e.currentTarget.style.filter = 'brightness(0.9)'}
                                 onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}
                             >
-                                <span style={{ 
-                                    textShadow: '0 1px 2px rgba(0,0,0,0.5)', 
-                                    display:'block', 
-                                    overflow:'hidden', 
-                                    textOverflow:'ellipsis', 
-                                    whiteSpace:'nowrap' 
+                                <span style={{
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                                    display: 'block',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
                                 }}>
                                     {board.title}
                                 </span>
-                                
+
                                 <div style={{ alignSelf: 'flex-end' }}>
                                     <Star size={18} fill="#e6c60d" color="#e6c60d" />
                                 </div>
@@ -216,38 +217,40 @@ export default function BoardsPage() {
             {workspaces.length === 0 ? (
                 <div className="empty-state">
                     <p>Bạn chưa có Workspace nào.</p>
-                    <button onClick={openCreateModal}>Tạo ngay!</button>
                 </div>
             ) : (
                 <div className="workspace-list">
                     {workspaces.map((ws) => (
-                        <div key={ws.id || ws.Id} className="workspace-container" style={{marginBottom: '40px'}}>
-                            <div className="workspace-header-info" style={{display:'flex', alignItems:'center', gap:'12px', marginBottom:'16px'}}>
+                        <div key={ws.id || ws.Id} className="workspace-container" style={{ marginBottom: '40px' }}>
+                            <div className="workspace-header-info" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                                 <div className="ws-avatar" style={{
-                                    width:'40px', height:'40px', background: ws.background || '#0079bf', 
-                                    color:'white', display:'flex', alignItems:'center', justifyContent:'center', 
-                                    borderRadius:'4px', fontWeight:'bold', fontSize:'20px'
+                                    width: '46px', height: '46px', background: ws.background || '#0079bf',
+                                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    borderRadius: '8px', fontWeight: 'bold', fontSize: '20px'
                                 }}>
                                     {(ws.name || 'W').charAt(0).toUpperCase()}
                                 </div>
-                                <div style={{flex: 1}}>
-                                    <h3 style={{margin:0}}>{ws.name}</h3>
-                                    <div style={{fontSize:'12px', color:'#666', display: 'flex', gap: '10px', alignItems: 'center', marginTop:'4px'}}>
-                                        <span style={{display:'flex', alignItems:'center', gap:'4px', background:'#eee', padding:'2px 6px', borderRadius:'4px'}}>
-                                            <Briefcase size={12}/> {WORKSPACE_TYPES[ws.type] || 'Khác'}
+                                <div style={{ flex: 1 }}>
+                                    <h3 style={{ margin: 0 }}>{ws.name}</h3>
+                                    <div style={{ fontSize: '13px', color: '#888', display: 'flex', gap: '10px', alignItems: 'center', marginTop: '4px' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#eee', padding: '1px 5px', borderRadius: '4px' }}>
+                                            <Briefcase size={12} /> {WORKSPACE_TYPES[ws.type] || 'Khác'}
                                         </span>
-                                        {ws.description && <span style={{color: '#888'}}>• {ws.description}</span>}
+                                        {ws.description &&
+                                            <p style={{ color: '#666', whiteSpace: "pre-wrap" }}>
+                                                • {ws.description}
+                                            </p>}
                                     </div>
                                 </div>
                                 <div className="ws-actions">
-                                    <button onClick={() => openEditModal(ws)}><Edit2 size={16}/></button>
-                                    <button onClick={() => { setSelectedWorkspace(ws); setShowMembersModal(true); }}><Users size={16}/></button>
-                                    <button onClick={() => handleDeleteWorkspace(ws.id || ws.Id)} style={{color:'red'}}><Trash2 size={16}/></button>
+                                    <Edit2 size={20} onClick={() => openEditModal(ws)} />
+                                    <Users size={20} onClick={() => { setSelectedWorkspace(ws); setShowMembersModal(true); }} />
+                                    <Trash2 size={20} onClick={() => handleDeleteWorkspace(ws.id || ws.Id)} style={{ color: 'red' }} />
                                 </div>
                             </div>
 
-                            <WorkspaceBoardList 
-                                workspaceId={ws.id || ws.Id} 
+                            <WorkspaceBoardList
+                                workspaceId={ws.id || ws.Id}
                                 onOpenCreateBoard={handleOpenCreateBoard}
                                 refreshTrigger={refreshTrigger}
                             />
@@ -258,21 +261,21 @@ export default function BoardsPage() {
             )}
 
             {showCreateWorkspace && (
-                <CreateWorkspaceModal 
-                    onClose={() => setShowCreateWorkspace(false)} 
+                <CreateWorkspaceModal
+                    onClose={() => setShowCreateWorkspace(false)}
                     onSubmit={handleFormSubmit}
                     initialData={selectedWorkspace}
                 />
             )}
-            
+
             {showMembersModal && selectedWorkspace && (
                 <WorkspaceMembersModal workspace={selectedWorkspace} onClose={() => setShowMembersModal(false)} />
             )}
 
             {showCreateBoardPopup && (
-                <CreateBoardPopup 
-                    onClose={() => setShowCreateBoardPopup(false)} 
-                    addNewBoard={handleCreateBoard} 
+                <CreateBoardPopup
+                    onClose={() => setShowCreateBoardPopup(false)}
+                    addNewBoard={handleCreateBoard}
                 />
             )}
         </div>

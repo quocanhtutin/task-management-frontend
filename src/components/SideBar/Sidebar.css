@@ -1,14 +1,15 @@
 .sidebar {
-  width: 300px;
+  width: 25vw;
   padding-left: 10px;
   padding-right: 10px;
   /* background: #f9fafb; */
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  padding-top: 16px;
+  padding-top: 30px;
   overflow-y: auto;       
   scrollbar-width: none;
+  overflow-x: visible;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -248,4 +249,59 @@
 .add-workspace-btn:hover {
   background: #eee;
 }
+
+@media (max-width: 800px) {
+  .sidebar {
+    width: 70px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .sidebar-option,
+  .template-item {
+    justify-content: center;
+    padding: 12px 0;
+  }
+
+  .sidebar-option p {
+    display: none;
+  }
+
+  .template-item {
+    padding-left: 0;
+    text-align: center;
+  }
+
+  .sidebar-option svg:last-child {
+    display: none;
+  }
+
+  .template-wrapper.open {
+    max-height: 300px;
+  }
+
+  .sidebar-option:hover::after {
+    opacity: 1;
+  }
+}
+
+.sidebar-option {
+  position: relative;
+}
+
+.sidebar-option::after {
+  content: attr(data-title);
+  position: absolute;
+  left: 80px;
+  background: #111827;
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
 

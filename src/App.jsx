@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
@@ -47,7 +46,6 @@ const App = () => {
         <Route path="/workspace/:title/members" element={<WorkspaceMember />} />
       </Route>
       <Route path="/" element={<Navigate to="/login" replace />} />
-      </Route>
     </Routes>
   );
 }

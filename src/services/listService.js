@@ -29,6 +29,23 @@ const listService = {
         );
     },
     
+    move: (listId, targetBoardId) => {
+        return axiosClient.put(
+            `/List/${listId}/Move`,
+            { targetBoardId },
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+    },
+
+    archive: (listId) => {
+        return axiosClient.put(`/List/${listId}/Archive`);
+    },
+
+    unarchive: (listId) => {
+        return axiosClient.put(`/List/${listId}/Unarchive`);
+    },
 };
 
 export default listService;

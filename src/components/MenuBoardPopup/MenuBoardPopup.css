@@ -164,21 +164,45 @@
   white-space: normal;
 }
 .stored-column-item {
-  border-radius: 4px;
-  padding: 8px;
-  border: 1px solid #eee;
-  padding-left: 14px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-  display: flex;
-  gap: 20px;
-  align-items: center;
+    background-color: #091e420f;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 .stored-column-item p {
-  max-width: 70%;
-  width: 70%;
-  word-wrap: break-word;       
-  overflow-wrap: break-word; 
-  white-space: normal;
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0;
+    color: #172b4d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+.stored-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.stored-actions .activate-btn,
+.stored-actions .delete-btn {
+    color: #6b778c;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+}
+.stored-actions .activate-btn:hover {
+    background-color: #e4e9f2;
+    color: #0079bf;
+}
+.stored-actions .delete-btn:hover {
+    background-color: #ffe3e3;
+    color: #c92a2a;
 }
 .activate-btn, .delete-btn{
   color: #333333a7;
@@ -194,7 +218,7 @@
 }
 .new-label-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5 cột */
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   margin-bottom: 8px;
 }
@@ -212,7 +236,6 @@
   opacity: 0.85;
 }
 
-/* Màu đang được chọn */
 .new-label-item.active {
   outline: 2px solid  #0052cc;
   outline-offset: 2px;
@@ -429,7 +452,6 @@
   line-height: 1.4;
 }
 
-/* Animation */
 @keyframes slideIn {
   from {
     transform: translateX(100%);

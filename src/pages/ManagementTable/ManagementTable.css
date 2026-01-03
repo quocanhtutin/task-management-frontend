@@ -4,7 +4,7 @@
     width: 100%;
     min-height: 100vh;
     height: auto;
-    padding-top: 60px;
+    padding-top: 50px;
     box-sizing: border-box;
     position: relative;
     align-items: stretch;
@@ -21,154 +21,35 @@
     transition: background 0.3s ease, background-image 0.3s ease;
 }
 
-.board-top-bar {
-    position: sticky;
-    top: 60px;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; 
-    justify-content: flex-start;
-    width: 320px;
-    height: calc(100vh - 60px);
-    flex-shrink: 0; 
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    gap: 20px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    overflow-y: auto;
-}
-
-.board-top-bar::-webkit-scrollbar {
-    width: 6px;
-}
-.board-top-bar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-
-.board-info-edit {
-    display: flex;
-    flex-direction: column;
-    gap: 10px; 
-    width: 100%;
-    flex-grow: 1;
-}
-
-.board-title-input {
-    background: transparent;
-    border: 1px solid transparent; 
-    color: white;
-    font-size: 24px; 
-    font-weight: 700;
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    outline: none;
-    width: 100%;
-    transition: all 0.2s ease;
-    white-space: normal; 
-}
-
-.board-title-input:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.board-title-input:focus {
-    background: white;
-    color: #172b4d; 
-    cursor: text;
-    border-color: #0079bf;
-}
-
-.board-desc-input {
-    background: transparent;
-    border: 1px solid transparent;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-    font-weight: 400;
-    padding: 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-    resize: none;
-    overflow: hidden; 
-    min-height: 60px; 
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: inherit;
-    line-height: 1.5;
-}
-
-.board-desc-input:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.board-desc-input:focus {
-    background: white;
-    color: #172b4d;
-    cursor: text;
-}
-
-.board-desc-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-    font-style: italic;
-}
-
-.board-menu-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-    color: white;
-    padding: 10px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%; 
-    margin-top: 20px;
-}
-
-.board-menu-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
 .main-content {
-    position: relative;
-    z-index: 1;
-    
-    flex: 1; 
-    display: flex;
-    flex-direction: column; 
-    overflow-x: auto;
-    padding: 20px; 
-    gap: 16px;
-    align-items: flex-start;
-    min-height: calc(100vh - 60px);
+  display: grid;
+  grid-template-columns: 260px 1fr 2fr;
+  gap: 16px;
+  padding: 16px;
+  height: 100%;
+  overflow-x: auto; 
+  overflow-y: hidden;
+  min-height: 0;
+  width:100%
 }
 
-.main-content::-webkit-scrollbar {
-    height: 12px;
-    width: 12px;
+.main-content.wide-board {
+  grid-template-columns: 1fr 3fr;
 }
 
-.main-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 6px;
+.main-content.full-board {
+  grid-template-columns: 1fr;
+  padding: 0;
 }
 
-.main-content::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+.main-content.full-board .trello-board {
+  border-radius: 0 !important;
+  padding: 0 !important;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  transition: width 3s ease, height 0.25s ease;
 }
-
-.full-board { width: 100%; }
 
 .toggle-floating-panel {
     position: fixed;
@@ -207,8 +88,95 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #0079bf;
-    color: white;
+    color: #0079BF;
     font-size: 24px;
     font-weight: 500;
+}
+
+.undo-toast-overlay {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #323232;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 9999;
+    min-width: 400px;
+    animation: slideUp 0.3s ease-out;
+}
+
+.undo-toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.undo-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.btn-undo-confirm {
+    background: #ff4d4f;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-undo-cancel {
+    background: #4ade80;
+    border: none;
+    color: #000;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.undo-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: #4ade80;
+    width: 100%;
+    animation: countdown 15s linear forwards;
+}
+
+@keyframes countdown {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+@keyframes slideUp {
+    from { transform: translate(-50%, 100%); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+.main-content::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.6); 
 }

@@ -68,47 +68,10 @@ const Sidebar = () => {
         }
     }, [accessToken]);
 
-    const handleAddWorkspace = async () => {
-        try {
-            if (workSpace.name && workSpace.background && workSpace.description && workSpace.type) {
-                const response = await axios.post(url + "/WorkSpace/Create", { workSpace }, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                })
-                if (response.data.isSuccess) {
-                    toast.success("Thêm không gian làm việc thành công!")
-                    fetchWorkspaces()
-                    setWorkSpace({
-                        name: "",
-                        description: "",
-                        background: "",
-                        type: 0,
-                    })
-                    setShowAddWorkSpace(false)
-                }
-                else {
-                    toast.error("Thêm không gian làm việc thất bại")
-                    setWorkSpace({
-                        name: "",
-                        description: "",
-                        background: "",
-                        type: 0,
-                    })
-                    setShowAddWorkSpace(false)
-                }
-            }
-        } catch (error) {
-            console.error("Create workspace error:", error.response?.status);
-            console.log(workSpace)
-        }
-    }
-
-
     return (
         <div className="sidebar">
             <div className="sidebar-options">
-                <NavLink to="/main/boards" className="sidebar-option">
+                <NavLink to="/main/boards" className="sidebar-option" data-title="Bảng">
                     <Layout size={18} />
                     <p>Bảng</p>
                 </NavLink>
@@ -116,6 +79,7 @@ const Sidebar = () => {
                 <div
                     className={`sidebar-option`}
                     onClick={() => setShowTemplates(!showTemplates)}
+                    data-title="Mẫu"
                 >
                     <FileStack size={18} />
                     <p>Mẫu</p>
@@ -132,156 +96,18 @@ const Sidebar = () => {
                     </div>
                 </div>
 
-                <NavLink to="/home" className="sidebar-option">
+                <NavLink to="/home" className="sidebar-option" data-title="Trang chủ">
                     <Home size={18} />
                     <p>Trang chủ</p>
                 </NavLink>
 
-                {
-                    (() => {
-                        const membersPath = currentWorkSpace && currentWorkSpace.name ? `/workspace/${currentWorkSpace.name}/members` : '/main/boards';
-                        return (
-                            <NavLink to={membersPath} className="sidebar-option">
-                                <Users size={18} />
-                                <p>Thành viên</p>
-                            </NavLink>
-                        )
-                    })()
-                }
-
-                <NavLink to="/main/settings" className="sidebar-option">
+                <NavLink to="/main/settings" className="sidebar-option" data-title="Cài đặt">
                     <Settings size={18} />
                     <p>Cài đặt</p>
                 </NavLink>
             </div>
-            <div className="workspace">
-                <div className="workspace-header">
-                    <h2>Không gian làm việc</h2>
-                    <CirclePlus size={22} onClick={() => setShowAddWorkSpace(!showAddWorkspace)} />
-                </div>
 
-                <div className={`add-workspace ${showAddWorkspace ? "open" : ""}`}>
-                    <h3>Tạo không gian làm việc</h3>
-
-                    <div className="form-group">
-                        <label>Tên</label>
-                        <input
-                            id="name"
-                            value={workSpace.name}
-                            onChange={handleChangeWs}
-                            placeholder="Nhập tên workspace"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Mô tả</label>
-                        <input
-                            id="description"
-                            value={workSpace.description}
-                            onChange={handleChangeWs}
-                            placeholder="Mô tả ngắn"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Background</label>
-                        <div
-                            className="color-input-ws"
-                            onClick={() => setShowColorPicker(!showColorPicker)}
-                        >
-                            <div
-                                className="color-preview-ws"
-                                style={{ background: workSpace.background || "#e4e6ea" }}
-                            />
-                            <span>{workSpace.background || "Chọn màu"}</span>
-                        </div>
-
-                        {showColorPicker && (
-                            <div className="color-picker">
-                                {colors.map(color => (
-                                    <div
-                                        key={color}
-                                        className="color-item-ws"
-                                        style={{ background: color }}
-                                        onClick={() => {
-                                            setWorkSpace(ws => ({ ...ws, background: color }));
-                                            setShowColorPicker(false);
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* TYPE */}
-                    <div className="form-group">
-                        <label>Loại workspace</label>
-                        <div
-                            className="type-input"
-                            onClick={() => setShowTypePicker(!showTypePicker)}
-                        >
-                            {
-                                workspaceTypes.find(t => t.value === workSpace.type)?.label
-                                || "Chọn loại"
-                            }
-                        </div>
-
-                        {showTypePicker && (
-                            <div className="type-picker">
-                                {workspaceTypes.map(type => (
-                                    <div
-                                        key={type.value}
-                                        className="type-item"
-                                        onClick={() => {
-                                            setWorkSpace(ws => ({ ...ws, type: type.value }));
-                                            setShowTypePicker(false);
-                                        }}
-                                    >
-                                        {type.label}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* SUBMIT */}
-                    <button className="add-workspace-btn" onClick={handleAddWorkspace}>
-                        Thêm không gian
-                    </button>
-                </div>
-
-                <div className="workspace-list">
-                    {workSpaces.map(ws => (
-                        <div key={ws.id}>
-                            <div
-
-                                className={`workspace-item ${activeWorkspace === ws.id ? 'active' : ''}`}
-                                onClick={() => { if (activeWorkspace === ws.id) { setActiveWorkspace('') } else { setActiveWorkspace(ws.id), setCurrentWorkSpace(ws) } }}
-                            >
-                                <div className="workspace-avatar">
-                                    {ws.name.charAt(0)}
-                                </div>
-                                <h2>{ws.name}</h2>
-                            </div>
-                            <div className={`workspace-wrapper ${activeWorkspace === ws.id ? 'open' : ''}`}>
-                                <NavLink to={`/workspace/${ws.name}/boards`} className="workspace-option">
-                                    <Layout size={18} />
-                                    <p>Bảng</p>
-                                </NavLink>
-                                <NavLink to={`/workspace/${ws.name}/members`} className="workspace-option">
-                                    <Users size={18} />
-                                    <p>Thành viên</p>
-                                </NavLink>
-                                <NavLink to="/" className="workspace-option">
-                                    <Settings size={18} />
-                                    <p>Cài đặt</p>
-                                </NavLink>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
+        </div >
     );
 };
 

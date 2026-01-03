@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import './ColumnMode.css'
-import { Archive, PenSquareIcon } from 'lucide-react'
+import { Archive, PenSquareIcon, ArrowRightCircle, Trash2 } from 'lucide-react'
+import cardService from '../../services/cardService';
 
 const ColumnMode = ({
     columns,
@@ -9,6 +10,7 @@ const ColumnMode = ({
     setInput,
     displayAddCard,
     addCard,
+    onToggleStatus,
     setCardDetail,
     setShowCardDetailPopup,
     updateCardInColumn,
@@ -16,7 +18,10 @@ const ColumnMode = ({
     storeCard,
     storeColumn,
     updateTitleColumn,
-    handleDragEnd
+    handleDragEnd,
+    onMoveList,
+    onSoftDelete,
+    boardLabelColors = []
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
@@ -37,10 +42,7 @@ const ColumnMode = ({
             setTitleError("Tên cột không được để trống");
             return;
         }
-
-        // gọi hàm cha (bạn tự implement trong parent)
         updateTitleColumn(col.id, columnTitleInput.trim());
-
         setEditingColId(null);
         setTitleError("");
     };
@@ -56,36 +58,70 @@ const ColumnMode = ({
         e.dataTransfer.setData("colIndex", colIndex);
     };
 
-
     const allowDrop = (e) => e.preventDefault();
 
-    const onDrop = (e, toCol) => {
+    const onDrop = async (e, toColIndex) => {
         const type = e.dataTransfer.getData("type");
-        if (type !== "card") return; //không phải card bỏ qua
-        const fromCol = e.dataTransfer.getData('fromCol');
-        const fromIndex = e.dataTransfer.getData('fromIndex');
+        if (type !== "card") return;
+        
+        const fromColIndex = parseInt(e.dataTransfer.getData('fromCol'), 10);
+        const fromCardIndex = parseInt(e.dataTransfer.getData('fromIndex'), 10);
 
-        if (fromCol === '' || fromIndex === '') return;
+        if (isNaN(fromColIndex) || isNaN(fromCardIndex)) return;
 
-        const updated = [...columns];
-        const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[toCol].cards.push({ ...movedCard, columnId: updated[toCol].id });
-
+        const updated = columns.map(c => ({...c, cards: [...c.cards]}));
+        
+        const [movedCard] = updated[fromColIndex].cards.splice(fromCardIndex, 1);
+        const cardWithNewCol = { ...movedCard, columnId: updated[toColIndex].id };
+        
+        updated[toColIndex].cards.push(cardWithNewCol);
         setColumns(updated);
+
+        try {
+            const cardId = movedCard.id;
+            const toListId = updated[toColIndex].id;
+            const newPosition = updated[toColIndex].cards.length - 1; 
+
+            await cardService.move(cardId, {
+                cardId: cardId,
+                toListId: toListId,
+                newPosition: newPosition
+            });
+        } catch (error) {
+            console.error("Lỗi di chuyển thẻ:", error);
+        }
     };
 
-    const onDropBeforeCard = (e, beforeCard, atCol) => {
+    const onDropBeforeCard = async (e, targetCardIndex, toColIndex) => {
         e.preventDefault();
-        e.stopPropagation();  // NGĂN column.onDrop chạy
-        const fromCol = e.dataTransfer.getData('fromCol');
-        const fromIndex = e.dataTransfer.getData('fromIndex');
+        e.stopPropagation();
+        
+        const fromColIndex = parseInt(e.dataTransfer.getData('fromCol'), 10);
+        const fromCardIndex = parseInt(e.dataTransfer.getData('fromIndex'), 10);
 
-        if (fromCol === '' || fromIndex === '') return;
+        if (isNaN(fromColIndex) || isNaN(fromCardIndex)) return;
 
-        const updated = [...columns];
-        const [movedCard] = updated[fromCol].cards.splice(fromIndex, 1);
-        updated[atCol].cards.splice(beforeCard, 0, { ...movedCard, columnId: updated[atCol].id });
+        const updated = columns.map(c => ({...c, cards: [...c.cards]}));
+        
+        const [movedCard] = updated[fromColIndex].cards.splice(fromCardIndex, 1);
+        const cardWithNewCol = { ...movedCard, columnId: updated[toColIndex].id };
+        
+        updated[toColIndex].cards.splice(targetCardIndex, 0, cardWithNewCol);
         setColumns(updated);
+
+        try {
+            const cardId = movedCard.id;
+            const toListId = updated[toColIndex].id;
+            const newPosition = targetCardIndex;
+
+            await cardService.move(cardId, {
+                cardId: cardId,
+                toListId: toListId,
+                newPosition: newPosition
+            });
+        } catch (error) {
+            console.error("Lỗi di chuyển thẻ:", error);
+        }
     };
 
     const onColumnDrop = (e, targetColIndex) => {
@@ -98,7 +134,6 @@ const ColumnMode = ({
             handleDragEnd(fromIndex, targetColIndex);
         }
     };
-
 
     const addColumn = () => {
         const title = newColumn;
@@ -113,7 +148,6 @@ const ColumnMode = ({
                 <div
                     key={i}
                     className="board-column"
-                    // onDrop={(e) => onDrop(e, i)}
                     onDrop={(e) => {
                         if (e.dataTransfer.getData("type") === "column")
                             onColumnDrop(e, i);
@@ -152,6 +186,14 @@ const ColumnMode = ({
                                 {col.title}
                             </h3>
                             <div className='column-tool'>
+                                <ArrowRightCircle 
+                                    className="edit-column-name-btn"
+                                    size={20}
+                                    style={{marginRight: '5px'}}
+                                    onClick={() => onMoveList && onMoveList(col.id)}
+                                    title="Di chuyển sang bảng khác"
+                                />
+
                                 <PenSquareIcon
                                     className="edit-column-name-btn"
                                     size={20}
@@ -166,7 +208,6 @@ const ColumnMode = ({
                             </div></div>
                     )}
 
-
                     <div className="card-list">
                         {col.cards.map((card, j) => (
                             <div
@@ -174,7 +215,7 @@ const ColumnMode = ({
                                 className="card-item"
                                 draggable
                                 onDragStart={(e) => {
-                                    e.stopPropagation();   // Quan trọng, chặn bubble
+                                    e.stopPropagation();
                                     onDragStart(e, i, j);
                                 }}
                                 onDrop={(e) => {
@@ -185,14 +226,47 @@ const ColumnMode = ({
                                         onDropBeforeCard(e, j, i)
                                 }}
                                 onDragOver={allowDrop}
-                            // style={card.label != [] ? { backgroundColor: card.label[0], color: "white" } : { background: "white" }}
                             >
-                                <input type="checkbox" checked={card.check} onChange={(e) => updateCardInColumn(col.id, card.id, "check", e.target.checked)} />
-                                <p onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>{card.title}</p>
-                                {card.check && <Archive size={20} onClick={() =>
-                                    // updateCardInColumn(col.title, card.id, "stored", true)
-                                    storeCard(card)}
-                                />}
+                                <input 
+                                    type="checkbox" 
+                                    checked={card.check} 
+                                    onChange={(e) => {
+                                        onToggleStatus(card.id, card.check);
+                                    }} 
+                                />
+                                <div className="card-content-wrapper" onClick={() => { setCardDetail(card), setShowCardDetailPopup(true) }}>
+                                    
+                                    {card.label && Array.isArray(card.label) && card.label.length > 0 && (
+                                        <div className="card-tags">
+                                            {card.label.map((labelIndex, idx) => {
+                                                const color = boardLabelColors[labelIndex];
+                                                if (!color) return null;
+                                                return (
+                                                    <span 
+                                                        key={idx} 
+                                                        className="card-tag-bar" 
+                                                        style={{ backgroundColor: color }}
+                                                    ></span>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    <p className="card-title-text">{card.title}</p>
+                                </div>
+                                
+                                {card.check && (
+                                    <div 
+                                        title="Xóa thẻ"
+                                        onClick={(e) => { 
+                                            e.stopPropagation();
+                                            onSoftDelete(card); 
+                                        }}
+                                        style={{ cursor: 'pointer', color: '#ef4444' }} 
+                                    >
+                                        <Trash2 size={20} />
+                                    </div>
+                                )}
 
                             </div>
                         ))}

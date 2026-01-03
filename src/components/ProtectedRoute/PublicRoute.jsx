@@ -1,12 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { StoreContext } from '../../context/StoreContext';
 
 const PublicRoute = () => {
-<<<<<<< Updated upstream
-  const isAuthenticated = localStorage.getItem('accessToken');
-
-  return isAuthenticated ? <Navigate to="/main/boards" replace /> : <Outlet />;
-=======
   const { accessToken, isLoaded } = useContext(StoreContext);
   const returnUrl = localStorage.getItem('returnUrl');
 
@@ -23,7 +19,6 @@ const PublicRoute = () => {
   }
 
   return <Outlet />;
->>>>>>> Stashed changes
 };
 
 export default PublicRoute;
