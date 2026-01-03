@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 32px;
   padding: 24px;
+  color: #334155;
 }
 
 .templates-section,

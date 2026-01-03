@@ -217,7 +217,6 @@ export default function BoardsPage() {
             {workspaces.length === 0 ? (
                 <div className="empty-state">
                     <p>Bạn chưa có Workspace nào.</p>
-                    <button onClick={openCreateModal}>Tạo ngay!</button>
                 </div>
             ) : (
                 <div className="workspace-list">

@@ -1,8 +1,13 @@
 .settings-container {
     padding: 24px;
-    max-width: 800px;
     margin: 0 auto;
 }
+
+.settings-container form {
+    display: flex;
+    flex-direction: column;
+}
+
 
 .settings-card {
     background: #ffffff;
@@ -12,8 +17,6 @@
 }
 
 .settings-header {
-    margin-bottom: 32px;
-    border-bottom: 1px solid #e2e8f0;
     padding-bottom: 16px;
 }
 
@@ -23,9 +26,9 @@
     margin: 0;
 }
 
-.settings-section {
+/* .settings-section {
     margin-bottom: 32px;
-}
+} */
 
 .avatar-section {
     display: flex;
@@ -39,7 +42,7 @@
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #dfe1e6;
+    border: 1px solid #dfe1e6;
 }
 
 .avatar-upload-btn {
@@ -63,11 +66,15 @@
     background-color: #dfe1e6;
 }
 
-.form-group {
-    margin-bottom: 20px;
+.form-group-pf {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
 }
 
-.form-group label {
+.form-group-pf label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
@@ -76,18 +83,20 @@
 }
 
 .form-control {
-    width: 100%;
-    padding: 10px;
-    border: 2px solid #dfe1e6;
-    border-radius: 4px;
+    width: 50%;
+    padding: 8px 12px;
+    border: 1px solid #dfe1e6;
+    border-radius: 10px;
     font-size: 14px;
     transition: border-color 0.2s;
     box-sizing: border-box;
+    color:#888;
 }
 
 .form-control:focus {
     border-color: #0079bf;
     outline: none;
+    color: black;
 }
 
 .form-control:disabled {
@@ -96,23 +105,26 @@
     color: #a5adba;
 }
 
-.btn-save {
+.btn-save-pf {
     background-color: #0079bf;
     color: white;
-    padding: 10px 24px;
+    padding: 4px 10px;
     border: none;
-    border-radius: 4px;
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
     font-size: 16px;
     transition: background 0.2s;
+    margin-left: auto;
+    margin-right:30px;
+    margin-top: 20px;
 }
 
-.btn-save:hover {
+.btn-save-pf:hover {
     background-color: #026aa7;
 }
 
-.btn-save:disabled {
+.btn-save-pf:disabled {
     background-color: #a5adba;
     cursor: not-allowed;
 }
@@ -121,11 +133,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    border: 1px solid #e0e0e0;
     border-radius: 6px;
     margin-bottom: 10px;
     background-color: #fff;
+    flex: 1;
 }
 
 .social-info {
@@ -135,8 +146,8 @@
 }
 
 .social-icon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -183,4 +194,10 @@
 
 .btn-connect-fb:hover {
     background-color: #166fe5;
+}
+
+.linking{
+    display:flex;
+    padding: 0 30px;
+    gap: 70px;
 }
