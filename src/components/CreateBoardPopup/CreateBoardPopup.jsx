@@ -114,7 +114,7 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
                         className="dropdown-btn"
                     >
                         {visibility === VISIBILITY.PRIVATE && "Riêng tư"}
-                        {visibility === VISIBILITY.PROTECTED && "Không gian làm việc"}
+                        {visibility === VISIBILITY.PROTECTED && "Được bảo vệ"}
                         {visibility === VISIBILITY.PUBLIC && "Công khai"}
                     </button>
 
@@ -125,7 +125,7 @@ const CreateBoardPopup = ({ onClose, addNewBoard }) => {
                                 <p className="item-desc">Chỉ thành viên được mời mới có thể xem.</p>
                             </div>
                             <div onClick={() => { setVisibility(VISIBILITY.PROTECTED); setShowViewSelect(false); }} className="dropdown-item">
-                                <p className="item-title">Không gian làm việc</p>
+                                <p className="item-title">Được bảo vệ</p>
                                 <p className="item-desc">Tất cả thành viên trong Workspace đều có thể xem.</p>
                             </div>
                             <div onClick={() => { setVisibility(VISIBILITY.PUBLIC); setShowViewSelect(false); }} className="dropdown-item">

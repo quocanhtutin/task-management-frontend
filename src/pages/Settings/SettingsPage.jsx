@@ -54,11 +54,14 @@ const SettingsPage = () => {
             setUserData(mappedData);
             setOriginalData(mappedData);
 
-            if (data.providers) {
-                setLinkedProviders(data.providers); 
-            } else {
-                setLinkedProviders([]);
+            const providersList = [];
+            if (data.isGoogleLinked) {
+                providersList.push(PROVIDERS.GOOGLE);
             }
+            if (data.isFacebookLinked) {
+                providersList.push(PROVIDERS.FACEBOOK);
+            }
+            setLinkedProviders(providersList);
 
         } catch (error) {
             console.error("Lỗi lấy thông tin:", error);
