@@ -4,12 +4,21 @@ import { StoreContext } from '../../context/StoreContext';
 
 const PublicRoute = () => {
   const { accessToken, isLoaded } = useContext(StoreContext);
+  const returnUrl = localStorage.getItem('returnUrl');
 
   if (!isLoaded) {
     return null;
   }
 
-  return accessToken ? <Navigate to="/main/boards" replace /> : <Outlet />;
+  if (accessToken) {
+    if (returnUrl) {
+      localStorage.removeItem('returnUrl');
+      return <Navigate to={returnUrl} replace />;
+    }
+    return <Navigate to="/main/boards" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default PublicRoute;

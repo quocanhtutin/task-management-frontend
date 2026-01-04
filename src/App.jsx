@@ -13,6 +13,7 @@ import SettingsPage from './pages/Settings/SettingsPage';
 import WorkspaceMember from './pages/WorkspaceMember/WorkspaceMember.jsx';
 import Home from './pages/Home/Home.jsx';
 import MembersRedirect from './components/MembersRedirect/MembersRedirect.jsx';
+import InvitePage from './pages/Invite/InvitePage';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
       </Route>
+
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/main/boards" element={<BoardsPage />} />
@@ -31,6 +33,7 @@ const App = () => {
           <Route path="/boards" element={<Navigate to="/main/boards" replace />} />
           <Route path="/settings" element={<Navigate to="/main/settings" replace />} />
           <Route path="/members" element={<MembersRedirect />} />
+          <Route path="/invite" element={<InvitePage />} />
         </Route>
         <Route element={<BoardLayout />}>
           <Route path="/board/:boardId" element={<ManagementTable />} />
