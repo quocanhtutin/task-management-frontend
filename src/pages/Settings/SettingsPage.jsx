@@ -55,16 +55,12 @@ const SettingsPage = () => {
             setOriginalData(mappedData);
 
             const providersList = [];
-            if (data.isGoogleLinked) {
-                providersList.push(PROVIDERS.GOOGLE);
-            }
-            if (data.isFacebookLinked) {
-                providersList.push(PROVIDERS.FACEBOOK);
-            }
+            if (data.isGoogleLinked) providersList.push(PROVIDERS.GOOGLE);
+            if (data.isFacebookLinked) providersList.push(PROVIDERS.FACEBOOK);
             setLinkedProviders(providersList);
 
         } catch (error) {
-            console.error("Lỗi lấy thông tin:", error);
+            console.error("Error fetching data:", error);
         } finally {
             setIsLoading(false);
         }
@@ -88,27 +84,19 @@ const SettingsPage = () => {
             alert(`Liên kết ${provider} thành công!`);
             fetchUserData();
         } catch (error) {
-            console.error(`Lỗi liên kết ${provider}:`, error);
-            const msg = error.response?.data?.message || "Liên kết thất bại (Có thể tài khoản này đã được sử dụng).";
+            const msg = error.response?.data?.message || "Liên kết thất bại.";
             alert(msg);
         }
     };
 
     const handleUnlinkAccount = async (provider) => {
-
         if (!window.confirm(`Bạn có chắc muốn hủy liên kết ${provider}?`)) return;
-
         try {
-            await axiosClient.post('/Auth/UnlinkOAuth', {
-                provider: provider
-            });
+            await axiosClient.post('/Auth/UnlinkOAuth', { provider: provider });
             alert(`Đã hủy liên kết ${provider}.`);
             fetchUserData();
         } catch (error) {
-            console.error(`Lỗi hủy liên kết ${provider}:`, error);
-            let msg = "Hủy liên kết thất bại.";
-            if (error.response?.data?.message) msg = error.response.data.message;
-            alert(msg);
+            alert(error.response?.data?.message || "Hủy liên kết thất bại.");
         }
     };
 
@@ -151,10 +139,7 @@ const SettingsPage = () => {
             alert("Cập nhật thông tin thành công!");
             window.location.reload();
         } catch (error) {
-            console.error("Lỗi lưu thông tin:", error);
-            let msg = "Có lỗi xảy ra.";
-            if (error.response?.data?.message) msg = error.response.data.message;
-            alert(`Lỗi: ${msg}`);
+            alert(`Lỗi: ${error.response?.data?.message || "Có lỗi xảy ra"}`);
         } finally {
             setIsSaving(false);
         }
@@ -167,14 +152,14 @@ const SettingsPage = () => {
 
     return (
         <div className="settings-container">
-            < div className="settings-header" >
+            <div className="settings-header">
                 <h2>Cài đặt tài khoản</h2>
-            </ div>
+            </div>
             <form onSubmit={handleSaveChanges}>
                 <div className="settings-section">
                     <div className="avatar-section">
                         <img
-                            src={userData.avatarUrl}
+                            src={userData.avatarUrl || DEFAULT_AVATAR}
                             alt="User Avatar"
                             className="current-avatar"
                             onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_AVATAR; }}
@@ -192,6 +177,7 @@ const SettingsPage = () => {
                         </div>
                     </div>
                 </div>
+
                 <h4 style={{ marginBottom: '10px', color: '#172b4d' }}>Liên kết mạng xã hội</h4>
                 <div className="settings-section linking" style={{ marginTop: '20px' }}>
                     <div className="social-link-item">
@@ -205,11 +191,7 @@ const SettingsPage = () => {
                             </div>
                         </div>
                         {isGoogleLinked ? (
-                            <button
-                                type="button"
-                                className="btn-unlink"
-                                onClick={() => handleUnlinkAccount(PROVIDERS.GOOGLE)}
-                            >
+                            <button type="button" className="btn-unlink" onClick={() => handleUnlinkAccount(PROVIDERS.GOOGLE)}>
                                 Hủy liên kết
                             </button>
                         ) : (
@@ -237,25 +219,15 @@ const SettingsPage = () => {
                             </div>
                         </div>
                         {isFacebookLinked ? (
-                            <button
-                                type="button"
-                                className="btn-unlink"
-                                onClick={() => handleUnlinkAccount(PROVIDERS.FACEBOOK)}
-                            >
+                            <button type="button" className="btn-unlink" onClick={() => handleUnlinkAccount(PROVIDERS.FACEBOOK)}>
                                 Hủy liên kết
                             </button>
                         ) : (
                             <FacebookLogin
                                 appId="1551117732875423"
-                                autoLoad={false}
-                                fields="name,email,picture"
                                 callback={handleFacebookResponse}
                                 render={renderProps => (
-                                    <button
-                                        type="button"
-                                        onClick={renderProps.onClick}
-                                        className="btn-connect-fb"
-                                    >
+                                    <button type="button" onClick={renderProps.onClick} className="btn-connect-fb">
                                         Kết nối Facebook
                                     </button>
                                 )}
@@ -263,6 +235,7 @@ const SettingsPage = () => {
                         )}
                     </div>
                 </div>
+
                 <h4 style={{ marginBottom: '10px', marginTop: '20px', color: '#172b4d' }}>Thông tin cá nhân</h4>
                 <div className="form-group-pf">
                     <label>Email</label>
@@ -284,14 +257,11 @@ const SettingsPage = () => {
                     <input type="date" name="dateOfBirth" className="form-control" value={userData.dateOfBirth} onChange={handleInputChange} />
                 </div>
 
-
                 <button type="submit" className="btn-save-pf" disabled={isSaving}>
                     {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
                 </button>
-
             </form>
-
-        </div >
+        </div>
     );
 };
 

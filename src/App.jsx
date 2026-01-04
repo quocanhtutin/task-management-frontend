@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
@@ -28,24 +29,25 @@ const App = () => {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
+          <Route path="/home" element={<Home />} />
           <Route path="/main/boards" element={<BoardsPage />} />
           <Route path="/main/settings" element={<SettingsPage />} />
+          <Route path="/workspace/:title/boards" element={<BoardsPage />} />
+          <Route path="/workspace/:title/members" element={<WorkspaceMember />} />
+          <Route path="/invite" element={<InvitePage />} />
+          <Route path="/members" element={<MembersRedirect />} />
           <Route path="/boards" element={<Navigate to="/main/boards" replace />} />
           <Route path="/settings" element={<Navigate to="/main/settings" replace />} />
-          <Route path="/members" element={<MembersRedirect />} />
-          <Route path="/invite" element={<InvitePage />} />
+          <Route path="/templates/business" element={<div>Trang Template Business đang phát triển</div>} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Route>
+
         <Route element={<BoardLayout />}>
           <Route path="/board/:boardId" element={<ManagementTable />} />
+          <Route path="/boards/:title" element={<ManagementTable />} />
         </Route>
       </Route>
-
-      <Route element={<MainLayout />}>
-        <Route path='/home' element={<Home />} />
-        <Route path="/workspace/:title/boards" element={<BoardsPage />} />
-        <Route path="/workspace/:title/members" element={<WorkspaceMember />} />
-      </Route>
-      <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

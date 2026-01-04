@@ -28,11 +28,12 @@ const Login = () => {
         localStorage.setItem('provider', data.provider || payload.type);
 
         const returnUrl = localStorage.getItem("returnUrl");
-        if (returnUrl) {
-          localStorage.removeItem("returnUrl");
+        localStorage.removeItem("returnUrl");
+
+        if (returnUrl && returnUrl.includes('/invite')) {
           navigate(returnUrl, { replace: true });
         } else {
-          navigate('/main/boards', { replace: true });
+          navigate('/home', { replace: true });
         }
       }
     } catch (error) {

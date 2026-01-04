@@ -15,7 +15,7 @@ const PublicRoute = () => {
       localStorage.removeItem('returnUrl');
       return <Navigate to={returnUrl} replace />;
     }
-    return <Navigate to="/main/boards" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return <Outlet />;

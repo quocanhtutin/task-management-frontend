@@ -37,9 +37,11 @@ const Navbar = () => {
   return (
     <div className="navbar">
       <div className="navbar-left">
-        <button className="icon-btn" onClick={() => navigate('/main/boards')}><Home /></button>
-        <input type="text" placeholder="Tìm kiếm" className="search-input" />
-      </div>
+  <button className="icon-btn" onClick={() => navigate('/home')}>
+    <Home size={18} />
+  </button>
+  <input type="text" placeholder="Tìm kiếm" className="search-input" />
+</div>
       <div className="navbar-right">
         <button className="icon-btn"><Plus /></button>
         <button className="icon-btn"><Bell /></button>

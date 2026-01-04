@@ -14,24 +14,22 @@ const InvitePage = () => {
     setIsJoining(true);
     try {
       const accessToken = localStorage.getItem("accessToken");
-      // API Join dùng chung cho cả Board và Workspace dựa trên Token Type ở Backend
       const res = await axios.post('/InviteLink/Join', { token }, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       
       const data = res.data?.value || res.data;
       
-      // Kiểm tra xem Backend trả về boardId hay chỉ thông báo thành công (Workspace)
       if (data?.boardId) {
         navigate(`/board/${data.boardId}`, { replace: true });
       } else {
         alert("Bạn đã tham gia thành công!");
-        navigate('/main/boards', { replace: true });
+        navigate('/home', { replace: true });
       }
     } catch (err) {
       const msg = err.response?.data?.message || "Link hết hạn hoặc bạn đã là thành viên.";
       alert(msg);
-      navigate('/main/boards', { replace: true });
+      navigate('/home', { replace: true });
     } finally {
       setIsJoining(false);
     }
@@ -53,7 +51,7 @@ const InvitePage = () => {
             {isJoining ? 'Đang xử lý...' : 'Chấp nhận tham gia'}
           </button>
           <button 
-            onClick={() => navigate('/main/boards')} 
+            onClick={() => navigate('/home')} 
             disabled={isJoining} 
             style={{ padding: '12px', cursor: 'pointer', border: '1px solid #ddd', background: 'none', borderRadius: '5px' }}
           >
