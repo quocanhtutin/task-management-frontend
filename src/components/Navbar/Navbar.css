@@ -243,12 +243,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-@media (max-width: 400px) {
-  .navbar-right {
-    gap:0px;
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 8px;
   }
-  .search-input{
-    display:none;
+
+  .navbar-left {
+    gap: 4px;
+  }
+
+  .navbar-right {
+    gap: 5px;
+  }
+
+  .search-input {
+    display: block;
+    width: 120px;
+    padding-left: 30px;
+  }
+
+  .search-input:focus {
+    width: 160px;
   }
 }
-
