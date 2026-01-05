@@ -46,6 +46,12 @@ const listService = {
     unarchive: (listId) => {
         return axiosClient.put(`/List/${listId}/Unarchive`);
     },
+
+    clone: (listId, copyCards = true) => {
+        return axiosClient.post(`/List/${listId}/Clone`, {
+            copyCards: copyCards
+        });
+    }
 };
 
 export default listService;

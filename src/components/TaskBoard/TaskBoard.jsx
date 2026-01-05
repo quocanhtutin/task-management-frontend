@@ -33,6 +33,7 @@ const TaskBoard = ({
     onMoveList,
     ownerName,
     ownerAvatar,
+    onCloneList
 }) => {
 
 
@@ -257,6 +258,7 @@ const TaskBoard = ({
                     onSoftDelete={onSoftDelete}
                     boardLabelColors={boardLabelColors}
                     onToggleStatus={onToggleStatus}
+                    onCloneList={onCloneList}
                 />
             )}
 

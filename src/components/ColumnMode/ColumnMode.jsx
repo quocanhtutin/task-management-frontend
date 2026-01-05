@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './ColumnMode.css'
-import { Archive, PenSquareIcon, ArrowRightCircle, Trash2 } from 'lucide-react'
+import { Archive, PenSquareIcon, ArrowRightCircle, Trash2, Copy } from 'lucide-react'
 import cardService from '../../services/cardService';
 
 const ColumnMode = ({
@@ -21,7 +21,8 @@ const ColumnMode = ({
     handleDragEnd,
     onMoveList,
     onSoftDelete,
-    boardLabelColors = []
+    boardLabelColors = [],
+    onCloneList
 }) => {
 
     const [showAddColumn, setShowAddColumn] = useState(false)
@@ -187,6 +188,14 @@ const ColumnMode = ({
                                     {col.title}
                                 </h3>
                                 <div className='column-tool'>
+                                    <Copy 
+                                        className="edit-column-name-btn"
+                                        size={20}
+                                        style={{ marginRight: '5px' }}
+                                        onClick={() => onCloneList && onCloneList(col.id)}
+                                        title="Sao chép danh sách"
+                                    />
+
                                     <ArrowRightCircle
                                         className="edit-column-name-btn"
                                         size={20}
