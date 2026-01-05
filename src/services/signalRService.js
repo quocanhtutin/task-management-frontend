@@ -10,6 +10,9 @@ class SignalRService {
         this.boardListeners = [];
         this.workspaceListeners = [];
         this.userListeners = [];
+        this.connection = null;
+        this.token = null;
+        this.listeners = [];
     }
 
     createConnection(url, token) {
@@ -20,34 +23,70 @@ class SignalRService {
             .build();
     }
 
-    async startBoardConnection(token) {
-        if (this.boardConnection && this.boardConnection.state !== "Disconnected") return;
-        this.token = token;
+    async startConnection(token) {
+        if (this.connection && this.connection.state !== "Disconnected") return;
         
-        this.boardConnection = this.createConnection("http://localhost:5174/hubs/board", token);
+        this.token = token;
+        const HUB_URL = "http://localhost:5174/hubs/board";
 
-        this.boardConnection.on("boardnotification", (data) => {
-            console.log("🔔 [BoardHub] Event:", data);
-            this.boardListeners.forEach(cb => cb(data));
+        this.connection = new HubConnectionBuilder()
+            .withUrl(HUB_URL, {
+                accessTokenFactory: () => this.token
+            })
+            .configureLogging(LogLevel.Information)
+            .withAutomaticReconnect()
+            .build();
+
+        this.connection.on("boardnotification", (data) => {
+            console.log("🔔 [SignalR] Event Received:", data);
+            
+            this.listeners.forEach(callback => callback(data));
         });
 
-        try { await this.boardConnection.start(); console.log("✅ BoardHub Connected"); } 
-        catch (err) { console.error("❌ BoardHub Error:", err); }
+        try {
+            await this.connection.start();
+            console.log("✅ SignalR Connected");
+        } catch (err) {
+            console.error("❌ SignalR Connection Error: ", err);
+        }
     }
 
     async joinBoard(boardId) {
-        if (this.boardConnection?.state === "Connected") {
+        if (this.connection?.state === "Connected") {
             try {
-                await this.boardConnection.invoke("JoinBoard", boardId);
-            } catch (error) {
-                console.warn(`⚠️ Cannot join board ${boardId}:`, error.message);
+                await this.connection.invoke("JoinBoard", boardId);
+            } catch (err) {
+                console.error("JoinBoard Error:", err);
             }
         }
     }
 
-    subscribeBoard(callback) {
-        this.boardListeners.push(callback);
-        return () => { this.boardListeners = this.boardListeners.filter(cb => cb !== callback); };
+    async leaveBoard(boardId) {
+        if (this.connection?.state === "Connected") {
+            try {
+                await this.connection.invoke("LeaveBoard", boardId);
+            } catch (err) {
+                console.error("LeaveBoard Error:", err);
+            }
+        }
+    }
+
+    subscribe(callback) {
+        this.listeners.push(callback);
+        console.log("➕ Đã thêm listener. Tổng số:", this.listeners.length);
+        
+        return () => {
+            this.listeners = this.listeners.filter(cb => cb !== callback);
+            console.log("➖ Đã xóa listener. Tổng số:", this.listeners.length);
+        };
+    }
+
+    async stopConnection() {
+        if (this.connection) {
+            await this.connection.stop();
+            this.connection = null;
+            this.listeners = [];
+        }
     }
 
     async startWorkspaceConnection(token) {
