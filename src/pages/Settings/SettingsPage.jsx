@@ -21,6 +21,7 @@ const SettingsPage = () => {
         avatarUrl: ''
     });
 
+    const [selectedFile, setSelectedFile] = useState(null);
     const [linkedProviders, setLinkedProviders] = useState([]);
     const [originalData, setOriginalData] = useState({});
     const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +54,8 @@ const SettingsPage = () => {
 
             setUserData(mappedData);
             setOriginalData(mappedData);
+            
+            setSelectedFile(null);
 
             const providersList = [];
             if (data.isGoogleLinked) providersList.push(PROVIDERS.GOOGLE);
@@ -73,6 +76,15 @@ const SettingsPage = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setUserData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            const previewUrl = URL.createObjectURL(file);
+            setUserData(prev => ({ ...prev, avatarUrl: previewUrl }));
+        }
     };
 
     const handleLinkAccount = async (provider, token) => {
@@ -125,8 +137,18 @@ const SettingsPage = () => {
                 const isoDate = new Date(userData.dateOfBirth).toISOString();
                 promises.push(axiosClient.put('/User/Me/DateOfBirth', { dateOfBirth: isoDate }));
             }
-            if (userData.avatarUrl && userData.avatarUrl !== originalData.avatarUrl) {
-                promises.push(axiosClient.put('/User/Me/Avatar', { avatarUrl: userData.avatarUrl }));
+
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('File', selectedFile); 
+
+                promises.push(
+                    axiosClient.put('/User/Me/Avatar', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    })
+                );
             }
 
             if (promises.length === 0) {
@@ -137,9 +159,17 @@ const SettingsPage = () => {
 
             await Promise.all(promises);
             alert("Cập nhật thông tin thành công!");
-            window.location.reload();
+            
+            window.location.reload(); 
         } catch (error) {
-            alert(`Lỗi: ${error.response?.data?.message || "Có lỗi xảy ra"}`);
+            console.error("Save error: ", error);
+            let msg = "Có lỗi xảy ra";
+            if (error.response?.data?.errors?.File) {
+                 msg = "Lỗi file: " + error.response.data.errors.File[0];
+            } else if (error.response?.data?.message) {
+                 msg = error.response.data.message;
+            }
+            alert(`Lỗi: ${msg}`);
         } finally {
             setIsSaving(false);
         }
@@ -163,17 +193,20 @@ const SettingsPage = () => {
                             alt="User Avatar"
                             className="current-avatar"
                             onError={(e) => { e.target.onerror = null; e.target.src = DEFAULT_AVATAR; }}
+                            style={{ objectFit: 'cover' }}
                         />
                         <div style={{ flex: 1 }}>
-                            <label style={{ marginBottom: '5px', display: 'block', fontWeight: '600' }}>Link ảnh đại diện (URL)</label>
+                            <label style={{ marginBottom: '5px', display: 'block', fontWeight: '600' }}>Ảnh đại diện</label>
                             <input
-                                type="text"
-                                name="avatarUrl"
+                                type="file"
+                                accept="image/*"
                                 className="form-control"
-                                value={userData.avatarUrl}
-                                onChange={handleInputChange}
-                                placeholder="Nhập đường dẫn ảnh..."
+                                onChange={handleFileChange}
+                                style={{ padding: '6px' }}
                             />
+                            <div style={{marginTop: '5px', fontSize: '12px', color: '#666'}}>
+                                Chấp nhận: .jpg, .png, .jpeg
+                            </div>
                         </div>
                     </div>
                 </div>

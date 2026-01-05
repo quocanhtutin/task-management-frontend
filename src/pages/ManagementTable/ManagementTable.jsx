@@ -299,6 +299,16 @@ const ManagementTable = () => {
         }
     };
 
+    const handleCloneList = async (listId) => {
+        try {
+            await listService.clone(listId, true);
+            fetchBoardData(); 
+        } catch (error) {
+            console.error("Lỗi sao chép danh sách:", error);
+            alert("Không thể sao chép danh sách!");
+        }
+    }
+
     const storeCard = (card) => {
         const now = new Date().toLocaleString("vi-VN");
         const updated = [...columns]
@@ -567,6 +577,7 @@ const ManagementTable = () => {
                     ownerName={ownerName}
                     ownerAvatar={ownerAvatar}
                     onToggleStatus={handleUpdateCardStatus}
+                    onCloneList={handleCloneList}
                 />
             </div>
 
