@@ -1,5 +1,5 @@
 import React from 'react';
-import BoardsPage from '../BoardsPage/BoardsPage.jsx'; // Kiểm tra kỹ đường dẫn file của bạn
+import BoardsPage from '../BoardsPage/BoardsPage.jsx';
 
 const Home = () => {
     return (
@@ -9,7 +9,6 @@ const Home = () => {
                 <p style={{ color: '#44546f' }}>Chọn một không gian làm việc để bắt đầu nhiệm vụ của bạn.</p>
             </div>
             
-            {/* Component BoardsPage sẽ hiển thị danh sách Workspace và Starred Boards */}
             <BoardsPage /> 
         </div>
     );

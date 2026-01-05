@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useContext } from 'react';
 import { StoreContext } from '../../context/StoreContext.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +11,7 @@ import boardService from '../../services/boardService';
 import './BoardsPage.css';
 import { Trash2, Edit2, Users, Briefcase, Star } from 'lucide-react';
 import { WORKSPACE_TYPES } from '../../components/CreateWorkspaceModal/CreateWorkspaceModal.jsx';
+import signalRService from '../../services/signalRService';
 
 export default function BoardsPage() {
     const navigate = useNavigate();
@@ -29,6 +29,7 @@ export default function BoardsPage() {
 
     const { accessToken } = useContext(StoreContext);
 
+    // 1. Fetch dữ liệu Workspace & Starred Boards
     useEffect(() => {
         if (!accessToken) return;
         const loadData = async () => {
@@ -38,6 +39,15 @@ export default function BoardsPage() {
                 const workspacesData = wsRes.data.value || wsRes.data || [];
                 setWorkspaces(workspacesData);
 
+                // [REALTIME] Join vào các phòng Workspace để nghe sự kiện
+                if (workspacesData.length > 0) {
+                    workspacesData.forEach(ws => {
+                        const wsId = ws.id || ws.Id;
+                        if (wsId) signalRService.joinWorkspace(wsId);
+                    });
+                }
+
+                // Load Starred Boards
                 if (Array.isArray(workspacesData) && workspacesData.length > 0) {
                     const pinnedPromises = workspacesData.map(ws =>
                         boardService.getBoards(ws.id || ws.Id, { pinned: true })
@@ -50,7 +60,6 @@ export default function BoardsPage() {
                     });
 
                     const uniquePinned = allPinnedBoards.filter(b => b.pinned);
-
                     setStarredBoards(uniquePinned);
                 } else {
                     setStarredBoards([]);
@@ -66,6 +75,43 @@ export default function BoardsPage() {
         loadData();
     }, [accessToken, refreshTrigger]);
 
+    // 2. [REALTIME SETUP]
+    useEffect(() => {
+        if (!accessToken) return;
+
+        const setupRealtime = async () => {
+            // Kết nối WorkspaceHub (Nghe tin tạo/xóa bảng, sửa workspace)
+            await signalRService.startWorkspaceConnection(accessToken);
+            // Kết nối UserHub (Nghe tin gắn sao bảng)
+            await signalRService.startUserConnection(accessToken);
+
+            // Đăng ký nhận tin từ WorkspaceHub
+            const unsubWS = signalRService.subscribeWorkspace((data) => {
+                console.log("♻️ [BoardsPage] Workspace Update -> Reloading...");
+                setRefreshTrigger(prev => prev + 1);
+            });
+
+            // Đăng ký nhận tin từ UserHub
+            const unsubUser = signalRService.subscribeUser((data) => {
+                console.log("♻️ [BoardsPage] User Update -> Reloading...");
+                setRefreshTrigger(prev => prev + 1);
+            });
+
+            return () => {
+                if(unsubWS) unsubWS();
+                if(unsubUser) unsubUser();
+            };
+        };
+
+        const cleanupPromise = setupRealtime();
+
+        return () => {
+            cleanupPromise.then(cleanup => cleanup && cleanup());
+        };
+    }, [accessToken]);
+
+
+    // --- CÁC HÀM XỬ LÝ SỰ KIỆN (GIỮ NGUYÊN) ---
     const openCreateModal = () => { setSelectedWorkspace(null); setShowCreateWorkspace(true); };
     const openEditModal = (ws) => { setSelectedWorkspace(ws); setShowCreateWorkspace(true); };
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -127,7 +173,8 @@ export default function BoardsPage() {
 
             setShowCreateBoardPopup(false);
             setActiveWorkspaceIdForBoard(null);
-
+            // Không cần gọi setRefreshTrigger thủ công nếu Realtime hoạt động tốt
+            // Nhưng cứ giữ lại để UX phản hồi nhanh hơn
             setRefreshTrigger(prev => prev + 1);
 
         } catch (error) {
@@ -151,7 +198,7 @@ export default function BoardsPage() {
         return { background: bg };
     };
 
-    if (isLoading) return <div className="loading-container">Đang tải dữ liệu...</div>;
+    if (isLoading && workspaces.length === 0) return <div className="loading-container">Đang tải dữ liệu...</div>;
 
     return (
         <div className="boards-page">
