@@ -87,6 +87,10 @@ const MenuBoardPopup = ({
         setTempTitle(boardTitle);
     }, [boardTitle]);
 
+    useEffect(() => {
+        setDesc(boardDes);
+    }, [boardDes]);
+
     const handleSaveTitle = () => {
         if (tempTitle.trim() !== "" && tempTitle !== boardTitle) {
             onUpdateTitle(tempTitle);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import './ManagementTable.css'
 import { useParams, useNavigate } from 'react-router-dom'
 import Inbox from '../../components/Inbox/Inbox.jsx'
@@ -11,6 +11,8 @@ import MoveListPopup from '../../components/MoveListPopup/MoveListPopup.jsx'
 import boardService from '../../services/boardService'
 import listService from '../../services/listService'
 import cardService from '../../services/cardService'
+import signalRService from '../../services/signalRService'
+import { StoreContext } from '../../context/StoreContext.jsx'
 
 export const BOARD_LABEL_COLORS = [
     "#4BCE97", "#E2B203", "#FAA53D", "#F87462", "#9F8FEF", "#579DFF",
@@ -22,6 +24,7 @@ export const BOARD_LABEL_COLORS = [
 const ManagementTable = () => {
     const { boardId } = useParams();
     const navigate = useNavigate();
+    const { accessToken } = useContext(StoreContext);
 
     const [ownerName, setOwnerName] = useState("");
     const [ownerAvatar, setOwnerAvatar] = useState("");
@@ -52,70 +55,92 @@ const ManagementTable = () => {
     const [activeLabelIndices, setActiveLabelIndices] = useState([]);
     const [visibility, setVisibility] = useState(0);
 
-    useEffect(() => {
+    const fetchBoardData = async () => {
         if (!boardId) return;
+        try {
+            const response = await boardService.getBoardFull(boardId);
+            const data = response.data.value || response.data;
 
-        const fetchBoardFull = async () => {
-            try {
-                const response = await boardService.getBoardFull(boardId);
-                const data = response.data.value || response.data;
+            const apiBoard = data.board || data;
+            const apiLists = data.lists || [];
+            const apiCards = data.cards || [];
 
-                const apiBoard = data.board || data;
-                const apiLists = data.lists || [];
-                const apiCards = data.cards || [];
+            setOwnerName(data.ownerName || "Admin");
+            setOwnerAvatar(data.ownerAvatarUrl || "");
+            setBoardData(apiBoard);
+            setBoardTitle(apiBoard.title || "Chưa có tiêu đề");
+            setBoardDes(apiBoard.description || "");
+            setRawColor(apiBoard.background || "#0079bf");
 
-                setOwnerName(data.ownerName || "Admin");
-                setOwnerAvatar(data.ownerAvatarUrl || "");
-                setBoardData(apiBoard);
-                setBoardTitle(apiBoard.title || "Chưa có tiêu đề");
-                setBoardDes(apiBoard.description || "");
-                setRawColor(apiBoard.background || "#0079bf");
-
-                setIsStarred(apiBoard.pinned || false);
-                setActiveLabelIndices(apiBoard.label || []);
-                if (apiBoard.visibility !== undefined) {
-                    setVisibility(apiBoard.visibility);
-                }
-
-                const mapListToColumn = (list) => {
-                    const listCards = apiCards
-                        .filter(c => (c.listId === list.id || c.columnId === list.id))
-                        .map(c => ({
-                            id: c.id,
-                            title: c.title,
-                            columnId: list.id,
-                            label: c.label || null,
-                            members: c.members || [],
-                            deadline: c.dueDate || c.deadline || null,
-                            check: c.status === 2,
-                            description: c.description,
-                            edit: false,
-                            storedDate: c.storedDate || null
-                        }));
-
-                    return {
-                        id: list.id,
-                        title: list.title,
-                        cards: listCards,
-                        addCard: false,
-                        storedDate: list.storedDate || null,
-                        isArchived: list.isArchived
-                    };
-                };
-
-                const activeLists = apiLists.filter(l => !l.isArchived).map(mapListToColumn);
-                const archivedLists = apiLists.filter(l => l.isArchived).map(mapListToColumn);
-
-                setColumns(activeLists);
-                setStoredColumns(archivedLists);
-
-            } catch (error) {
-                console.error("Lỗi tải dữ liệu Board:", error);
+            setIsStarred(apiBoard.pinned || false);
+            setActiveLabelIndices(apiBoard.label || []);
+            if (apiBoard.visibility !== undefined) {
+                setVisibility(apiBoard.visibility);
             }
+
+            const mapListToColumn = (list) => {
+                const listCards = apiCards
+                    .filter(c => (c.listId === list.id || c.columnId === list.id))
+                    .map(c => ({
+                        id: c.id,
+                        title: c.title,
+                        columnId: list.id,
+                        label: c.label || null,
+                        members: c.members || [],
+                        deadline: c.dueDate || c.deadline || null,
+                        check: c.status === 2,
+                        description: c.description,
+                        edit: false,
+                        storedDate: c.storedDate || null
+                    }));
+
+                return {
+                    id: list.id,
+                    title: list.title,
+                    cards: listCards,
+                    addCard: false,
+                    storedDate: list.storedDate || null,
+                    isArchived: list.isArchived
+                };
+            };
+
+            const activeLists = apiLists.filter(l => !l.isArchived).map(mapListToColumn);
+            const archivedLists = apiLists.filter(l => l.isArchived).map(mapListToColumn);
+
+            setColumns(activeLists);
+            setStoredColumns(archivedLists);
+
+        } catch (error) {
+            console.error("Lỗi tải dữ liệu Board:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchBoardData();
+    }, [boardId]);
+
+    useEffect(() => {
+        if (!boardId || !accessToken) return;
+
+        const setupSignalR = async () => {
+            await signalRService.startConnection(accessToken);
+            await signalRService.joinBoard(boardId);
+
+            const unsubscribe = signalRService.subscribe((data) => {
+            fetchBoardData();
+            });
+            return unsubscribe;
         };
 
-        fetchBoardFull();
-    }, [boardId]);
+        const cleanupPromise = setupSignalR();
+
+        return () => {
+            cleanupPromise.then(unsubscribe => {
+                if(unsubscribe) unsubscribe();
+                //signalRService.leaveBoard(boardId);
+            });
+        };
+    }, [boardId, accessToken]);
 
     useEffect(() => {
         const allCards = columns.flatMap(column => column.cards);
@@ -163,7 +188,6 @@ const ManagementTable = () => {
 
         try {
             await boardService.delete(boardId);
-
             alert("Đã xóa bảng thành công!");
             navigate('/');
         } catch (error) { alert("Xóa thất bại."); }
@@ -230,25 +254,7 @@ const ManagementTable = () => {
 
         try {
             await cardService.restore(card.id);
-            
-            setColumns(prev => {
-                const newCols = prev.map(col => ({
-                    ...col,
-                    cards: [...col.cards] 
-                }));
-
-                const colIdx = newCols.findIndex(c => c.id === card.columnId);
-                
-                if (colIdx !== -1) {
-                    const isExist = newCols[colIdx].cards.some(c => c.id === card.id);
-                    
-                    if (!isExist) {
-                        newCols[colIdx].cards.push(card);
-                    }
-                }
-                return newCols;
-            });
-
+            fetchBoardData();
             setUndoState(null);
         } catch (error) {
             console.error("Lỗi khôi phục thẻ:", error);
@@ -323,7 +329,7 @@ const ManagementTable = () => {
 
         try {
             await listService.archive(listId);
-
+            // Fetch lại để đồng bộ hoặc update state
             const now = new Date().toLocaleString("vi-VN");
             const newColumns = [...columns];
             newColumns.splice(columnIndex, 1);
@@ -342,7 +348,7 @@ const ManagementTable = () => {
 
         try {
             await listService.unarchive(listId);
-
+            
             const newStoredColumns = [...storedColumns];
             newStoredColumns.splice(columnIndex, 1);
             setStoredColumns(newStoredColumns);
@@ -472,8 +478,6 @@ const ManagementTable = () => {
 
     return (
         <div className="man-table-container">
-            {/* <div className="board-background-layer" style={getBackgroundStyle(rawColor)} /> */}
-
             {showMoveListPopup && (
                 <MoveListPopup
                     onClose={() => setShowMoveListPopup(false)}
@@ -531,47 +535,6 @@ const ManagementTable = () => {
                     ownerAvatar={ownerAvatar}
                 />
             }
-
-            {/* <div className="board-top-bar">
-                <div className="board-info-edit">
-                    <div style={{display: 'flex', alignItems: 'center', gap: '8px', width: '100%'}}>
-                        <input 
-                            className="board-title-input"
-                            value={boardTitle}
-                            onChange={(e) => setBoardTitle(e.target.value)}
-                            onBlur={handleTitleUpdate}
-                            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
-                            placeholder="Tiêu đề bảng"
-                        />
-                        <button 
-                            onClick={handleTogglePinned}
-                            style={{
-                                background: 'transparent', border: 'none', cursor: 'pointer',
-                                fontSize: '24px', color: isStarred ? '#f2d600' : 'rgba(255,255,255,0.4)',
-                                transition: 'color 0.2s', padding: 0
-                            }}
-                            title={isStarred ? "Bỏ gắn sao" : "Gắn sao"}
-                        >
-                            {isStarred ? "★" : "☆"}
-                        </button>
-                    </div>
-                    
-                    <textarea 
-                        ref={descTextareaRef}
-                        className="board-desc-input"
-                        value={boardDes}
-                        onChange={(e) => setBoardDes(e.target.value)}
-                        onBlur={handleDescriptionUpdate}
-                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.target.blur(); } }}
-                        placeholder="Thêm mô tả..."
-                        rows={1}
-                    />
-                </div>
-                
-                <button className="board-menu-btn" onClick={() => setShowMenuBoardPopup(true)}>
-                    ... Menu
-                </button>
-            </div> */}
 
             <div className={`main-content ${boardWide}`}>
                 {showInbox && <Inbox onClose={() => setShowInbox(false)} />}

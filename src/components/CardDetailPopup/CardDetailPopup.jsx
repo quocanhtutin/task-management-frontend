@@ -11,6 +11,7 @@ import taskService from "../../services/taskService";
 import subTaskService from "../../services/subTaskService";
 import commentService from "../../services/commentService";
 import attachmentService from "../../services/attachmentService";
+import signalRService from "../../services/signalRService";
 
 function CommentEditor({ initial, onSave, onCancel }) {
     const [val, setVal] = useState(initial);
@@ -86,6 +87,92 @@ export default function CardDetailPopup({
 
     // Checklists
     const [checklists, setChecklists] = useState(card.checklists || []);
+    
+    const checklistsRef = useRef(checklists);
+    useEffect(() => { checklistsRef.current = checklists; }, [checklists]);
+
+    const fetchCardDetail = async () => {
+        try {
+            const [detailResponse, assigneesResponse, tasksResponse, commentsResponse, attachmentsResponse] = await Promise.all([
+                cardService.getDetail(card.id),
+                cardService.getAssignees(card.id),
+                taskService.getTasks(card.id),
+                commentService.getComments(card.id),
+                attachmentService.getAttachments(card.id)
+            ]);
+
+            const tasksData = tasksResponse.data.value || tasksResponse.data || [];
+            const formattedChecklists = tasksData.map(task => ({
+                ...task,
+                items: (task.subTasks || []).map(sub => ({
+                    ...sub,
+                    done: sub.status === 2,
+                    status: sub.status
+                }))
+            }));
+            setChecklists(formattedChecklists);
+
+            const data = detailResponse.data.value || detailResponse.data;
+            const assigneesData = assigneesResponse.data.value || assigneesResponse.data;
+
+            if (!editTitle) setTitle(data.title || card.title);
+            if (!isEditingDesc) setDesc(data.description || "");
+            
+            setCompleted(data.isCompleted ?? (data.status === 2) ?? data.check ?? false);
+
+            if (Array.isArray(data.label)) {
+                setSelectedLabels(data.label);
+            } else {
+                setSelectedLabels([]);
+            }
+
+            setStartDate(data.startDate || null);
+            setDeadline(data.dueDate || data.deadline || null);
+
+            if (!showDatePicker && data.dueDate) {
+                const d = new Date(data.dueDate);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                setDateInput(`${year}-${month}-${day}`);
+                const hh = String(d.getHours()).padStart(2, '0');
+                const mm = String(d.getMinutes()).padStart(2, '0');
+                setTimeInput(`${hh}:${mm}`);
+            }
+
+            if (data.reminderEnabled === false) {
+                setReminder("none");
+            } else {
+                if (data.reminderBeforeMinutes === 0) setReminder("at");
+                else setReminder(String(data.reminderBeforeMinutes));
+            }
+
+            const mappedMembers = assigneesData.map(u => ({
+                id: u.userId,
+                name: u.userName,
+                avatarColor: "#2196F3"
+            }));
+            setMembers(mappedMembers);
+
+            const commentsData = commentsResponse.data.value || commentsResponse.data || [];
+            const formattedComments = commentsData.map(c => ({
+                id: c.id,
+                text: c.content,
+                author: c.userName || c.user?.name || "Người dùng",
+                avatar: c.userAvatar,
+                time: c.createdAt || c.createdTime || new Date().toISOString(),
+                userId: c.userId
+            }));
+            formattedComments.sort((a, b) => new Date(b.time) - new Date(a.time));
+            setComments(formattedComments);
+
+            const attachData = attachmentsResponse.data.value || attachmentsResponse.data || [];
+            setAttachments(attachData);
+
+        } catch (error) {
+            console.error("Lỗi tải chi tiết card:", error);
+        }
+    };
 
     useEffect(() => {
         if (!boardId) return;
@@ -111,97 +198,55 @@ export default function CardDetailPopup({
 
     useEffect(() => {
         if (!card?.id) return;
-
-        const fetchCardDetail = async () => {
-            setLoading(true);
-            try {
-                const [detailResponse, assigneesResponse, tasksResponse, commentsResponse, attachmentsResponse] = await Promise.all([
-                    cardService.getDetail(card.id),
-                    cardService.getAssignees(card.id),
-                    taskService.getTasks(card.id),
-                    commentService.getComments(card.id),
-                    attachmentService.getAttachments(card.id)
-                ]);
-
-                const tasksData = tasksResponse.data.value || tasksResponse.data || [];
-                const formattedChecklists = tasksData.map(task => ({
-                    ...task,
-                    items: (task.subTasks || []).map(sub => ({
-                        ...sub,
-                        done: sub.status === 2,
-                        status: sub.status
-                    }))
-                }));
-                setChecklists(formattedChecklists);
-
-                const data = detailResponse.data.value || detailResponse.data;
-                const assigneesData = assigneesResponse.data.value || assigneesResponse.data;
-
-                setTitle(data.title || card.title);
-                setDesc(data.description || "");
-                setCompleted(data.isCompleted ?? data.check ?? false);
-
-                if (Array.isArray(data.label)) {
-                    setSelectedLabels(data.label);
-                } else {
-                    setSelectedLabels([]);
-                }
-
-                setStartDate(data.startDate || null);
-                setDeadline(data.dueDate || data.deadline || null);
-
-                if (data.dueDate) {
-                    const d = new Date(data.dueDate);
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const day = String(d.getDate()).padStart(2, '0');
-                    setDateInput(`${year}-${month}-${day}`);
-
-                    const hh = String(d.getHours()).padStart(2, '0');
-                    const mm = String(d.getMinutes()).padStart(2, '0');
-                    setTimeInput(`${hh}:${mm}`);
-                }
-
-                if (data.reminderEnabled === false) {
-                    setReminder("none");
-                } else {
-                    if (data.reminderBeforeMinutes === 0) setReminder("at");
-                    else setReminder(String(data.reminderBeforeMinutes));
-                }
-
-                const mappedMembers = assigneesData.map(u => ({
-                    id: u.userId,
-                    name: u.userName,
-                    avatarColor: "#2196F3"
-                }));
-                setMembers(mappedMembers);
-
-                // Xử lý comments (có Avatar)
-                const commentsData = commentsResponse.data.value || commentsResponse.data || [];
-                const formattedComments = commentsData.map(c => ({
-                    id: c.id,
-                    text: c.content,
-                    author: c.userName || c.user?.name || "Người dùng",
-                    avatar: c.userAvatar, // Lấy avatar từ GET API
-                    time: c.createdAt || c.createdTime || new Date().toISOString(),
-                    userId: c.userId
-                }));
-                formattedComments.sort((a, b) => new Date(b.time) - new Date(a.time));
-                setComments(formattedComments);
-
-                // Xử lý Attachments
-                const attachData = attachmentsResponse.data.value || attachmentsResponse.data || [];
-                setAttachments(attachData);
-
-            } catch (error) {
-                console.error("Lỗi tải chi tiết card:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCardDetail();
+        setLoading(true);
+        fetchCardDetail().finally(() => setLoading(false));
     }, [card.id]);
+
+    useEffect(() => {
+        if (!card?.id) return;
+
+        const unsubscribe = signalRService.subscribe((payload) => {
+            if (!payload) return;
+
+            const targetCardId = 
+                payload.cardId ||
+                payload.data?.cardId ||
+                payload.data?.id;
+
+            if (targetCardId && targetCardId === card.id) {
+                console.log(`♻️ [CardDetail] Event '${payload.action}' trùng CardId -> Reload`);
+                fetchCardDetail();
+                return;
+            }
+
+            const targetSubTaskId = payload.subTaskId || payload.data?.subTaskId || payload.data?.id;
+            
+            if (targetSubTaskId) {
+                const isMySubTask = checklistsRef.current.some(checklist => 
+                    checklist.items && checklist.items.some(item => item.id === targetSubTaskId)
+                );
+                if (isMySubTask) {
+                    console.log(`♻️ [CardDetail] Event '${payload.action}' trùng SubTaskId -> Reload`);
+                    fetchCardDetail();
+                    return;
+                }
+            }
+
+            const targetTaskId = payload.taskId || payload.data?.taskId;
+            if (targetTaskId) {
+                const isMyChecklist = checklistsRef.current.some(checklist => checklist.id === targetTaskId);
+                if (isMyChecklist) {
+                    console.log(`♻️ [CardDetail] Event '${payload.action}' trùng TaskId (Checklist) -> Reload`);
+                    fetchCardDetail();
+                    return;
+                }
+            }
+        });
+
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
+    }, [card.id]); 
 
     useEffect(() => {
         function onDocClick(e) {
@@ -363,12 +408,11 @@ export default function CardDetailPopup({
         const contentToDisplay = commentText;
         const tempId = "temp-" + Date.now();
 
-        // Optimistic UI update
         const newCommentOptimistic = {
             id: tempId,
             text: contentToDisplay,
             author: "Bạn",
-            avatar: null, // Mới tạo chưa có avatar
+            avatar: null, 
             time: new Date().toISOString()
         };
 
@@ -377,9 +421,7 @@ export default function CardDetailPopup({
 
         try {
             const response = await commentService.create(card.id, contentToDisplay);
-
-            // Dữ liệu API trả về: { userName, userAvatar, id, createdAt, ... }
-            const apiData = response.data.value;
+            const apiData = response.data.value || response.data;
 
             setComments(prevComments =>
                 prevComments.map(c =>
@@ -387,8 +429,8 @@ export default function CardDetailPopup({
                         ...c,
                         id: apiData.id,
                         time: apiData.createdAt,
-                        author: apiData.userName,   // Cập nhật tên thật từ server
-                        avatar: apiData.userAvatar  // Cập nhật link avatar từ server
+                        author: apiData.userName,   
+                        avatar: apiData.userAvatar
                     } : c
                 )
             );
@@ -428,7 +470,6 @@ export default function CardDetailPopup({
 
     useEffect(() => { updateCardInColumn(card.columnId, card.id, "deadline", deadline) }, [deadline])
     useEffect(() => { updateCardInColumn(card.columnId, card.id, "members", members) }, [members])
-    //useEffect(() => { updateCardInColumn(card.columnId, card.id, "check", completed) }, [completed])
     useEffect(() => { updateCardInColumn(card.columnId, card.id, "checklists", checklists) }, [checklists]);
 
     useEffect(() => {
@@ -438,8 +479,8 @@ export default function CardDetailPopup({
     const handleCheckboxChange = (e) => {
         const newStatus = e.target.checked;
         setCompleted(newStatus);
-        onToggleStatus(card.id, !newStatus);
         onToggleStatus(card.id, completed); 
+        onToggleStatus(card.id, !newStatus);
     };
 
     const handleChangeColumn = (toCol) => {
@@ -646,14 +687,14 @@ export default function CardDetailPopup({
                                                     {members.map(u => (
                                                         <div key={u.id} className={`member-item`}>
                                                             <div className="avatar small" style={{ background: u.avatarColor }}>
-                                                                {m.avatarUrl ? (
+                                                                {u.avatarUrl ? (
                                                                     <img
-                                                                        src={m.avatarUrl}
-                                                                        alt={m.name}
+                                                                        src={u.avatarUrl}
+                                                                        alt={u.name}
                                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                                     />
                                                                 ) : (
-                                                                    m.name[0]
+                                                                    u.name[0]
                                                                 )}
 
                                                             </div>
@@ -700,7 +741,6 @@ export default function CardDetailPopup({
                                 </div>
                             </div>
 
-                            {/* [FIXED] Nút Đính kèm nhỏ gọn */}
                             <div className="action-row" style={{ flex: '0 0 auto' }}>
                                 <button
                                     className="action-btn attachment-btn"
@@ -822,7 +862,6 @@ export default function CardDetailPopup({
                             {comments.map(c => (
                                 <div className="comment-card" key={c.id}>
                                     <div className="comment-meta">
-                                        {/* [FIXED] Hiển thị Avatar */}
                                         {c.avatar ? (
                                             <img
                                                 src={c.avatar}
