@@ -304,4 +304,8 @@
   transition: opacity 0.2s;
 }
 
-
+@media (max-width: 400px) {
+  .sidebar{
+    width: 50px;
+  }
+}

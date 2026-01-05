@@ -243,3 +243,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+@media (max-width: 400px) {
+  .navbar-right {
+    gap:0px;
+  }
+  .search-input{
+    display:none;
+  }
+}
+

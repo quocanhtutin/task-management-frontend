@@ -28,3 +28,9 @@
   height: calc(100vh - 60px);
   overflow: hidden;
 }
+
+@media (max-width: 400px) {
+  .page-content{
+    padding: 15px;
+  }
+}

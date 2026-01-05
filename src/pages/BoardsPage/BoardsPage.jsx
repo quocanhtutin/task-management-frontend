@@ -9,7 +9,7 @@ import WorkspaceBoardList from '../../components/WorkspaceBoardList/WorkspaceBoa
 import workspaceService from '../../services/workspaceService';
 import boardService from '../../services/boardService';
 import './BoardsPage.css';
-import { Trash2, Edit2, Users, Briefcase, Star } from 'lucide-react';
+import { Trash2, Edit2, Users, Briefcase, Star, PlusCircle } from 'lucide-react';
 import { WORKSPACE_TYPES } from '../../components/CreateWorkspaceModal/CreateWorkspaceModal.jsx';
 import signalRService from '../../services/signalRService';
 
@@ -98,8 +98,8 @@ export default function BoardsPage() {
             });
 
             return () => {
-                if(unsubWS) unsubWS();
-                if(unsubUser) unsubUser();
+                if (unsubWS) unsubWS();
+                if (unsubUser) unsubUser();
             };
         };
 
@@ -204,7 +204,7 @@ export default function BoardsPage() {
         <div className="boards-page">
             <div className="bp-header">
                 <h2>Các không gian làm việc của bạn</h2>
-                <p className="btn-create-ws" onClick={openCreateModal}>+ Tạo Workspace Mới</p>
+                <div className="btn-create-ws" onClick={openCreateModal}><PlusCircle size={18} /> <span>Tạo Workspace Mới</span></div>
             </div>
 
             {starredBoards.length > 0 && (

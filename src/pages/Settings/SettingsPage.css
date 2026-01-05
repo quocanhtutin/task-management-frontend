@@ -201,3 +201,21 @@
     padding: 0 30px;
     gap: 70px;
 }
+@media (max-width: 400px) {
+  .settings-container{
+    padding: 5px;
+  }
+  .social-link-item{
+    flex-direction: column;
+    gap:10px;
+    justify-content: left;
+  }
+  .linking{
+    flex-direction: column;
+    gap:10px;
+    justify-content: left;
+  }
+  .form-group-pf{
+    padding: 0;
+  }
+}

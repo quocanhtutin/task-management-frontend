@@ -597,3 +597,44 @@
         width:38%;
     }
 }
+
+@media (max-width: 400px) {
+  .cdp-overlay{
+    align-items: stretch; /* full chiều cao */
+  }
+
+  .cdp-main {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+  .share-invite{
+    display: flex;
+    flex-direction: column;
+  }
+  .cdp-under{
+    display: flex;
+    flex-direction: column;
+  }
+  .cdp-left{
+    width: 100%;
+    padding: 16px;
+    padding-bottom: 16px;
+    min-height: fit-content;
+  }
+  .cdp-right{
+    width: 100%;
+    min-height: fit-content;
+  }
+  .date-popup{
+    left: -70px;
+    top:-50px;
+  }
+  .member-search{
+    left:-150px;
+    max-width: 90vw;
+  }
+}

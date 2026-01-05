@@ -195,26 +195,26 @@ const TaskBoard = ({
                     </div>
                 </div>
                 <div className='board-header-right'>
-                    <div 
-                        className="board-avatar" 
+                    <div
+                        className="board-avatar"
                         title={`Chủ sở hữu: ${ownerName}`}
                         style={{
-                            overflow: 'hidden', 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                            overflow: 'hidden',
+                            display: 'flex',
+                            alignItems: 'center',
                             justifyContent: 'center',
                             cursor: 'default'
                         }}
                     >
                         {ownerAvatar ? (
-                            <img 
-                                src={ownerAvatar} 
-                                alt={ownerName} 
+                            <img
+                                src={ownerAvatar}
+                                alt={ownerName}
                                 style={{
-                                    width: '100%', 
-                                    height: '100%', 
+                                    width: '100%',
+                                    height: '100%',
                                     objectFit: 'cover'
-                                }} 
+                                }}
                             />
                         ) : (
                             <span>{ownerName ? ownerName[0].toUpperCase() : "?"}</span>
@@ -229,7 +229,7 @@ const TaskBoard = ({
                     <button className="share-btn" onClick={() => setShowSharePopup(true)}>
                         + Chia sẻ
                     </button>
-                    <button className="share-btn" onClick={() => setShowMembersModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <button className="share-btn" onClick={() => setShowMembersModal(true)} >
                         <Users size={14} /> Thành viên
                     </button>
                     <button className='menu-board' onClick={() => setShowMenuBoardPopup(true)}>
