@@ -104,6 +104,9 @@
   border-radius: 4px;
   cursor: pointer;
   opacity: 0.5;
+  align-items: center;
+  display: flex;
+  gap:5px;
 }
 .btn-create-ws:hover{
   opacity: 1;
@@ -111,4 +114,16 @@
 .bp-header{
   display:flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 400px) {
+  .boards-page{
+    padding: 5px;
+  }
+  .bp-header{
+    flex-direction: column;
+    gap:10px;
+    justify-content: left;
+  }
 }
