@@ -60,7 +60,6 @@ const StoreContextProvider = (props) => {
             localStorage.removeItem("email");
             localStorage.removeItem("name");
         }
-        console.log(accessToken)
     }, [accessToken, refreshToken, name, email]);
 
     const logout = () => {
