@@ -257,10 +257,24 @@ const SettingsPage = () => {
                             </button>
                         ) : (
                             <FacebookLogin
-                                appId="1551117732875423"
-                                callback={handleFacebookResponse}
-                                render={renderProps => (
-                                    <button type="button" onClick={renderProps.onClick} className="btn-connect-fb">
+                                appId="1497769627987814"
+                                
+                                onSuccess={(response) => {
+                                    console.log('Facebook Link Success:', response);
+                                    handleLinkAccount(PROVIDERS.FACEBOOK, response.accessToken);
+                                }}
+                                
+                                onFail={(error) => {
+                                    console.log('Facebook Link Failed:', error);
+                                    alert("Kết nối Facebook thất bại!");
+                                }}
+
+                                render={({ onClick }) => (
+                                    <button 
+                                        type="button" 
+                                        onClick={onClick} 
+                                        className="btn-connect-fb"
+                                    >
                                         Kết nối Facebook
                                     </button>
                                 )}
