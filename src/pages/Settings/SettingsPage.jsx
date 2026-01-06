@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../../utils/axiosConfig';
-import { GoogleLogin } from '@react-oauth/google';
+import { signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+import { auth, googleProvider, facebookProvider } from '../../utils/firebaseConfig';
 import FacebookLogin from '@greatsumini/react-facebook-login';
 import './SettingsPage.css';
 
@@ -112,13 +113,32 @@ const SettingsPage = () => {
         }
     };
 
-    const handleGoogleSuccess = (credentialResponse) => {
-        handleLinkAccount(PROVIDERS.GOOGLE, credentialResponse.credential);
+    const handleConnectGoogle = async () => {
+        try {
+            googleProvider.setCustomParameters({ prompt: 'select_account' });
+            
+            const result = await signInWithPopup(auth, googleProvider);
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.idToken;
+
+            handleLinkAccount(PROVIDERS.GOOGLE, token);
+        } catch (error) {
+            console.error("Google Link Error:", error);
+            alert("Lỗi kết nối Google: " + error.message);
+        }
     };
 
-    const handleFacebookResponse = (response) => {
-        if (response.accessToken) {
-            handleLinkAccount(PROVIDERS.FACEBOOK, response.accessToken);
+    const handleConnectFacebook = async () => {
+        try {
+
+            const result = await signInWithPopup(auth, facebookProvider);
+            const credential = FacebookAuthProvider.credentialFromResult(result);
+            const accessToken = credential.accessToken;
+
+            handleLinkAccount(PROVIDERS.FACEBOOK, accessToken);
+        } catch (error) {
+            console.error("Facebook Link Error:", error);
+            alert("Lỗi kết nối Facebook: " + error.message);
         }
     };
 
@@ -228,16 +248,13 @@ const SettingsPage = () => {
                                 Hủy liên kết
                             </button>
                         ) : (
-                            <div style={{ width: 'fit-content' }}>
-                                <GoogleLogin
-                                    onSuccess={handleGoogleSuccess}
-                                    onError={() => alert("Google Link Failed")}
-                                    text="signin"
-                                    shape="pill"
-                                    size="big"
-                                    width="150"
-                                />
-                            </div>
+                            <button 
+                                type="button" 
+                                className="btn-connect-google" 
+                                onClick={handleConnectGoogle}
+                            >
+                                Kết nối Google
+                            </button>
                         )}
                     </div>
 
@@ -256,29 +273,9 @@ const SettingsPage = () => {
                                 Hủy liên kết
                             </button>
                         ) : (
-                            <FacebookLogin
-                                appId="1497769627987814"
-                                
-                                onSuccess={(response) => {
-                                    console.log('Facebook Link Success:', response);
-                                    handleLinkAccount(PROVIDERS.FACEBOOK, response.accessToken);
-                                }}
-                                
-                                onFail={(error) => {
-                                    console.log('Facebook Link Failed:', error);
-                                    alert("Kết nối Facebook thất bại!");
-                                }}
-
-                                render={({ onClick }) => (
-                                    <button 
-                                        type="button" 
-                                        onClick={onClick} 
-                                        className="btn-connect-fb"
-                                    >
-                                        Kết nối Facebook
-                                    </button>
-                                )}
-                            />
+                            <button type="button" className="btn-connect-fb" onClick={handleConnectFacebook}>
+                                Kết nối Facebook
+                            </button>
                         )}
                     </div>
                 </div>

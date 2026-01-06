@@ -219,3 +219,19 @@
     padding: 0;
   }
 }
+
+.btn-connect-google {
+    background-color: #DB4437;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn-connect-google:hover {
+    opacity: 0.9;
+}

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
-import FacebookLogin from '@greatsumini/react-facebook-login';
+import { signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+import { auth, googleProvider, facebookProvider } from '../../utils/firebaseConfig'; 
 import axiosClient from '../../utils/axiosConfig';
 import { StoreContext } from '../../context/StoreContext.jsx'
 import './Login.css';
@@ -48,31 +48,44 @@ const Login = () => {
     performLogin({ type: "Local", email: emailInput, password, token: "" });
   };
 
-  const handleFacebookResponse = async (response) => {
-      if (response.accessToken) {
-          try {
-              const token = response.accessToken;
-              
-              const graphRes = await fetch(
-                  `https://graph.facebook.com/me?fields=name,email,picture&access_token=${token}`
-              );
-              const profile = await graphRes.json();
+  const handleGoogleLogin = async (e) => {
+      if (e) e.preventDefault();
+      try {
+          const result = await signInWithPopup(auth, googleProvider);
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.idToken;
+          
+          performLogin({ 
+              type: "Google", 
+              token: token
+          });
 
-              console.log("FB Profile fetched:", profile);
+      } catch (error) {
+          console.error("Google Login Error:", error);
+          alert("Đăng nhập Google thất bại.");
+      }
+  };
 
-              performLogin({ 
-                  type: "Facebook", 
-                  email: profile.email || "no-email",
-                  name: profile.name, 
-                  token: token
-              });
+  const handleFacebookLogin = async (e) => {
+      if (e) e.preventDefault();
+      try {
+          const result = await signInWithPopup(auth, facebookProvider);
+          
+          const credential = FacebookAuthProvider.credentialFromResult(result);
+          const accessToken = credential.accessToken;
+          
+          performLogin({ 
+              type: "Facebook", 
+              token: accessToken 
+          });
 
-          } catch (error) {
-              console.error("Lỗi lấy thông tin Facebook:", error);
-              alert("Không thể lấy thông tin từ Facebook.");
+      } catch (error) {
+          console.error("Facebook Login Error:", error);
+          if (error.code === 'auth/account-exists-with-different-credential') {
+              alert("Email đã tồn tại với phương thức đăng nhập khác.");
+          } else {
+              alert("Đăng nhập Facebook thất bại.");
           }
-      } else {
-          alert("Đăng nhập Facebook thất bại (Không có token).");
       }
   };
 
@@ -94,24 +107,13 @@ const Login = () => {
         </form>
         <div className="divider"><span>Hoặc</span></div>
         <div className="social-login">
-          <GoogleOAuthProvider clientId="1079952925292-374ad5i80lfacs983o0apitqaib68k38.apps.googleusercontent.com">
-            <GoogleLogin onSuccess={(res) => performLogin({ type: "Google", token: res.credential })} theme="filled_blue" width="340" />
-          </GoogleOAuthProvider>
-          <FacebookLogin
-            appId="1497769627987814"
-            
-            onSuccess={handleFacebookResponse}
-            
-            onFail={(error) => {
-              console.log('Login Failed!', error);
-            }}
-            
-            render={({ onClick }) => (
-              <button onClick={onClick} className="btn-facebook" disabled={isLoading}>
-                <span className="fb-icon">f</span> Tiếp tục với Facebook
-              </button>
-            )}
-          />
+          <button onClick={handleGoogleLogin} className="btn-google" disabled={isLoading}>
+            <span className="google-icon">G</span> Tiếp tục với Google
+          </button>
+          
+          <button onClick={handleFacebookLogin} className="btn-facebook" disabled={isLoading}>
+            <span className="fb-icon">f</span> Tiếp tục với Facebook
+          </button>
         </div>
         <div className="register-link"><p>Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p></div>
       </div>
