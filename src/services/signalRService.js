@@ -27,7 +27,7 @@ class SignalRService {
         if (this.connection && this.connection.state !== "Disconnected") return;
         
         this.token = token;
-        const HUB_URL = "http://localhost:5174/hubs/board";
+        const HUB_URL = "https://workflow-0euv.onrender.com/hubs/board";
 
         this.connection = new HubConnectionBuilder()
             .withUrl(HUB_URL, {
@@ -92,7 +92,7 @@ class SignalRService {
     async startWorkspaceConnection(token) {
         if (this.workspaceConnection && this.workspaceConnection.state !== "Disconnected") return;
         this.token = token;
-        this.workspaceConnection = this.createConnection("http://localhost:5174/hubs/workSpace", token);
+        this.workspaceConnection = this.createConnection("https://workflow-0euv.onrender.com/hubs/workSpace", token);
 
         this.workspaceConnection.on("workspacenotification", (data) => {
             console.log("🔔 [WorkspaceHub] Event:", data);
@@ -127,7 +127,7 @@ class SignalRService {
         if (this.userConnection && this.userConnection.state !== "Disconnected") return;
         this.token = token;
 
-        this.userConnection = this.createConnection("http://localhost:5174/hubs/user", token);
+        this.userConnection = this.createConnection("https://workflow-0euv.onrender.com/hubs/user", token);
 
         this.userConnection.on("usernotification", (data) => {
             console.log("🔔 [UserHub] Event:", data);
